@@ -59,16 +59,27 @@ export interface FieldBase {
   required: boolean
 }
 
+/**
+ * Every field kind except `image` carries a mandatory default, seeded by
+ * `ainam push` into the draft and published rows. That is what stops a fresh
+ * integration from rendering a blank page, and what makes the generated
+ * accessors safe to type as non-nullable.
+ */
+
 export interface TextField extends FieldBase {
   type: 'text'
+  default: string
   multiline: boolean
   maxLength?: number | undefined
 }
 
 export interface RichTextField extends FieldBase {
   type: 'richText'
+  /** Seeded as a single paragraph; authoring a node tree in a config file is unreadable. */
+  default: string
 }
 
+/** The one kind without a default — an unuploaded file has no meaningful value. */
 export interface ImageField extends FieldBase {
   type: 'image'
   alt: boolean
@@ -76,10 +87,12 @@ export interface ImageField extends FieldBase {
 
 export interface BooleanField extends FieldBase {
   type: 'boolean'
+  default: boolean
 }
 
 export interface NumberField extends FieldBase {
   type: 'number'
+  default: number
   min?: number | undefined
   max?: number | undefined
 }
@@ -90,6 +103,7 @@ export type ScalarField = TextField | RichTextField | ImageField | BooleanField 
 export interface ListField extends FieldBase {
   type: 'list'
   fields: Record<string, ScalarField>
+  default: Array<Record<string, unknown>>
   maxItems?: number | undefined
 }
 

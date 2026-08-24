@@ -16,6 +16,22 @@ export default defineContentSchema({
     label: 'Hero title',
     required: true,
     multiline: false,
+    // Every key needs a default. It is seeded on push, so the site renders real
+    // copy from the first deploy instead of waiting for someone to type it in.
+    default: 'Content, decoupled',
+  },
+  'home/hero/subtitle': {
+    type: 'text',
+    label: 'Hero subtitle',
+    required: false,
+    multiline: true,
+    default: 'Ship the site. Hand the copy to whoever owns it.',
+  },
+  'home/pricing/visible': {
+    type: 'boolean',
+    label: 'Show the pricing section',
+    required: false,
+    default: true,
   },
 })
 `

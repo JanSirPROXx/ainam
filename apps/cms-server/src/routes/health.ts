@@ -1,6 +1,7 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { sql } from 'drizzle-orm'
 import type { Database } from '../db/client'
+import type { AppEnv } from '../http/context'
 
 const healthResponse = z.object({
   status: z.enum(['ok', 'degraded']),
@@ -19,7 +20,7 @@ const route = createRoute({
   },
 })
 
-export function registerHealthRoutes(app: OpenAPIHono, db: Database): void {
+export function registerHealthRoutes(app: OpenAPIHono<AppEnv>, db: Database): void {
   app.openapi(route, async (c) => {
     let database: 'up' | 'down' = 'up'
     try {

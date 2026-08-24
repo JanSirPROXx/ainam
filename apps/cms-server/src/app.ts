@@ -3,7 +3,9 @@ import { cors } from 'hono/cors'
 import { requestId } from 'hono/request-id'
 import type { Database } from './db/client'
 import type { Env } from './env'
+import type { AppEnv } from './http/context'
 import { buildApiError, handleError } from './http/errors'
+import { registerContentRoutes } from './routes/content'
 import { registerHealthRoutes } from './routes/health'
 
 /**
@@ -12,8 +14,8 @@ import { registerHealthRoutes } from './routes/health'
  * Kept separate from `index.ts` so tests can build an app against a throwaway
  * database without binding a port.
  */
-export function createApp(env: Env, db: Database): OpenAPIHono {
-  const app = new OpenAPIHono()
+export function createApp(env: Env, db: Database): OpenAPIHono<AppEnv> {
+  const app = new OpenAPIHono<AppEnv>()
 
   // First, so every later handler and every log line can quote the same id.
   app.use('*', requestId())
@@ -28,13 +30,20 @@ export function createApp(env: Env, db: Database): OpenAPIHono {
       buildApiError(
         'not_found',
         `No route for ${c.req.method} ${new URL(c.req.url).pathname}. See /openapi.json for what exists.`,
-        c.get('requestId') ?? 'unknown',
+        c.get('requestId'),
       ),
       404,
     ),
   )
 
   registerHealthRoutes(app, db)
+  registerContentRoutes(app, db)
+
+  app.openAPIRegistry.registerComponent('securitySchemes', 'apiKey', {
+    type: 'http',
+    scheme: 'bearer',
+    description: 'A project API key, created in the dashboard.',
+  })
 
   app.doc('/openapi.json', {
     openapi: '3.1.0',

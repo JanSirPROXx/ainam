@@ -6,7 +6,15 @@
     "types": [
       "node"
     ],
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@ainam/schema": [
+        "../../packages/schema/src/index.ts"
+      ],
+      "@ainam/schema/types": [
+        "../../packages/schema/src/types.ts"
+      ]
+    }
   },
   "include": [
     "src",

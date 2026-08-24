@@ -3,8 +3,24 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "types": ["node"],
-    "noEmit": true
+    "types": [
+      "node"
+    ],
+    "noEmit": true,
+    "paths": {
+      "@ainam/core": [
+        "../core/src/index.ts"
+      ],
+      "@ainam/schema": [
+        "../schema/src/index.ts"
+      ],
+      "@ainam/schema/types": [
+        "../schema/src/types.ts"
+      ]
+    }
   },
-  "include": ["src", "tsdown.config.ts"]
+  "include": [
+    "src",
+    "tsdown.config.ts"
+  ]
 }

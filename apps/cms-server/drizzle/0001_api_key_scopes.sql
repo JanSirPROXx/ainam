@@ -1,0 +1,1 @@
+ALTER TABLE "project_api_keys" ADD COLUMN "scopes" jsonb DEFAULT '["content:read"]'::jsonb NOT NULL;

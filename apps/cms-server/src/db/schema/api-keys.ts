@@ -1,4 +1,5 @@
-import { index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import type { ApiKeyScope } from '@ainam/schema'
+import { index, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { projects } from './projects'
 
 /**
@@ -20,6 +21,9 @@ export const projectApiKeys = pgTable(
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
+    // A read key lives in a customer's deployment environment and can leak, so
+    // rewriting the schema is a separate capability rather than an implied one.
+    scopes: jsonb('scopes').$type<ApiKeyScope[]>().notNull().default(['content:read']),
     keyHash: text('key_hash').notNull(),
     /** Leading characters, kept in clear so a key is identifiable in a list. */
     prefix: text('prefix').notNull(),

@@ -26,5 +26,7 @@ export type {
   RichTextValue,
   ScalarField,
   ScalarValue,
+  SchemaPushRequest,
+  SchemaPushResult,
   TextField,
 } from '@ainam/schema/types'

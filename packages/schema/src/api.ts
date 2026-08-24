@@ -18,6 +18,15 @@ export const apiErrorCodeSchema = z.enum([
   'internal',
 ])
 
+/**
+ * What a project API key is allowed to do.
+ *
+ * A read key ends up in a customer's deployment environment and can leak; it
+ * must not be able to rewrite the content schema. Push therefore needs its own
+ * scope, held only by a key the developer keeps.
+ */
+export const apiKeyScopeSchema = z.enum(['content:read', 'schema:write'])
+
 export const apiErrorSchema = z.object({
   error: z.object({
     code: apiErrorCodeSchema,

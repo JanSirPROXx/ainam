@@ -127,6 +127,8 @@ export interface SchemaPushResult {
 
 // ---------------------------------------------------------------- api
 
+export type ApiKeyScope = 'content:read' | 'schema:write'
+
 export type ApiErrorCode =
   | 'bad_request'
   | 'unauthorized'

@@ -1,4 +1,5 @@
 import { and, eq, isNull, or, sql } from 'drizzle-orm'
+import type { ApiKeyScope } from '@ainam/schema'
 import type { Database } from '../db/client'
 import { projectApiKeys } from '../db/schema'
 
@@ -8,6 +9,7 @@ const LAST_USED_RESOLUTION_MS = 60_000
 export interface ActiveApiKey {
   id: string
   projectId: string
+  scopes: ApiKeyScope[]
   lastUsedAt: Date | null
 }
 
@@ -24,6 +26,7 @@ export function createApiKeyRepository(db: Database) {
         .select({
           id: projectApiKeys.id,
           projectId: projectApiKeys.projectId,
+          scopes: projectApiKeys.scopes,
           lastUsedAt: projectApiKeys.lastUsedAt,
         })
         .from(projectApiKeys)

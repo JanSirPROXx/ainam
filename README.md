@@ -51,6 +51,26 @@ pnpm build
 this repository, so cms-server refuses to start with it when `NODE_ENV` is
 `production`.
 
+## Connecting a website
+
+The content schema lives in the website's codebase, not in a dashboard form.
+
+```bash
+npx ainam init     # writes ainam.config.ts and the env keys it needs
+npx ainam push     # uploads the schema
+```
+
+Keys declared in `ainam.config.ts` carry a `default`, and `push` seeds it into
+both the draft and the published copy — so the site renders the copy the
+developer already wrote, from its first deploy, instead of a blank page waiting
+for someone to fill it in. A later push never overwrites what the customer has
+since edited, and a key removed from the schema stops being editable but keeps
+its content.
+
+Keys are scoped. The key in a customer's deployment is `content:read` only, so
+if it leaks it cannot rewrite their schema; `push` needs a `schema:write` key
+the developer keeps.
+
 ## Commands
 
 ```bash

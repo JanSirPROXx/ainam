@@ -3,7 +3,6 @@ import { localeSchema } from '@ainam/schema'
 import type { Database } from '../db/client'
 import type { AppEnv } from '../http/context'
 import { HttpError } from '../http/errors'
-import { requireApiKey } from '../middleware/api-key'
 import { createContentRepository } from '../repositories/content'
 
 const route = createRoute({
@@ -28,8 +27,6 @@ const route = createRoute({
 
 export function registerContentRoutes(app: OpenAPIHono<AppEnv>, db: Database): void {
   const content = createContentRepository(db)
-
-  app.use('/v1/*', requireApiKey(db))
 
   app.openapi(route, async (c) => {
     const { projectId } = c.req.valid('param')

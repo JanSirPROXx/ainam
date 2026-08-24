@@ -5,8 +5,10 @@ import type { Database } from './db/client'
 import type { Env } from './env'
 import type { AppEnv } from './http/context'
 import { buildApiError, handleError } from './http/errors'
+import { requireApiKey } from './middleware/api-key'
 import { registerContentRoutes } from './routes/content'
 import { registerHealthRoutes } from './routes/health'
+import { registerSchemaRoutes } from './routes/schema'
 
 /**
  * Assembles the HTTP surface.
@@ -36,8 +38,14 @@ export function createApp(env: Env, db: Database): OpenAPIHono<AppEnv> {
     ),
   )
 
+  // Scopes are mounted per path prefix, so a read key that leaks from a
+  // customer's deployment cannot be used to rewrite their content schema.
+  app.use('/v1/content/*', requireApiKey(db, 'content:read'))
+  app.use('/v1/schema/*', requireApiKey(db, 'schema:write'))
+
   registerHealthRoutes(app, db)
   registerContentRoutes(app, db)
+  registerSchemaRoutes(app, db)
 
   app.openAPIRegistry.registerComponent('securitySchemes', 'apiKey', {
     type: 'http',

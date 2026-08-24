@@ -7,7 +7,7 @@
  * the mismatch would only surface as a runtime bug in a customer's site.
  */
 import type { z } from 'zod'
-import type { apiErrorSchema } from './api'
+import type { apiErrorSchema, apiKeyScopeSchema } from './api'
 import type { contentEntrySchema, contentValueSchema, scalarValueSchema } from './content'
 import type { fieldSchema, listFieldSchema, scalarFieldSchema } from './fields'
 import type { contentSchemaSchema, schemaPushRequestSchema, schemaPushResultSchema } from './project'
@@ -26,3 +26,4 @@ export type _ContentSchema = Expect<Exact<z.infer<typeof contentSchemaSchema>, T
 export type _PushRequest = Expect<Exact<z.infer<typeof schemaPushRequestSchema>, T.SchemaPushRequest>>
 export type _PushResult = Expect<Exact<z.infer<typeof schemaPushResultSchema>, T.SchemaPushResult>>
 export type _ApiError = Expect<Exact<z.infer<typeof apiErrorSchema>, T.ApiError>>
+export type _ApiKeyScope = Expect<Exact<z.infer<typeof apiKeyScopeSchema>, T.ApiKeyScope>>

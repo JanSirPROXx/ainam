@@ -1,0 +1,154 @@
+/* Surfaces: Card, Dialog. */
+
+/* ------------------------------------------------------------------ card */
+
+.ainam-card {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: var(--surface-card);
+  border: var(--hairline) solid var(--border-default);
+  border-radius: var(--radius-card);
+  /* A card is not a floating layer: its lift is an inner top highlight, and
+     --shadow-card resolves to exactly that, never to a drop shadow. */
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-surface);
+}
+
+.ainam-card--interactive:hover {
+  border-color: var(--border-strong);
+}
+
+.ainam-card--pad-none { padding: var(--space-0); }
+.ainam-card--pad-sm { padding: var(--space-5); }
+.ainam-card--pad-md { padding: var(--space-7); }
+.ainam-card--pad-lg { padding: var(--space-8); }
+
+/* The gradient hairline is a 1px frame painted behind the card. The card drops
+   its own border and shrinks its radius by that same 1px so the two curves stay
+   concentric — otherwise the frame reads as thicker at the corners. */
+.ainam-card-frame {
+  height: 100%;
+  padding: var(--hairline);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--alpha-16), var(--alpha-4) 30%, var(--alpha-4));
+}
+
+.ainam-card--framed {
+  border: none;
+  border-radius: calc(var(--radius-card) - var(--hairline));
+}
+
+.ainam-card__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Only separates from body content — a header sitting directly above the footer
+   rule keeps its own spacing from that rule instead. */
+.ainam-card__head--spaced { margin-bottom: var(--space-6); }
+
+.ainam-card__eyebrow {
+  font: var(--type-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.ainam-card__title {
+  margin: 0;
+  font: var(--fw-medium) var(--fs-heading-sm) / var(--lh-heading) var(--font-sans);
+  letter-spacing: var(--ls-heading);
+  color: var(--text-primary);
+}
+
+.ainam-card__description {
+  margin: 0;
+  font: var(--fw-regular) var(--fs-body-sm) / var(--lh-body) var(--font-sans);
+  letter-spacing: var(--ls-body);
+  color: var(--text-muted);
+}
+
+.ainam-card__foot {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: var(--hairline) solid var(--border-subtle);
+}
+
+/* ---------------------------------------------------------------- dialog */
+
+/* A dialog is a genuinely floating layer — one of the few surfaces allowed a
+   real shadow and a blurred scrim. It positions against the nearest positioned
+   ancestor, so a demo can scope one to a single panel. */
+.ainam-dialog-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--space-7);
+  background: var(--scrim-modal);
+  /* An optical blur radius, not a spacing step: it stays 4px at every size. */
+  backdrop-filter: blur(4px);
+}
+
+.ainam-dialog {
+  width: 100%;
+  background: var(--surface-raised);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lg), var(--shadow-inset-top);
+  animation: ainam-rise var(--dur-normal) var(--ease-out);
+}
+
+/* The panel is focused programmatically when it opens and cannot be tabbed to,
+   so a focus ring here would only ever be a false positive. */
+.ainam-dialog:focus { outline: none; }
+
+.ainam-dialog__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-7);
+}
+
+.ainam-dialog__title {
+  margin: 0;
+  font: var(--fw-medium) var(--fs-heading-md) / var(--lh-heading) var(--font-sans);
+  letter-spacing: var(--ls-heading);
+  color: var(--text-primary);
+}
+
+.ainam-dialog__description {
+  margin: 0;
+  font: var(--fw-regular) var(--fs-body-sm) / var(--lh-body) var(--font-sans);
+  letter-spacing: var(--ls-body);
+  color: var(--text-muted);
+}
+
+/* The head supplies the top padding; a dialog without one supplies its own. */
+.ainam-dialog__body { padding: 0 var(--space-7) var(--space-7); }
+.ainam-dialog__body--lead { padding-top: var(--space-7); }
+
+.ainam-dialog__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-7);
+  background: var(--ink-900);
+  border-top: var(--hairline) solid var(--border-subtle);
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+}
+
+/* The system's single entrance, shared with Toast: a fade plus a 6px rise,
+   never a scale. 6px is the specified travel, above the usual 4px cap. */
+@keyframes ainam-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ainam-card { transition: none; }
+  .ainam-dialog { animation: none; }
+}

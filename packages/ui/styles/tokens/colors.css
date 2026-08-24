@@ -1,0 +1,105 @@
+/* AINAM colour system — dark only, near-monochrome.
+   One near-white accent (--accent) carries all emphasis; hue is reserved
+   for status. Never introduce a decorative hue. */
+:root {
+  /* Base ink ramp (backgrounds, darkest -> lightest) */
+  --black: #000000;
+  --ink-1000: #000000;
+  --ink-950: #070707;
+  --ink-900: #0A0A0A;
+  --ink-850: #0F0F0F;
+  --ink-800: #141414;
+  --ink-750: #191919;
+  --ink-700: #1F1F1F;
+  --ink-650: #262626;
+  --ink-600: #2E2E2E;
+  --ink-500: #3A3A3A;
+
+  /* Neutral ramp (text, icons, hairlines) */
+  --gray-600: #4A4A4A;
+  --gray-500: #5C5C5C;
+  --gray-400: #757575;
+  --gray-300: #8F8F8F;
+  --gray-250: #A1A1A1;
+  --gray-200: #B4B4B4;
+  --gray-150: #CFCFCF;
+  --gray-100: #E5E5E5;
+  --gray-050: #F2F2F2;
+  --white: #FFFFFF;
+
+  /* Accent — deliberately achromatic */
+  --accent: #E5E5E5;
+  --accent-strong: #FFFFFF;
+  --accent-muted: #A1A1A1;
+  --accent-contrast: #0A0A0A;
+
+  /* Status hues — the only saturated colour in the system */
+  --green-500: #3ECF8E;
+  --green-900: #0C231A;
+  --amber-500: #F5A524;
+  --amber-900: #2A1E07;
+  --red-500: #F45B5B;
+  --red-900: #2A1010;
+  --blue-500: #5B9DF4;
+  --blue-900: #0E1A2B;
+
+  /* Alpha hairlines — borders are alpha-white, never a solid grey,
+     so they read correctly over any surface in the ink ramp. */
+  --alpha-4: rgba(255, 255, 255, 0.04);
+  --alpha-6: rgba(255, 255, 255, 0.06);
+  --alpha-8: rgba(255, 255, 255, 0.08);
+  --alpha-12: rgba(255, 255, 255, 0.12);
+  --alpha-16: rgba(255, 255, 255, 0.16);
+  --alpha-24: rgba(255, 255, 255, 0.24);
+  --alpha-48: rgba(255, 255, 255, 0.48);
+
+  /* ---- Semantic aliases: use these in components ---- */
+  --bg-page: var(--ink-1000);
+  --bg-subtle: var(--ink-900);
+  --surface-card: var(--ink-900);
+  --surface-raised: var(--ink-850);
+  --surface-input: var(--ink-850);
+  --surface-hover: var(--ink-800);
+  --surface-active: var(--ink-750);
+  --surface-code: var(--ink-950);
+
+  --text-primary: var(--gray-100);
+  --text-body: var(--gray-250);
+  --text-muted: var(--gray-400);
+  --text-faint: var(--gray-600);
+  --text-inverse: var(--ink-900);
+  --text-link: var(--gray-100);
+
+  --border-subtle: var(--alpha-6);
+  --border-default: var(--alpha-8);
+  --border-strong: var(--alpha-16);
+  --border-focus: var(--alpha-48);
+
+  --icon-default: var(--gray-300);
+  --icon-muted: var(--gray-500);
+
+  --status-success: var(--green-500);
+  --status-success-bg: var(--green-900);
+  --status-warning: var(--amber-500);
+  --status-warning-bg: var(--amber-900);
+  --status-danger: var(--red-500);
+  --status-danger-bg: var(--red-900);
+  --status-info: var(--blue-500);
+  --status-info-bg: var(--blue-900);
+
+  /* Pressed state for the danger variant. Added while porting: the design
+     system's Button.jsx hardcoded #361414 here, which its own adherence lint
+     forbids. Same value, now addressable. */
+  --status-danger-bg-hover: #361414;
+
+  /* Signature effects */
+  --glow-hero: radial-gradient(60% 60% at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 45%, transparent 100%);
+  --grid-line: var(--alpha-4);
+  --edge-highlight: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0) 40%);
+  --scrim-bottom: linear-gradient(180deg, transparent, var(--ink-1000) 85%);
+
+  /* Modal scrim. Added while porting: the design system's Dialog.jsx hardcoded
+     rgba(0,0,0,0.72) here, which its own adherence lint forbids. Same value,
+     now addressable. */
+  --scrim-modal: rgba(0, 0, 0, 0.72);
+}

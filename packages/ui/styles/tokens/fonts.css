@@ -1,0 +1,11 @@
+/* AINAM webfonts — Geist Sans + Geist Mono, Google-hosted.
+   SUBSTITUTION NOTE: no brand font files were supplied. Geist is the closest
+   neutral, engineered grotesk to the reference aesthetic. Swap the @import for
+   local @font-face rules if licensed files arrive — nothing else in the system
+   references a family directly. */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap");
+
+:root {
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}

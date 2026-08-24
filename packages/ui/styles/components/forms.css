@@ -1,0 +1,348 @@
+/* Forms: Field, Input, Textarea, Select, Checkbox, Radio, Switch.
+ *
+ * Input, Textarea and Select share one chrome. The design system repeated the
+ * same `fieldChrome()` helper in all three files — it is a single decision, so
+ * it is written once here and the three blocks are listed against it.
+ *
+ * Focus, invalid, checked and disabled are all selector state. The source
+ * tracked focus in `useState`, which re-renders on every focus change and drops
+ * the state entirely when focus arrives from a form autofill.
+ *
+ * Raw px appears only for optical control values the design system itself sets
+ * off the 4px grid — control padding, the caret, and the toggle dimensions.
+ * Each one is marked where it occurs.
+ */
+
+/* ------------------------------------------------------------------ field */
+
+.ainam-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ainam-field__label {
+  display: flex;
+  gap: var(--space-2);
+  font: var(--fw-medium) var(--fs-body-sm) / var(--lh-heading) var(--font-sans);
+  letter-spacing: var(--ls-body);
+  color: var(--text-primary);
+}
+
+.ainam-field__required { color: var(--text-faint); }
+
+.ainam-field__message {
+  font: var(--type-caption);
+  letter-spacing: var(--ls-body);
+  color: var(--text-muted);
+}
+
+.ainam-field__message--error { color: var(--status-danger); }
+
+/* --------------------------------------------------- shared control chrome */
+
+.ainam-input,
+.ainam-input-group,
+.ainam-textarea,
+.ainam-select__control {
+  width: 100%;
+  background: var(--surface-input);
+  color: var(--text-primary);
+  font: var(--fw-regular) var(--fs-body-sm) / var(--lh-tight) var(--font-sans);
+  letter-spacing: var(--ls-body);
+  border: var(--hairline) solid var(--border-default);
+  border-radius: var(--radius-input);
+  box-shadow: var(--shadow-inset-top);
+  outline: none;
+  transition: var(--transition-control), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.ainam-input::placeholder,
+.ainam-input-group__control::placeholder,
+.ainam-textarea::placeholder {
+  color: var(--text-faint);
+  font-style: normal;
+}
+
+/* `:focus`, not `:focus-visible` — a text field earns the ring however focus
+   arrived, including a click. */
+.ainam-input:focus,
+.ainam-input-group:focus-within,
+.ainam-textarea:focus,
+.ainam-select__control:focus {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+/* Equal specificity to the focus rules above, declared after them: an invalid
+   control keeps its danger hairline while focused. */
+.ainam-input[aria-invalid='true'],
+.ainam-input-group:has([aria-invalid='true']),
+.ainam-textarea[aria-invalid='true'],
+.ainam-select__control[aria-invalid='true'] {
+  border-color: var(--status-danger);
+}
+
+.ainam-input:disabled,
+.ainam-input-group:has(:disabled),
+.ainam-textarea:disabled,
+.ainam-select__control:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Control padding is optical, not a grid step: 10px matches the design
+   system's own fields. */
+.ainam-input,
+.ainam-input-group { padding-inline: 10px; }
+
+.ainam-input--sm,
+.ainam-input-group--sm,
+.ainam-select__control--sm { height: var(--control-h-sm); }
+
+.ainam-input--md,
+.ainam-input-group--md,
+.ainam-select__control--md { height: var(--control-h-md); }
+
+.ainam-input--lg,
+.ainam-input-group--lg,
+.ainam-select__control--lg { height: var(--control-h-lg); }
+
+/* ------------------------------------------------ input with prefix/suffix */
+
+.ainam-input-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ainam-input-group__affix {
+  font: var(--type-code);
+  font-size: var(--fs-caption);
+  color: var(--text-faint);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ainam-input-group__control {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+/* --------------------------------------------------------------- textarea */
+
+.ainam-textarea {
+  /* Optical control padding, as above. */
+  padding: 9px 10px;
+  line-height: var(--lh-body);
+  resize: vertical;
+}
+
+/* ----------------------------------------------------------------- select */
+
+.ainam-select {
+  position: relative;
+  display: block;
+}
+
+.ainam-select__control {
+  /* Optical again, with the right side widened to clear the caret. */
+  padding-inline: 10px 30px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.ainam-select__control:disabled { cursor: not-allowed; }
+
+.ainam-select__caret {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--icon-muted);
+  font-family: var(--font-mono);
+  /* Below --fs-micro on purpose: the caret is a mark, not text. */
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* --------------------------------------------- checkbox, radio and switch */
+
+.ainam-checkbox,
+.ainam-radio,
+.ainam-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  cursor: pointer;
+}
+
+.ainam-switch { display: inline-flex; }
+
+.ainam-checkbox--stacked,
+.ainam-radio--stacked { align-items: flex-start; }
+
+/* The real control stays focusable and hit-testable through its label; the
+   visible box is its sibling. */
+.ainam-checkbox__input,
+.ainam-radio__input,
+.ainam-switch__input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+.ainam-checkbox:has(:disabled),
+.ainam-radio:has(:disabled),
+.ainam-switch:has(:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ainam-checkbox__box,
+.ainam-radio__ring {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--space-5);
+  height: var(--space-5);
+  background: var(--surface-input);
+  border: var(--hairline) solid var(--border-strong);
+  box-shadow: var(--shadow-inset-top);
+  transition: var(--transition-control);
+}
+
+.ainam-checkbox__box {
+  border-radius: var(--radius-xs);
+  color: var(--accent-contrast);
+}
+
+.ainam-radio__ring { border-radius: var(--radius-pill); }
+
+.ainam-checkbox--stacked .ainam-checkbox__box,
+.ainam-radio--stacked .ainam-radio__ring { margin-top: var(--space-1); }
+
+.ainam-checkbox__input:checked + .ainam-checkbox__box {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-none);
+}
+
+.ainam-radio__input:checked + .ainam-radio__ring { border-color: var(--accent); }
+
+.ainam-checkbox__input:focus-visible + .ainam-checkbox__box,
+.ainam-radio__input:focus-visible + .ainam-radio__ring,
+.ainam-switch__input:focus-visible + .ainam-switch__track { box-shadow: var(--shadow-focus); }
+
+.ainam-checkbox__check,
+.ainam-radio__dot {
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+/* Mark sizes inside the 16px box are optical values from the source. */
+.ainam-checkbox__check { width: 10px; height: 10px; }
+
+.ainam-radio__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.ainam-checkbox__input:checked + .ainam-checkbox__box .ainam-checkbox__check,
+.ainam-radio__input:checked + .ainam-radio__ring .ainam-radio__dot { opacity: 1; }
+
+.ainam-checkbox__text,
+.ainam-radio__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ainam-checkbox__label,
+.ainam-radio__label,
+.ainam-switch__label {
+  font: var(--fw-regular) var(--fs-body-sm) / var(--lh-tight) var(--font-sans);
+  letter-spacing: var(--ls-body);
+  color: var(--text-primary);
+}
+
+.ainam-checkbox__description,
+.ainam-radio__description {
+  font: var(--type-caption);
+  letter-spacing: var(--ls-body);
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------------- switch */
+
+/* Track and knob dimensions are optical control values, off the 4px grid. */
+.ainam-switch--sm {
+  --ainam-switch-w: 28px;
+  --ainam-switch-h: 16px;
+  --ainam-switch-knob: 10px;
+}
+
+.ainam-switch--md {
+  --ainam-switch-w: 36px;
+  --ainam-switch-h: 20px;
+  --ainam-switch-knob: 14px;
+}
+
+.ainam-switch__track {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--ainam-switch-w);
+  height: var(--ainam-switch-h);
+  background: var(--ink-700);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  transition: var(--transition-control);
+}
+
+.ainam-switch__knob {
+  position: absolute;
+  top: var(--space-1);
+  left: var(--space-1);
+  width: var(--ainam-switch-knob);
+  height: var(--ainam-switch-knob);
+  background: var(--gray-300);
+  border-radius: var(--radius-pill);
+  transition: left var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.ainam-switch__input:checked + .ainam-switch__track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.ainam-switch__input:checked + .ainam-switch__track .ainam-switch__knob {
+  left: calc(var(--ainam-switch-w) - var(--ainam-switch-knob) - var(--space-2));
+  background: var(--accent-contrast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ainam-input,
+  .ainam-input-group,
+  .ainam-textarea,
+  .ainam-select__control,
+  .ainam-checkbox__box,
+  .ainam-radio__ring,
+  .ainam-switch__track,
+  .ainam-switch__knob,
+  .ainam-checkbox__check,
+  .ainam-radio__dot { transition: none; }
+}

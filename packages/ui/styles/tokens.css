@@ -1,0 +1,10 @@
+/* Tokens only — no reset, no component styles.
+   Import this when a surface needs the design system's values but brings its
+   own component layer, as the marketing site does. */
+@import "./tokens/fonts.css";
+@import "./tokens/colors.css";
+@import "./tokens/typography.css";
+@import "./tokens/spacing.css";
+@import "./tokens/radius.css";
+@import "./tokens/elevation.css";
+@import "./tokens/motion.css";

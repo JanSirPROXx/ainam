@@ -1,0 +1,276 @@
+/* Data: Badge, Tag, Table, CodeBlock, Metric. */
+
+/* ----------------------------------------------------------------- badge */
+
+.ainam-badge {
+  display: inline-flex;
+  align-items: center;
+  /* 6px gap and the 5px dot are optical values off the 4px grid: they keep the
+     dot reading as punctuation beside 11px mono rather than as a bullet. */
+  gap: 6px;
+  height: var(--space-6);
+  padding-inline: var(--space-3);
+  border: var(--hairline) solid transparent;
+  border-radius: var(--radius-xs);
+  font: var(--fw-medium) var(--fs-micro) / 1 var(--font-mono);
+  /* Between --ls-mono (0) and --ls-eyebrow: mono opened just enough to read
+     at 11px without becoming an eyebrow. */
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.ainam-badge__dot {
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+}
+
+/* Status is a tint behind a saturated foreground, never a solid fill. */
+.ainam-badge--neutral {
+  color: var(--text-body);
+  background: var(--ink-800);
+  border-color: var(--border-default);
+}
+.ainam-badge--success { color: var(--status-success); background: var(--status-success-bg); }
+.ainam-badge--warning { color: var(--status-warning); background: var(--status-warning-bg); }
+.ainam-badge--danger  { color: var(--status-danger);  background: var(--status-danger-bg); }
+.ainam-badge--info    { color: var(--status-info);    background: var(--status-info-bg); }
+
+/* ------------------------------------------------------------------- tag */
+
+.ainam-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; /* optical, off the 4px grid — matches the badge */
+  height: var(--space-7);
+  /* 9px is optical control padding: a pill needs more side room than the 8px
+     grid step for its label to sit evenly inside the curve. */
+  padding-inline: 9px;
+  border: var(--hairline) solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--ink-850);
+  color: var(--text-body);
+  font: var(--fw-regular) var(--fs-caption) / 1 var(--font-sans);
+  letter-spacing: var(--ls-body);
+  white-space: nowrap;
+  transition: var(--transition-control);
+}
+
+.ainam-tag:hover { border-color: var(--border-strong); }
+
+/* The remove control sits closer to the edge than a label would. */
+.ainam-tag--removable { padding-right: var(--space-2); }
+
+.ainam-tag__remove {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: var(--space-5);
+  height: var(--space-5);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--icon-muted);
+  font: var(--fw-regular) var(--fs-caption) / 1 var(--font-mono);
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.ainam-tag__remove:hover { color: var(--text-primary); }
+
+/* The global :focus-visible squares the ring to --radius-xs; a round control
+   needs its own radius back. */
+.ainam-tag__remove:focus-visible { border-radius: var(--radius-pill); }
+
+/* ----------------------------------------------------------------- table */
+
+.ainam-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ainam-table {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--fw-regular) var(--fs-body-sm) / 1.4 var(--font-sans);
+  letter-spacing: var(--ls-body);
+}
+
+/* 9px and 11px are optical row padding: the 4px grid has no step between 8 and
+   12, and these are what hold a 34px header above 38px rows. */
+.ainam-table th {
+  padding: 9px var(--space-5);
+  text-align: left;
+  font: var(--type-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border-bottom: var(--hairline) solid var(--border-default);
+  white-space: nowrap;
+}
+
+.ainam-table td {
+  padding: 11px var(--space-5);
+  text-align: left;
+  color: var(--text-primary);
+  border-bottom: var(--hairline) solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.ainam-table th.ainam-table__col--right,
+.ainam-table td.ainam-table__col--right { text-align: right; }
+
+.ainam-table th.ainam-table__col--center,
+.ainam-table td.ainam-table__col--center { text-align: center; }
+
+/* Ids, content keys and timestamps are machine output — mono, caption size. */
+.ainam-table td.ainam-table__col--mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+}
+
+.ainam-table td.ainam-table__col--muted { color: var(--text-muted); }
+
+.ainam-table td.ainam-table__empty {
+  padding: var(--space-9);
+  text-align: center;
+  color: var(--text-faint);
+}
+
+.ainam-table tbody tr {
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+/* Only a row that does something gets the affordance of doing something. */
+.ainam-table--clickable tbody tr { cursor: pointer; }
+
+.ainam-table--clickable tbody tr:hover,
+.ainam-table--clickable tbody tr:focus-visible { background: var(--surface-hover); }
+
+/* ------------------------------------------------------------- codeblock */
+
+.ainam-code {
+  background: var(--surface-code);
+  border: var(--hairline) solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.ainam-code__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--control-h-md);
+  padding-left: var(--space-5);
+  padding-right: var(--space-4);
+  background: var(--ink-900);
+  border-bottom: var(--hairline) solid var(--border-subtle);
+}
+
+.ainam-code__label {
+  font: var(--type-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  color: var(--text-faint);
+}
+
+/* A language is machine metadata and is set uppercase. A filename is written
+   exactly as the author typed it. */
+.ainam-code__label--language { text-transform: uppercase; }
+
+.ainam-code__copy {
+  /* 22px is optical: a control inside a 34px bar, below the 28px sm step. */
+  height: 22px;
+  padding-inline: var(--space-3);
+  background: transparent;
+  border: var(--hairline) solid var(--border-default);
+  border-radius: var(--radius-xs);
+  color: var(--text-muted);
+  font: var(--fw-medium) var(--fs-micro) / 1 var(--font-mono);
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.ainam-code__copy:hover { color: var(--text-primary); border-color: var(--border-strong); }
+.ainam-code__copy--copied { color: var(--status-success); }
+
+.ainam-code__pre {
+  margin: 0;
+  padding-block: var(--space-5);
+  overflow-x: auto;
+}
+
+.ainam-code__code {
+  display: block;
+  font: var(--type-code);
+  letter-spacing: var(--ls-mono);
+  color: var(--text-body);
+}
+
+.ainam-code__line {
+  display: flex;
+  gap: var(--space-5);
+  padding-inline: var(--space-5);
+}
+
+.ainam-code__gutter {
+  /* 18px holds two digits of 13.5px mono without shifting the code column. */
+  flex: 0 0 18px;
+  text-align: right;
+  color: var(--text-faint);
+  user-select: none;
+}
+
+.ainam-code__text { white-space: pre; }
+
+/* ---------------------------------------------------------------- metric */
+
+.ainam-metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ainam-metric__label {
+  font: var(--type-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.ainam-metric__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+}
+
+.ainam-metric__value {
+  font: var(--fw-medium) var(--fs-display-sm) / 1 var(--font-sans);
+  letter-spacing: var(--ls-display);
+  color: var(--text-primary);
+}
+
+/* The delta is a measured number, so it is mono. */
+.ainam-metric__delta {
+  font: var(--fw-medium) var(--fs-caption) / 1 var(--font-mono);
+}
+
+.ainam-metric__delta--up { color: var(--status-success); }
+.ainam-metric__delta--down { color: var(--status-danger); }
+.ainam-metric__delta--neutral { color: var(--text-muted); }
+
+.ainam-metric__hint {
+  font: var(--type-caption);
+  letter-spacing: var(--ls-body);
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ainam-tag,
+  .ainam-tag__remove,
+  .ainam-table tbody tr,
+  .ainam-code__copy { transition: none; }
+}

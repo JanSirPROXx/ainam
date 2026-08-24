@@ -1,0 +1,35 @@
+/* Minimal global reset. Consuming projects get page background, body type,
+   selection colour and link colours for free. */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-body);
+  font: var(--type-body);
+  letter-spacing: var(--ls-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--alpha-16); color: var(--white); }
+/* Wrapped in :where() so these contribute no specificity. A component that
+   renders an anchor — Button as="a", Breadcrumb, SidebarNav — must be able to
+   set its own colour from a plain class. Without this, `a:hover` at (0,1,1)
+   beat `.ainam-btn--primary` at (0,1,0) and a primary button rendered as a link
+   went white-on-white on hover. */
+:where(a) { color: var(--text-link); text-decoration: none; transition: var(--transition-control); }
+:where(a):hover { color: var(--white); }
+h1, h2, h3, h4, h5, h6 { margin: 0; color: var(--text-primary); font-weight: var(--fw-medium); letter-spacing: var(--ls-heading); }
+p { margin: 0; text-wrap: pretty; }
+code, pre, kbd { font-family: var(--font-mono); }
+/* The design system specifies focus as "a 48%-alpha hairline plus a 3px soft
+   ring". Only the soft ring was applied here, and on its own it composites to
+   roughly #222 over a card — about 1.25:1, where WCAG 2.2 requires 3:1 for a
+   focus indicator. The hairline at --border-focus brings it to about 5:1.
+   `outline` follows the element's own border-radius, so the radius is no longer
+   forced here — forcing 4px squared off the corners of every 6px control. */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+  box-shadow: var(--shadow-focus);
+}

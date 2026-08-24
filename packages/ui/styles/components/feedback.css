@@ -1,0 +1,162 @@
+/* Feedback: Toast, Tooltip, EmptyState. */
+
+/* ----------------------------------------------------------------- toast */
+
+.ainam-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  /* The toast measure is a fixed optical column in the source — no container
+     token exists at this size, and the 4px grid does not reach it. */
+  min-width: 280px;
+  max-width: 380px;
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-raised);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-md);
+  /* A toast genuinely floats, so it earns a real shadow. Everything anchored
+     to the page uses hairlines instead. */
+  box-shadow: var(--shadow-md), var(--shadow-inset-top);
+  animation: ainam-rise var(--dur-normal) var(--ease-out);
+}
+
+/* Status is a mono glyph and its colour — never a coloured bar or a fill. */
+.ainam-toast__glyph {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-sm);
+  line-height: 1.5;
+  letter-spacing: var(--ls-mono);
+}
+
+.ainam-toast--success .ainam-toast__glyph { color: var(--status-success); }
+.ainam-toast--error .ainam-toast__glyph { color: var(--status-danger); }
+.ainam-toast--info .ainam-toast__glyph { color: var(--text-muted); }
+
+.ainam-toast__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ainam-toast__title {
+  font: var(--fw-medium) var(--fs-body-sm) / 1.4 var(--font-sans);
+  letter-spacing: var(--ls-body);
+  color: var(--text-primary);
+}
+
+.ainam-toast__description {
+  font: var(--type-caption);
+  letter-spacing: var(--ls-body);
+  color: var(--text-muted);
+}
+
+.ainam-toast__dismiss {
+  flex: 0 0 auto;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--icon-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-sm);
+  line-height: 1;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.ainam-toast__dismiss:hover { color: var(--text-primary); }
+
+/* 6px of travel: the design system's own rise distance for floating layers. */
+@keyframes ainam-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* --------------------------------------------------------------- tooltip */
+
+.ainam-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+
+.ainam-tooltip__bubble {
+  position: absolute;
+  z-index: 40;
+  /* The bubble must never swallow a click meant for the trigger beneath it. */
+  pointer-events: none;
+  opacity: 0;
+  /* Fades only — the system forbids movement on a hover hint. */
+  transition: opacity var(--dur-fast) var(--ease-out);
+  /* 5px is optical control padding, deliberately off the 4px grid. */
+  padding: 5px var(--space-3);
+  background: var(--ink-700);
+  color: var(--text-primary);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  font: var(--fw-regular) var(--fs-micro) / 1.3 var(--font-mono);
+  letter-spacing: var(--ls-mono);
+}
+
+/* :focus-within is what the source's mouse-only handler could not do — the
+   hint appears when the trigger is reached by keyboard, too. */
+.ainam-tooltip:hover .ainam-tooltip__bubble,
+.ainam-tooltip:focus-within .ainam-tooltip__bubble {
+  opacity: 1;
+}
+
+/* A 6px stand-off from the trigger on every side. */
+.ainam-tooltip__bubble--top { bottom: 100%; left: 50%; transform: translate(-50%, -6px); }
+.ainam-tooltip__bubble--bottom { top: 100%; left: 50%; transform: translate(-50%, 6px); }
+.ainam-tooltip__bubble--left { right: 100%; top: 50%; transform: translate(-6px, -50%); }
+.ainam-tooltip__bubble--right { left: 100%; top: 50%; transform: translate(6px, -50%); }
+
+/* ----------------------------------------------------------- empty state */
+
+.ainam-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-12) var(--space-7);
+  text-align: center;
+}
+
+.ainam-empty__icon {
+  display: grid;
+  place-items: center;
+  /* A 36px tile sits between the sm and md control heights; the spacing scale
+     has no step for it. */
+  width: 36px;
+  height: 36px;
+  margin-bottom: var(--space-2);
+  background: var(--ink-850);
+  border: var(--hairline) solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--icon-muted);
+}
+
+.ainam-empty__title {
+  font: var(--fw-medium) var(--fs-heading-sm) / var(--lh-heading) var(--font-sans);
+  letter-spacing: var(--ls-heading);
+  color: var(--text-primary);
+}
+
+.ainam-empty__description {
+  /* Prose measure for a centred, single-paragraph state — well inside the
+     680px cap that left-aligned prose uses. */
+  max-width: 340px;
+  font: var(--fw-regular) var(--fs-body-sm) / var(--lh-body) var(--font-sans);
+  letter-spacing: var(--ls-body);
+  color: var(--text-muted);
+}
+
+.ainam-empty__action { margin-top: var(--space-3); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ainam-toast { animation: none; }
+  .ainam-tooltip__bubble { transition: none; }
+}

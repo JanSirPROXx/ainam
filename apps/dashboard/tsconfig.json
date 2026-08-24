@@ -26,6 +26,9 @@
       ],
       "@ainam/schema/types": [
         "../../packages/schema/src/types.ts"
+      ],
+      "@ainam/ui": [
+        "../../packages/ui/src/index.ts"
       ]
     }
   },

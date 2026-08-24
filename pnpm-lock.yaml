@@ -78,6 +78,9 @@ importers:
       '@ainam/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@ainam/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@tanstack/react-query':
         specifier: 5.102.2
         version: 5.102.2(react@19.2.8)
@@ -166,6 +169,21 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
+      tsdown:
+        specifier: 0.22.14
+        version: 0.22.14(tsx@4.23.12)(typescript@6.0.3)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/ui:
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
       tsdown:
         specifier: 0.22.14
         version: 0.22.14(tsx@4.23.12)(typescript@6.0.3)

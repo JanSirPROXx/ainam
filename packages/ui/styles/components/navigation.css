@@ -1,0 +1,235 @@
+/* Navigation: Tabs, SidebarNav, Breadcrumb. */
+
+/* ------------------------------------------------------------------ tabs */
+
+.ainam-tabs {
+  /* The tablist is one tab stop; arrow keys move the roving tabindex inside it. */
+  display: flex;
+}
+
+.ainam-tab {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  letter-spacing: var(--ls-body);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.ainam-tab:hover {
+  color: var(--text-body);
+}
+
+.ainam-tab[aria-selected='true'] {
+  color: var(--text-primary);
+}
+
+.ainam-tab:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-focus);
+}
+
+/* Counts are machine-produced, so they are mono and quiet. */
+.ainam-tab__count {
+  font: var(--fw-regular) var(--fs-micro) / 1 var(--font-mono);
+  letter-spacing: var(--ls-mono);
+  color: var(--text-faint);
+}
+
+.ainam-tabs--underline {
+  gap: var(--space-7);
+  border-bottom: var(--hairline) solid var(--border-default);
+}
+
+/* 10px of padding under the label and a 7px gap are optical values, off the
+   4px grid deliberately — they set the distance from label to the rule. */
+.ainam-tabs--underline .ainam-tab {
+  position: relative;
+  gap: 7px;
+  padding: 0 0 10px;
+  font: var(--fw-medium) var(--fs-body-sm) / 1 var(--font-sans);
+}
+
+/* The active marker is a 1px near-white rule sitting on top of the container
+   hairline — never a coloured bar. */
+.ainam-tabs--underline .ainam-tab::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: calc(-1 * var(--hairline));
+  left: 0;
+  height: var(--hairline);
+  background: transparent;
+  transition: var(--transition-control);
+}
+
+.ainam-tabs--underline .ainam-tab[aria-selected='true']::after {
+  background: var(--accent);
+}
+
+.ainam-tabs--segmented {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: var(--ink-850);
+  border: var(--hairline) solid var(--border-default);
+  border-radius: var(--radius-control);
+}
+
+/* 26px is the inner height of a 34px control once the 2px track and its
+   hairline are removed; 10px of inline padding is the optical match. */
+.ainam-tabs--segmented .ainam-tab {
+  height: 26px;
+  padding-inline: 10px;
+  border-radius: var(--radius-xs);
+  font: var(--fw-medium) var(--fs-caption) / 1 var(--font-sans);
+}
+
+.ainam-tabs--segmented .ainam-tab[aria-selected='true'] {
+  background: var(--ink-700);
+}
+
+/* ----------------------------------------------------------- sidebar nav */
+
+.ainam-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.ainam-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ainam-nav-group__label {
+  padding: 0 var(--space-4) var(--space-3);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.ainam-nav-group__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 30px rows: taller than a 28px control, shorter than a 34px one — the sidebar
+   sets its own density. */
+.ainam-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  height: 30px;
+  padding: 0 var(--space-4);
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font: var(--fw-regular) var(--fs-body-sm) / 1 var(--font-sans);
+  letter-spacing: var(--ls-body);
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.ainam-nav-item:hover {
+  background: var(--surface-hover);
+}
+
+.ainam-nav-item[aria-current='page'] {
+  background: var(--surface-active);
+  color: var(--text-primary);
+  font-weight: var(--fw-medium);
+}
+
+.ainam-nav-item:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.ainam-nav-item__icon {
+  display: grid;
+  place-items: center;
+  /* --space-5 is 16px: the Lucide glyph box. */
+  width: var(--space-5);
+  height: var(--space-5);
+  color: var(--icon-muted);
+}
+
+.ainam-nav-item[aria-current='page'] .ainam-nav-item__icon {
+  color: var(--text-primary);
+}
+
+.ainam-nav-item__label {
+  flex: 1;
+}
+
+/* ------------------------------------------------------------ breadcrumb */
+
+.ainam-breadcrumb__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ainam-breadcrumb__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* The separator is a mono slash because AINAM content keys are slash-paths.
+   A pseudo-element keeps it out of the accessibility tree. */
+.ainam-breadcrumb__item + .ainam-breadcrumb__item::before {
+  content: '/';
+  font: var(--fw-regular) var(--fs-micro) / 1 var(--font-mono);
+  letter-spacing: var(--ls-mono);
+  color: var(--text-faint);
+}
+
+.ainam-breadcrumb__crumb {
+  font: var(--fw-regular) var(--fs-caption) / 1 var(--font-sans);
+  letter-spacing: var(--ls-body);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: var(--transition-control);
+}
+
+.ainam-breadcrumb__crumb[aria-current='page'] {
+  color: var(--text-primary);
+}
+
+a.ainam-breadcrumb__crumb:hover {
+  color: var(--text-primary);
+}
+
+a.ainam-breadcrumb__crumb:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ainam-tab,
+  .ainam-tabs--underline .ainam-tab::after,
+  .ainam-nav-item,
+  .ainam-breadcrumb__crumb {
+    transition: none;
+  }
+}

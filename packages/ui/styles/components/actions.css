@@ -1,0 +1,137 @@
+/* Actions: Button, IconButton. */
+
+/* ---------------------------------------------------------------- button */
+
+.ainam-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--hairline) solid transparent;
+  border-radius: var(--radius-control);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  letter-spacing: var(--ls-body);
+  white-space: nowrap;
+  text-decoration: none;
+  user-select: none;
+  cursor: pointer;
+  transition: var(--transition-control), transform var(--dur-instant) var(--ease-out);
+}
+
+/* A 1px settle, never a scale — the system caps transforms at 4px and 2%. */
+.ainam-btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.ainam-btn:disabled {
+  background: var(--ink-850);
+  border-color: var(--border-subtle);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Control padding is an optical value, not a grid step: 10 and 14 sit off the
+   4px scale deliberately, matching the design system's own buttons. */
+.ainam-btn--sm { height: var(--control-h-sm); padding-inline: 10px; font-size: var(--fs-caption); gap: 6px; }
+.ainam-btn--md { height: var(--control-h-md); padding-inline: 14px; font-size: var(--fs-body-sm); gap: 7px; }
+.ainam-btn--lg { height: var(--control-h-lg); padding-inline: var(--space-6); font-size: var(--fs-body-md); gap: var(--space-3); }
+
+.ainam-btn--full { display: flex; width: 100%; }
+
+.ainam-btn--primary { background: var(--accent); color: var(--accent-contrast); }
+.ainam-btn--primary:not(:disabled):hover { background: var(--accent-strong); }
+
+.ainam-btn--secondary {
+  background: var(--ink-850);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-inset-top);
+}
+.ainam-btn--secondary:not(:disabled):hover { background: var(--surface-hover); }
+
+.ainam-btn--ghost { background: transparent; color: var(--text-body); }
+.ainam-btn--ghost:not(:disabled):hover { background: var(--surface-hover); color: var(--text-primary); }
+
+.ainam-btn--outline {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-inset-top);
+}
+.ainam-btn--outline:not(:disabled):hover { background: var(--surface-hover); }
+
+.ainam-btn--danger {
+  background: var(--status-danger-bg);
+  color: var(--status-danger);
+  border-color: var(--border-default);
+}
+.ainam-btn--danger:not(:disabled):hover { background: var(--status-danger-bg-hover); }
+
+.ainam-spinner {
+  display: inline-block;
+  width: var(--space-4);
+  height: var(--space-4);
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--radius-pill);
+  animation: ainam-spin var(--dur-reveal) var(--ease-linear) infinite;
+}
+
+@keyframes ainam-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Respect a reduced-motion preference: a spinner is decorative, and the system
+   caps motion elsewhere too. */
+@media (prefers-reduced-motion: reduce) {
+  .ainam-spinner { animation-duration: 2.4s; }
+  .ainam-btn { transition: none; }
+  .ainam-btn:not(:disabled):active { transform: none; }
+}
+
+/* ----------------------------------------------------------- icon button */
+
+.ainam-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-0);
+  border: var(--hairline) solid transparent;
+  border-radius: var(--radius-control);
+  color: var(--icon-default);
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+/* Square: the glyph sits in a control-height box, so an icon button lines up
+   with a Button of the same size on the same row. */
+.ainam-icon-btn--sm { width: var(--control-h-sm); height: var(--control-h-sm); }
+.ainam-icon-btn--md { width: var(--control-h-md); height: var(--control-h-md); }
+.ainam-icon-btn--lg { width: var(--control-h-lg); height: var(--control-h-lg); }
+
+.ainam-icon-btn--ghost { background: transparent; }
+.ainam-icon-btn--secondary { background: var(--ink-850); border-color: var(--border-default); }
+
+.ainam-icon-btn:not(:disabled):hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* The variant background is kept: a disabled icon button dims, it does not
+   change shape or gain chrome. */
+.ainam-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The global :focus-visible ring squares off to --radius-xs; a control keeps
+   its own radius so the ring traces the button rather than cutting it. */
+.ainam-icon-btn:focus-visible {
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-control);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ainam-icon-btn { transition: none; }
+}

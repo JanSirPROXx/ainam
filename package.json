@@ -11,7 +11,7 @@
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
     "typecheck": "pnpm -r run typecheck",
-    "lint": "oxlint .",
+    "lint": "oxlint . && node scripts/check-tokens.mjs",
     "db:generate": "pnpm --filter @ainam/cms-server run db:generate",
     "db:migrate": "pnpm --filter @ainam/cms-server run db:migrate",
     "changeset": "changeset",

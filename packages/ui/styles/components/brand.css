@@ -1,0 +1,102 @@
+/* Brand: Wordmark, GridBackdrop, Eyebrow. */
+
+/* -------------------------------------------------------------- wordmark */
+
+/* AINAM has no supplied logo mark — the wordmark is set in type. `size` is the
+   cap height; the gap and the suffix are proportions of it, so a single
+   variable scales the whole lockup. 16px is the contract default and has no
+   type token: the scale runs 15px, 17px, with nothing at 16. */
+.ainam-wordmark {
+  --ainam-wordmark-size: 16px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: calc(var(--ainam-wordmark-size) * 0.5);
+}
+
+.ainam-wordmark__mark {
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+  font-size: var(--ainam-wordmark-size);
+  line-height: 1;
+  /* The brand tracking constant. It is not --ls-eyebrow (0.08em) and the type
+     scale carries no token for it. Never tighten it, never go past 500. */
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ainam-wordmark-color, var(--text-primary));
+}
+
+.ainam-wordmark__suffix {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-regular);
+  font-size: calc(var(--ainam-wordmark-size) * 0.82);
+  line-height: 1;
+  letter-spacing: var(--ls-body);
+  color: var(--text-faint);
+}
+
+/* --------------------------------------------------------- grid backdrop */
+
+.ainam-backdrop {
+  --ainam-backdrop-cell: var(--space-11);
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-page);
+}
+
+.ainam-backdrop__grid,
+.ainam-backdrop__glow,
+.ainam-backdrop__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ainam-backdrop__grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) var(--hairline), transparent var(--hairline)),
+    linear-gradient(to bottom, var(--grid-line) var(--hairline), transparent var(--hairline));
+  background-size: var(--ainam-backdrop-cell) var(--ainam-backdrop-cell);
+  /* A mask stencil, not a colour: --black is the opaque end of the falloff, so
+     the grid fades out below and to the sides of the glow. */
+  -webkit-mask-image: radial-gradient(80% 70% at 50% 0%, var(--black) 0%, transparent 100%);
+  mask-image: radial-gradient(80% 70% at 50% 0%, var(--black) 0%, transparent 100%);
+}
+
+.ainam-backdrop__glow {
+  background: var(--glow-hero);
+}
+
+.ainam-backdrop__grain {
+  /* 3.5% fractal noise, blended rather than drawn: overlay keeps it invisible
+     as texture and stops it lifting the page off pure black. A ratio has no
+     token in the system. */
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Establishes the stacking context that lifts content above all three layers. */
+.ainam-backdrop__content {
+  position: relative;
+}
+
+/* --------------------------------------------------------------- eyebrow */
+
+.ainam-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* Decoration, so it stays out of the accessibility tree as a pseudo-element. */
+.ainam-eyebrow--rule::before {
+  content: "";
+  flex: none;
+  width: var(--space-7);
+  height: var(--hairline);
+  background: var(--border-strong);
+}

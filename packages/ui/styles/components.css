@@ -1,0 +1,19 @@
+/* Component layer.
+ *
+ * The design system authored these as React inline styles with hover and press
+ * tracked in `useState`. That works in a design canvas but is worse in a
+ * product: a JS-only hover has no keyboard or touch equivalent, and every mouse
+ * movement re-renders the tree. The visual result here is identical; the state
+ * lives in CSS where the browser already handles it.
+ *
+ * Every value is a token. `_adherence.oxlintrc.json` enforces that in JS; this
+ * file holds itself to the same rule.
+ */
+
+@import "./components/actions.css";
+@import "./components/forms.css";
+@import "./components/surfaces.css";
+@import "./components/data.css";
+@import "./components/navigation.css";
+@import "./components/feedback.css";
+@import "./components/brand.css";

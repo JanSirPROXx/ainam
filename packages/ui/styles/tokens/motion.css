@@ -1,0 +1,16 @@
+/* Motion is short, eased-out and opacity-led. No bounce, no spring, no
+   overshoot. Transforms never exceed 4px of travel or 2% of scale. */
+:root {
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-normal: 220ms;
+  --dur-slow: 400ms;
+  --dur-reveal: 700ms;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-linear: linear;
+
+  --transition-control: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+  --transition-surface: background-color var(--dur-normal) var(--ease-out), border-color var(--dur-normal) var(--ease-out);
+}

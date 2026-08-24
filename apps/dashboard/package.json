@@ -1,0 +1,29 @@
+{
+  "name": "@ainam/dashboard",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AINAM editor UI. A pure client of the cms-server admin API.",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ainam/schema": "workspace:*",
+    "@tanstack/react-query": "5.102.2",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "22.19.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.4",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3"
+  }
+}

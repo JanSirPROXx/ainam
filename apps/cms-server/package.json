@@ -1,0 +1,34 @@
+{
+  "name": "@ainam/cms-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AINAM content and admin API. Owns the database.",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+    "build": "tsdown",
+    "start": "node --env-file-if-exists=.env dist/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@ainam/schema": "workspace:*",
+    "@hono/node-server": "2.1.1",
+    "@hono/zod-openapi": "1.6.1",
+    "better-auth": "1.7.1",
+    "drizzle-orm": "0.45.2",
+    "hono": "4.13.4",
+    "pg": "8.23.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.2",
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "0.31.10",
+    "tsdown": "0.22.14",
+    "tsx": "4.23.12",
+    "typescript": "6.0.3"
+  }
+}

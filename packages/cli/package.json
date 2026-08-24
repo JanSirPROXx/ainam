@@ -1,0 +1,22 @@
+{
+  "name": "ainam",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "AINAM command line interface — scaffold a project, push its content schema, pull generated types.",
+  "license": "MIT",
+  "bin": { "ainam": "./dist/index.mjs" },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ainam/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.2",
+    "tsdown": "0.22.14",
+    "typescript": "6.0.3"
+  }
+}

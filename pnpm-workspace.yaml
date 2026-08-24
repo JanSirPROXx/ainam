@@ -1,0 +1,12 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "examples/*"
+
+# pnpm blocks dependency lifecycle scripts unless they are listed here. Every
+# entry is code we let run at install time, so both lists stay short and argued.
+#
+# esbuild ships its platform binaries as optional dependencies, so its install
+# script is redundant — declining it costs nothing and keeps install hermetic.
+ignoredBuiltDependencies:
+  - esbuild

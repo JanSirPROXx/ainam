@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Design tokens are not vendored yet. Until the AINAM design system lands in a
+   workspace package, this file deliberately defines no colours, type or spacing
+   of its own — inventing values here would create exactly the drift the design
+   system exists to prevent. */

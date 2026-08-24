@@ -1,0 +1,26 @@
+{
+  "name": "ainam-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.1.2",
+  "engines": {
+    "node": ">=22.11.0"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "oxlint .",
+    "db:generate": "pnpm --filter @ainam/cms-server run db:generate",
+    "db:migrate": "pnpm --filter @ainam/cms-server run db:migrate",
+    "changeset": "changeset",
+    "release": "pnpm build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "3.0.1",
+    "@types/node": "22.19.2",
+    "oxlint": "1.79.0",
+    "typescript": "6.0.3"
+  }
+}

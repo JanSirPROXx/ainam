@@ -13,6 +13,7 @@ node_modules/
 .yarn/*
 
 # --- Build output ---
+next-env.d.ts
 dist/
 build/
 out/

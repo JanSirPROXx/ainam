@@ -1,0 +1,49 @@
+# --- Internal planning — deliberately not published ---
+planing.md
+CLAUDE.md
+/planning/
+*.private.md
+
+# --- Claude Code ---
+.claude/
+
+# --- Dependencies ---
+node_modules/
+.pnp.*
+.yarn/*
+
+# --- Build output ---
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# --- Environment ---
+.env
+.env.*
+!.env.example
+
+# --- Testing ---
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Editors ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# --- OS ---
+.DS_Store
+Thumbs.db

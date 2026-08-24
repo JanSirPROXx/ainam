@@ -3,8 +3,15 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2023", "DOM"],
+    "lib": [
+      "ES2023",
+      "DOM"
+    ],
     "noEmit": true
   },
-  "include": ["src", "tsdown.config.ts"]
+  "include": [
+    "src",
+    "test",
+    "tsdown.config.ts"
+  ]
 }

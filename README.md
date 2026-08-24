@@ -25,15 +25,31 @@ examples/
 
 ## Getting started
 
-Requires Node 22 (see `.nvmrc`) and pnpm 11.
+The whole stack, with nothing installed but Docker:
 
 ```bash
+docker compose up
+```
+
+That brings up Postgres, applies migrations, and serves the API on
+http://localhost:8787 and the dashboard on http://localhost:3000. No accounts,
+no external services. `./scripts/smoke.sh` asserts exactly this, and CI runs it
+on every push.
+
+To work on the code you also need Node 24 (see `.nvmrc`) and pnpm, which
+`corepack enable` provides at the version this repository pins:
+
+```bash
+corepack enable
 pnpm install
 cp .env.example .env
 pnpm build
 ```
 
-`.env.example` documents every variable the workspace reads.
+`.env.example` documents every variable the workspace reads. The
+`BETTER_AUTH_SECRET` it ships is a development placeholder — it is published in
+this repository, so cms-server refuses to start with it when `NODE_ENV` is
+`production`.
 
 ## Commands
 
@@ -47,8 +63,9 @@ pnpm db:generate  # generate a migration from the Drizzle schema
 pnpm db:migrate   # apply pending migrations
 ```
 
-A Postgres instance is needed to run `cms-server`. Docker Compose support is not
-wired up yet.
+`cms-server` applies pending migrations at startup, which is what makes
+`docker compose up` a single step. Set `RUN_MIGRATIONS_ON_START=false` where a
+deploy pipeline runs them as its own stage instead.
 
 ## Licence
 

@@ -3,8 +3,16 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "noEmit": true
   },
-  "include": ["src", "drizzle.config.ts", "tsdown.config.ts"]
+  "include": [
+    "src",
+    "test",
+    "auth.config.ts",
+    "drizzle.config.ts",
+    "tsdown.config.ts"
+  ]
 }

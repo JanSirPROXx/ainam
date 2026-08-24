@@ -3,10 +3,12 @@ packages:
   - "packages/*"
   - "examples/*"
 
-# pnpm blocks dependency lifecycle scripts unless they are listed here. Every
-# entry is code we let run at install time, so both lists stay short and argued.
+# pnpm blocks dependency install scripts until each is decided explicitly. Every
+# entry here is a deliberate call about letting third-party code run at install
+# time, so the list stays short and argued.
 #
-# esbuild ships its platform binaries as optional dependencies, so its install
-# script is redundant — declining it costs nothing and keeps install hermetic.
-ignoredBuiltDependencies:
-  - esbuild
+# esbuild: declined. It ships its platform binaries as optional dependencies, so
+# the install script is redundant — verified by running tsx and drizzle-kit
+# without it.
+allowBuilds:
+  esbuild: false

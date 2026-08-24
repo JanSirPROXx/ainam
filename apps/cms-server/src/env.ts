@@ -16,6 +16,10 @@ const envSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.url().default('http://localhost:8787'),
   DASHBOARD_ORIGIN: z.url().default('http://localhost:3000'),
+  RUN_MIGRATIONS_ON_START: z
+    .stringbool()
+    .default(true)
+    .describe('Set false when a deploy pipeline applies migrations as its own step.'),
 })
 
 export type Env = z.infer<typeof envSchema>

@@ -124,3 +124,30 @@ export interface SchemaPushResult {
   updated: ContentKey[]
   removed: ContentKey[]
 }
+
+// ---------------------------------------------------------------- api
+
+export type ApiErrorCode =
+  | 'bad_request'
+  | 'unauthorized'
+  | 'forbidden'
+  | 'not_found'
+  | 'conflict'
+  | 'validation_failed'
+  | 'rate_limited'
+  | 'internal'
+
+export interface ApiErrorDetail {
+  path: string
+  message: string
+}
+
+/** The shape of every non-2xx response body. */
+export interface ApiError {
+  error: {
+    code: ApiErrorCode
+    message: string
+    requestId: string
+    details?: ApiErrorDetail[] | undefined
+  }
+}

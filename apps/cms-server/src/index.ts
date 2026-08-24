@@ -1,10 +1,17 @@
 import { serve } from '@hono/node-server'
 import { createApp } from './app'
 import { createDatabase } from './db/client'
+import { runMigrations } from './db/migrate'
 import { loadEnv } from './env'
 
 const env = loadEnv()
 const db = createDatabase(env.DATABASE_URL)
+
+if (env.RUN_MIGRATIONS_ON_START) {
+  await runMigrations(db, new URL('../drizzle', import.meta.url).pathname)
+  process.stdout.write('migrations up to date\n')
+}
+
 const app = createApp(env, db)
 
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {

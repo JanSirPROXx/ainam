@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits"],
+  "timezone": "Europe/Zurich",
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "@types/node must track the Node major we run, never latest.",
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": "<25"
+    },
+    {
+      "description": "TypeScript 7 is latest, but typescript-eslint declares <6.1.0.",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<6.1.0"
+    },
+    {
+      "description": "Group the SDK's own toolchain so releases stay reviewable.",
+      "matchPackageNames": ["tsdown", "@changesets/cli"],
+      "groupName": "sdk toolchain"
+    }
+  ],
+  "minimumReleaseAge": "3 days"
+}

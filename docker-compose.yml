@@ -1,0 +1,72 @@
+# The local evaluation stack. `docker compose up` from a clean checkout must
+# always work — a broken Compose setup is a broken build.
+#
+# Every value below has a default, so this runs with or without a .env file.
+# Host ports are overridable — POSTGRES_PORT, CMS_PORT, DASHBOARD_PORT — because
+# 3000 and 5432 are commonly already taken on a developer's machine.
+# NODE_ENV stays at development here: the placeholder secret in .env.example is
+# public, and cms-server refuses to start with it when NODE_ENV=production. A
+# real deployment sets both.
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ainam
+      POSTGRES_PASSWORD: ainam
+      POSTGRES_DB: ainam
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # Postgres 18+ wants the mount one level up, so data lands in a
+      # version-named subdirectory and a future major upgrade can use
+      # `pg_upgrade --link` without crossing a mount boundary.
+      - ainam-postgres:/var/lib/postgresql
+    healthcheck:
+      # cms-server applies migrations at startup, so it must not start against a
+      # database that is still initialising.
+      test: ["CMD-SHELL", "pg_isready -U ainam -d ainam"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  cms-server:
+    build:
+      context: .
+      dockerfile: apps/cms-server/Dockerfile
+    environment:
+      DATABASE_URL: postgres://ainam:ainam@postgres:5432/ainam
+      PORT: "8787"
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-development-only-secret-not-for-any-deployment}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:8787}
+      DASHBOARD_ORIGIN: ${DASHBOARD_ORIGIN:-http://localhost:3000}
+    ports:
+      - "${CMS_PORT:-8787}:8787"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # No curl in the runtime image, and adding one to serve a healthcheck
+      # would be a package we ship to every self-hoster for our convenience.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:8787/health').then(r=>r.json()).then(b=>process.exit(b.database==='up'?0:1)).catch(()=>process.exit(1))"
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+    environment:
+      NEXT_PUBLIC_CMS_URL: ${NEXT_PUBLIC_CMS_URL:-http://localhost:8787}
+    ports:
+      - "${DASHBOARD_PORT:-3000}:3000"
+    depends_on:
+      cms-server:
+        condition: service_healthy
+
+volumes:
+  ainam-postgres:

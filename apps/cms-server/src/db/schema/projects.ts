@@ -1,17 +1,21 @@
 import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import { organizations } from './auth'
 
 /**
  * A website connected to AINAM.
  *
- * `organizationId` references the table Better Auth's organization plugin owns,
- * so there is no foreign key here — the auth tables are generated separately and
- * a cross-schema constraint would couple our migrations to theirs.
+ * Better Auth's tables are generated into `auth.ts` and committed, so they live
+ * in our own migration set — which is what lets this carry a real foreign key.
+ * Deleting an organization must take its projects with it; an orphaned project
+ * would be content nobody can reach and nobody can remove.
  */
 export const projects = pgTable(
   'projects',
   {
     id: text('id').primaryKey(),
-    organizationId: text('organization_id').notNull(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     slug: text('slug').notNull(),
     defaultLocale: text('default_locale').notNull().default('en'),

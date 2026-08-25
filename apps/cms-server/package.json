@@ -17,6 +17,7 @@
     "bootstrap": "tsx --env-file-if-exists=.env src/bootstrap.ts"
   },
   "dependencies": {
+    "@ainam/core": "workspace:*",
     "@ainam/schema": "workspace:*",
     "@hono/node-server": "2.1.1",
     "@hono/zod-openapi": "1.6.1",

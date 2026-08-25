@@ -2,17 +2,17 @@ import type { CSSProperties, HTMLAttributes, ReactNode } from 'react'
 import { cx } from '../lib/cx'
 
 export interface GridBackdropProps extends HTMLAttributes<HTMLDivElement> {
-  children?: ReactNode
+  children?: ReactNode | undefined
   /** Radial white glow from the top edge. Use it once per page, at the top. @default true */
-  glow?: boolean
+  glow?: boolean | undefined
   /** Masked hairline grid. @default true */
-  grid?: boolean
+  grid?: boolean | undefined
   /** 3.5% fractal-noise overlay. @default true */
-  grain?: boolean
+  grain?: boolean | undefined
   /** Grid cell size in px. @default 64 */
-  cell?: number
+  cell?: number | undefined
   /** A number is read as px; a string is passed through. */
-  height?: number | string
+  height?: number | string | undefined
 }
 
 /**

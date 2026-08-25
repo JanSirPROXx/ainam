@@ -6,20 +6,20 @@ export type CardPadding = 'none' | 'sm' | 'md' | 'lg'
 
 /** Props for {@link Card}. Any other div attribute is forwarded to the card element. */
 export interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
-  children?: ReactNode
+  children?: ReactNode | undefined
   /** Uppercase mono label above the title. */
-  eyebrow?: string
+  eyebrow?: string | undefined
   /** Rendered as the card's heading, not as a browser tooltip. */
-  title?: string
-  description?: string
+  title?: string | undefined
+  description?: string | undefined
   /** Rendered below a hairline divider. */
-  footer?: ReactNode
+  footer?: ReactNode | undefined
   /** Swaps the flat hairline for a top-lit gradient hairline. Feature cards only. */
-  gradientBorder?: boolean
+  gradientBorder?: boolean | undefined
   /** Brightens the border on hover. Use when the whole card is a link. */
-  interactive?: boolean
+  interactive?: boolean | undefined
   /** @default "md" */
-  padding?: CardPadding
+  padding?: CardPadding | undefined
 }
 
 /**

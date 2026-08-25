@@ -1,8 +1,9 @@
+import { signWebhookBody } from '@ainam/core'
 import { revalidateTag } from 'next/cache'
 import { contentTag } from './tags'
 
 export interface RevalidateHandlerConfig {
-  /** Shared secret, sent by the CMS as the `x-ainam-signature` header. */
+  /** Shared secret. Signs the body; it is never sent. */
   secret: string
   /** Project this route accepts webhooks for. */
   projectId: string
@@ -17,13 +18,12 @@ export interface RevalidateHandlerConfig {
 }
 
 /**
- * Compares two secrets without leaking their contents through timing.
+ * Compares two hex digests without leaking their contents through timing.
  *
  * A plain `===` returns as soon as two bytes differ, which lets an attacker
- * recover the secret one character at a time. The length is compared first and
- * separately — that much is unavoidably observable.
+ * recover a signature one character at a time.
  */
-function secretsMatch(received: string, expected: string): boolean {
+function digestsMatch(received: string, expected: string): boolean {
   if (received.length !== expected.length) return false
   let diff = 0
   for (let i = 0; i < received.length; i++) {
@@ -34,6 +34,10 @@ function secretsMatch(received: string, expected: string): boolean {
 
 /**
  * Builds the route handler that the CMS calls after a publish.
+ *
+ * The signature is an HMAC over the request body, not the shared secret itself:
+ * a bare secret in a header can be replayed by anything that observes one
+ * delivery, and says nothing about whether the body was altered on the way.
  *
  * @example
  * ```ts
@@ -49,13 +53,20 @@ export function createRevalidateHandler(
 ): (request: Request) => Promise<Response> {
   return async function handleRevalidate(request: Request): Promise<Response> {
     const signature = request.headers.get('x-ainam-signature')
-    if (signature === null || !secretsMatch(signature, config.secret)) {
+    if (signature === null) {
+      return Response.json({ error: 'Missing x-ainam-signature.' }, { status: 401 })
+    }
+
+    // Read once, as text: the signature covers the exact bytes sent, so parsing
+    // first and re-serialising would verify something the CMS never signed.
+    const body = await request.text()
+    if (!digestsMatch(signature, await signWebhookBody(config.secret, body))) {
       return Response.json({ error: 'Invalid signature.' }, { status: 401 })
     }
 
     let payload: { projectId?: string; locale?: string }
     try {
-      payload = (await request.json()) as typeof payload
+      payload = JSON.parse(body) as typeof payload
     } catch {
       return Response.json({ error: 'Body is not valid JSON.' }, { status: 400 })
     }

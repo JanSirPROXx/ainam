@@ -20,6 +20,10 @@ export const projects = pgTable(
     slug: text('slug').notNull(),
     defaultLocale: text('default_locale').notNull().default('en'),
     locales: jsonb('locales').$type<string[]>().notNull().default(['en']),
+    /** Called after a publish so the site revalidates. Null until configured. */
+    webhookUrl: text('webhook_url'),
+    /** Signs the delivery body. Never sent, only used to compute the HMAC. */
+    webhookSecret: text('webhook_secret'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

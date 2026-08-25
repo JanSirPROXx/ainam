@@ -6,19 +6,19 @@ export type ButtonSize = 'sm' | 'md' | 'lg'
 
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'disabled'> {
-  children?: ReactNode
+  children?: ReactNode | undefined
   /** At most one `primary` per view — everything else is secondary or quieter. */
-  variant?: ButtonVariant
-  size?: ButtonSize
-  iconLeft?: ReactNode
-  iconRight?: ReactNode
-  disabled?: boolean
+  variant?: ButtonVariant | undefined
+  size?: ButtonSize | undefined
+  iconLeft?: ReactNode | undefined
+  iconRight?: ReactNode | undefined
+  disabled?: boolean | undefined
   /** Replaces `iconLeft` with a spinner and blocks interaction. */
-  loading?: boolean
-  fullWidth?: boolean
+  loading?: boolean | undefined
+  fullWidth?: boolean | undefined
   /** Render as a link. An `a` still looks and behaves like a button. */
-  as?: 'button' | 'a'
-  href?: string
+  as?: 'button' | 'a' | undefined
+  href?: string | undefined
 }
 
 /**

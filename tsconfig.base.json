@@ -19,8 +19,10 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
+    // No "declaration": tsc only ever runs with --noEmit here, and tsdown
+    // generates the published .d.ts itself. Leaving it on made tsc demand
+    // portable names for types it was never going to emit, which fails on
+    // library types that reference their own internals.
     "sourceMap": true,
     "paths": {
       "@ainam/schema": [

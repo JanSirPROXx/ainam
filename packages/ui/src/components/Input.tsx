@@ -5,13 +5,13 @@ export type InputSize = 'sm' | 'md' | 'lg'
 
 export interface InputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'prefix' | 'suffix'> {
-  size?: InputSize
+  size?: InputSize | undefined
   /** Draws the danger hairline and sets `aria-invalid`. Pair with `Field error`. */
-  invalid?: boolean
+  invalid?: boolean | undefined
   /** Static mono text inside the left edge, e.g. `"ainam.dev/"`. */
-  prefix?: ReactNode
+  prefix?: ReactNode | undefined
   /** Static mono text inside the right edge, e.g. `"px"`. */
-  suffix?: ReactNode
+  suffix?: ReactNode | undefined
 }
 
 /**

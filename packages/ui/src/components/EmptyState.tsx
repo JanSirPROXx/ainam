@@ -5,11 +5,11 @@ export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
   /** What is absent, stated plainly. No apology, no exclamation mark. */
   title: string
   /** One sentence on what the missing thing is for. */
-  description?: string
+  description?: string | undefined
   /** Usually a single primary Button, labelled verb + object. */
-  action?: ReactNode
+  action?: ReactNode | undefined
   /** A 16px glyph. The component draws the bordered tile around it. */
-  icon?: ReactNode
+  icon?: ReactNode | undefined
 }
 
 /**

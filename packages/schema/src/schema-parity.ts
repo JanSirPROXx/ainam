@@ -8,6 +8,14 @@
  */
 import type { z } from 'zod'
 import type { apiErrorSchema, apiKeyScopeSchema } from './api'
+import type {
+  editorEntrySchema,
+  editorViewSchema,
+  publishRequestSchema,
+  publishResultSchema,
+  saveDraftRequestSchema,
+  saveDraftResultSchema,
+} from './editor'
 import type { contentEntrySchema, contentValueSchema, scalarValueSchema } from './content'
 import type { fieldSchema, listFieldSchema, scalarFieldSchema } from './fields'
 import type { contentSchemaSchema, schemaPushRequestSchema, schemaPushResultSchema } from './project'
@@ -27,3 +35,9 @@ export type _PushRequest = Expect<Exact<z.infer<typeof schemaPushRequestSchema>,
 export type _PushResult = Expect<Exact<z.infer<typeof schemaPushResultSchema>, T.SchemaPushResult>>
 export type _ApiError = Expect<Exact<z.infer<typeof apiErrorSchema>, T.ApiError>>
 export type _ApiKeyScope = Expect<Exact<z.infer<typeof apiKeyScopeSchema>, T.ApiKeyScope>>
+export type _EditorEntry = Expect<Exact<z.infer<typeof editorEntrySchema>, T.EditorEntry>>
+export type _EditorView = Expect<Exact<z.infer<typeof editorViewSchema>, T.EditorView>>
+export type _SaveDraftRequest = Expect<Exact<z.infer<typeof saveDraftRequestSchema>, T.SaveDraftRequest>>
+export type _SaveDraftResult = Expect<Exact<z.infer<typeof saveDraftResultSchema>, T.SaveDraftResult>>
+export type _PublishRequest = Expect<Exact<z.infer<typeof publishRequestSchema>, T.PublishRequest>>
+export type _PublishResult = Expect<Exact<z.infer<typeof publishResultSchema>, T.PublishResult>>

@@ -11,7 +11,7 @@ export interface TabItem {
    * Rendered by the `underline` variant only — `segmented` is a compact
    * filter and carries labels alone.
    */
-  count?: number
+  count?: number | undefined
 }
 
 /** `underline` for page-level nav, `segmented` for in-panel filters. */
@@ -20,13 +20,13 @@ export type TabsVariant = 'underline' | 'segmented'
 export interface TabsProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'defaultValue' | 'onChange'> {
   /** A bare string is shorthand for `{ value: s, label: s }`. */
-  items?: Array<string | TabItem>
+  items?: Array<string | TabItem> | undefined
   /** Controlled selection. Pair it with `onChange`. */
-  value?: string
+  value?: string | undefined
   /** Uncontrolled starting selection. Defaults to the first item. */
-  defaultValue?: string
-  onChange?: (value: string) => void
-  variant?: TabsVariant
+  defaultValue?: string | undefined
+  onChange?: (value: string) => void | undefined
+  variant?: TabsVariant | undefined
 }
 
 /**

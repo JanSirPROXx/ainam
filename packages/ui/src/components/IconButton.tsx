@@ -17,10 +17,10 @@ export interface IconButtonProps
    * `ghost` shows no chrome until hover. Reach for `secondary` only when the
    * control has to stay visible against a busy surface.
    */
-  variant?: IconButtonVariant
+  variant?: IconButtonVariant | undefined
   /** Square, matching the control heights: 28 / 34 / 42px. */
-  size?: IconButtonSize
-  disabled?: boolean
+  size?: IconButtonSize | undefined
+  disabled?: boolean | undefined
 }
 
 /**

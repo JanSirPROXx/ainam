@@ -13,11 +13,11 @@ const TONE_GLYPH: Record<ToastTone, string> = {
 export interface ToastProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
   title: string
   /** One line of detail. Prefer a specific, unrounded number over a vague one. */
-  description?: string
+  description?: string | undefined
   /** Carried by the glyph and its colour, never by a coloured bar or fill. */
-  tone?: ToastTone
+  tone?: ToastTone | undefined
   /** Omit for a toast the caller retires on a timer instead. */
-  onDismiss?: () => void
+  onDismiss?: () => void | undefined
 }
 
 /**

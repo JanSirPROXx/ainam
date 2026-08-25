@@ -6,18 +6,18 @@ import { useFocusTrap, useScrollLock } from '../lib/useFocusTrap'
 /** Props for {@link Dialog}. */
 export interface DialogProps {
   /** @default true */
-  open?: boolean
-  title?: string
-  description?: string
-  children?: ReactNode
+  open?: boolean | undefined
+  title?: string | undefined
+  description?: string | undefined
+  children?: ReactNode | undefined
   /** Action row on a darker footer bar, right-aligned. */
-  footer?: ReactNode
+  footer?: ReactNode | undefined
   /** Fired by a scrim click or the Escape key. */
-  onClose?: () => void
+  onClose?: () => void | undefined
   /** Max width in px. @default 460 */
-  width?: number
-  className?: string
-  style?: CSSProperties
+  width?: number | undefined
+  className?: string | undefined
+  style?: CSSProperties | undefined
 }
 
 /**

@@ -2,9 +2,9 @@ import type { TextareaHTMLAttributes } from 'react'
 import { cx } from '../lib/cx'
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  rows?: number
+  rows?: number | undefined
   /** Draws the danger hairline and sets `aria-invalid`. Pair with `Field error`. */
-  invalid?: boolean
+  invalid?: boolean | undefined
 }
 
 /**

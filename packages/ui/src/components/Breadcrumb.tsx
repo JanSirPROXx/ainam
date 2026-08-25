@@ -6,7 +6,7 @@ import { EMPTY } from '../lib/constants'
 export interface BreadcrumbItem {
   label: string
   /** Renders the crumb as a link. Without it the crumb is plain text. */
-  href?: string
+  href?: string | undefined
 }
 
 export interface BreadcrumbProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
@@ -14,7 +14,7 @@ export interface BreadcrumbProps extends Omit<HTMLAttributes<HTMLElement>, 'chil
    * A bare string is shorthand for `{ label: s }`. The last item is the
    * current page: it is never a link, whether or not it carries an `href`.
    */
-  items?: Array<string | BreadcrumbItem>
+  items?: Array<string | BreadcrumbItem> | undefined
 }
 
 /**

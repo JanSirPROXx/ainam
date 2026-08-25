@@ -8,11 +8,11 @@ export interface MetricProps extends Omit<HTMLAttributes<HTMLDivElement>, 'child
   label: string
   value: ReactNode
   /** Mono delta string. Specific and unrounded: `+12.4%`, not `up a bit`. */
-  delta?: string
+  delta?: string | undefined
   /** @default 'neutral' */
-  deltaTone?: MetricDeltaTone
+  deltaTone?: MetricDeltaTone | undefined
   /** Muted caption below the value. */
-  hint?: string
+  hint?: string | undefined
 }
 
 /**

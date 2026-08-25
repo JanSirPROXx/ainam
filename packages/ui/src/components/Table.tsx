@@ -7,25 +7,25 @@ export interface TableColumn {
   key: string
   label: string
   /** Right-align numeric columns only. @default 'left' */
-  align?: 'left' | 'right' | 'center'
+  align?: 'left' | 'right' | 'center' | undefined
   /** Passed through as a CSS width; a number is read as pixels. */
-  width?: number | string
+  width?: number | string | undefined
   /** Set the cell in mono at caption size — ids, content keys, timestamps. */
-  mono?: boolean
+  mono?: boolean | undefined
   /** Set the cell in `--text-muted`, for values that support rather than carry. */
-  muted?: boolean
+  muted?: boolean | undefined
 }
 
 /** One row. Cell values may be nodes, so a cell can hold a `Badge` or a `Tag`. */
 export type TableRow = Record<string, ReactNode>
 
 export interface TableProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
-  columns?: TableColumn[]
-  rows?: TableRow[]
+  columns?: TableColumn[] | undefined
+  rows?: TableRow[] | undefined
   /** Makes rows interactive: pointer cursor, hover tint, keyboard activation. */
-  onRowClick?: (row: TableRow, index: number) => void
+  onRowClick?: (row: TableRow, index: number) => void | undefined
   /** @default 'No records' */
-  emptyLabel?: string
+  emptyLabel?: string | undefined
 }
 
 /**

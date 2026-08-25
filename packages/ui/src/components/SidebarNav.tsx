@@ -7,24 +7,24 @@ export interface NavItemDef {
   id: string
   label: string
   /** 16px Lucide glyph. Decorative — the label carries the meaning. */
-  icon?: ReactNode
+  icon?: ReactNode | undefined
   /** Right-aligned node — a Badge, a count, a chevron. */
-  trailing?: ReactNode
+  trailing?: ReactNode | undefined
 }
 
 /** A labelled group of rows. */
 export interface NavSection {
   /** Mono uppercase group label. Omit it for an unlabelled group. */
-  label?: string
-  items?: NavItemDef[]
+  label?: string | undefined
+  items?: NavItemDef[] | undefined
 }
 
 export interface SidebarNavProps
   extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onSelect'> {
-  sections?: NavSection[]
+  sections?: NavSection[] | undefined
   /** `id` of the row for the view currently on screen. */
-  activeId?: string
-  onSelect?: (id: string) => void
+  activeId?: string | undefined
+  onSelect?: (id: string) => void | undefined
 }
 
 /**

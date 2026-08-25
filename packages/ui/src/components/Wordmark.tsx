@@ -3,11 +3,11 @@ import { cx } from '../lib/cx'
 
 export interface WordmarkProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
   /** Cap height in px. @default 16 */
-  size?: number
+  size?: number | undefined
   /** Colour of the mark itself. The suffix always stays `--text-faint`. @default `var(--text-primary)` */
-  color?: string
+  color?: string | undefined
   /** Lockup suffix in sans, e.g. `Docs` or `Studio`. */
-  suffix?: string
+  suffix?: string | undefined
 }
 
 /**

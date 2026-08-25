@@ -5,6 +5,7 @@ export type { AinamClientConfig } from './config'
 export { AinamError } from './errors'
 export type { AinamErrorCode } from './errors'
 export { isContentSnapshot } from './snapshot'
+export { signWebhookBody } from './webhook'
 export type { ContentSnapshot } from './snapshot'
 export type { ContentMap } from './transport'
 

@@ -2,19 +2,19 @@ import type { HTMLAttributes, ReactNode } from 'react'
 import { cx } from '../lib/cx'
 
 export interface FieldProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
-  label?: string
+  label?: string | undefined
   /** Muted helper text below the control. */
-  hint?: string
+  hint?: string | undefined
   /** Replaces `hint` and turns it red. Set `invalid` on the control too. */
-  error?: string
-  required?: boolean
+  error?: string | undefined
+  required?: boolean | undefined
   /**
    * `id` of the control this labels. It also ids the hint/error as
    * `${htmlFor}-message`, so the control can point at it with
    * `aria-describedby` — a Field cannot set that on a child it does not own.
    */
-  htmlFor?: string
-  children?: ReactNode
+  htmlFor?: string | undefined
+  children?: ReactNode | undefined
 }
 
 /**

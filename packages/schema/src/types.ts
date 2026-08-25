@@ -153,3 +153,64 @@ export interface ApiError {
     details?: ApiErrorDetail[] | undefined
   }
 }
+
+// ---------------------------------------------------------------- editor
+
+/**
+ * Versions are per key, not per publish: two keys published together can be at
+ * different versions because they were edited a different number of times. A
+ * single number on the publish result would have to be one of them, and would
+ * be wrong for the other.
+ */
+export interface ContentRevision {
+  value: ContentValue
+  version: number
+  updatedAt: string
+  updatedBy: Author
+}
+
+/** Whether a key's draft differs from what the public sees. */
+export type EditorEntryState = 'unpublished' | 'published' | 'never-published'
+
+export interface EditorEntry {
+  key: ContentKey
+  field: Field
+  draft: ContentRevision | null
+  published: ContentRevision | null
+  state: EditorEntryState
+}
+
+export interface EditorView {
+  locale: Locale
+  entries: EditorEntry[]
+  unpublishedCount: number
+}
+
+export interface SaveDraftEntry {
+  key: ContentKey
+  value: ContentValue
+  /** What the editor had when it loaded. A moved version means someone else edited. */
+  expectedVersion: number
+}
+
+export interface SaveDraftRequest {
+  locale: Locale
+  entries: SaveDraftEntry[]
+}
+
+export interface SaveDraftResult {
+  saved: Array<{ key: ContentKey; version: number }>
+}
+
+export interface PublishRequest {
+  locale: Locale
+  keys?: ContentKey[] | undefined
+}
+
+export type WebhookDelivery = 'delivered' | 'failed' | 'not-configured'
+
+export interface PublishResult {
+  published: ContentKey[]
+  publishedAt: string
+  webhook: WebhookDelivery
+}

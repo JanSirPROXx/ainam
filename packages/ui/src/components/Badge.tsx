@@ -8,11 +8,11 @@ import { cx } from '../lib/cx'
 export type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info'
 
 export interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
-  children?: ReactNode
+  children?: ReactNode | undefined
   /** @default 'neutral' */
-  tone?: BadgeTone
+  tone?: BadgeTone | undefined
   /** Prepends a dot in the tone colour, for state that is scanned rather than read. */
-  dot?: boolean
+  dot?: boolean | undefined
 }
 
 /**

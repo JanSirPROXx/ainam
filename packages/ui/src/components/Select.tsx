@@ -13,12 +13,12 @@ export interface SelectOption {
 export interface SelectProps
   extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size' | 'children'> {
   /** Strings, or `{ value, label }` pairs. */
-  options?: Array<string | SelectOption>
-  size?: SelectSize
+  options?: Array<string | SelectOption> | undefined
+  size?: SelectSize | undefined
   /** Draws the danger hairline and sets `aria-invalid`. Pair with `Field error`. */
-  invalid?: boolean
+  invalid?: boolean | undefined
   /** Rendered as an empty-value first option. */
-  placeholder?: string
+  placeholder?: string | undefined
 }
 
 /**

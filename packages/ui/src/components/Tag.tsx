@@ -2,9 +2,9 @@ import type { HTMLAttributes, ReactNode } from 'react'
 import { cx } from '../lib/cx'
 
 export interface TagProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
-  children?: ReactNode
+  children?: ReactNode | undefined
   /** Renders a remove affordance. Omit it for read-only tags. */
-  onRemove?: () => void
+  onRemove?: () => void | undefined
 }
 
 /**

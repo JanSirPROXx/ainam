@@ -129,4 +129,58 @@ curl --silent "http://localhost:${CMS_PORT}/v1/content/proj_smoke" |
   grep -q '"code":"unauthorized"' || {
     echo "FAIL: content API served an unauthenticated request" >&2; exit 1; }
 
+echo "==> a person signs in, edits a draft, and publishes it"
+jar=$(mktemp)
+origin="Origin: http://localhost:3000"
+
+curl --silent --fail --max-time 10 -c "$jar" -X POST \
+  "http://localhost:${CMS_PORT}/api/auth/sign-up/email" -H 'content-type: application/json' \
+  -d '{"email":"smoke@example.test","password":"correct-horse-battery","name":"Smoke"}' >/dev/null
+
+# Better Auth requires an Origin on state-changing calls; that is its CSRF
+# protection, not a quirk to work around.
+org=$(curl --silent --fail --max-time 10 -b "$jar" -c "$jar" -H "$origin" -X POST \
+  "http://localhost:${CMS_PORT}/api/auth/organization/create" -H 'content-type: application/json' \
+  -d '{"name":"Smoke org","slug":"smoke-org"}')
+org_id=$(echo "$org" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).id))")
+
+docker compose exec -T postgres psql -U ainam -d ainam -q <<SQL
+update projects set organization_id='$org_id' where id='proj_smoke';
+SQL
+
+[ "$(curl --silent --fail -b "$jar" "http://localhost:${CMS_PORT}/admin/projects" |
+     grep -c proj_smoke)" -ge 1 ] || {
+  echo "FAIL: the editor cannot see a project in their own organisation" >&2; exit 1; }
+
+version=$(curl --silent --fail -b "$jar" \
+  "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/content" |
+  node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{
+    const e=JSON.parse(s).entries.find(x=>x.key==='home/hero/title');console.log(e.draft.version)})")
+
+curl --silent --fail --max-time 10 -b "$jar" -H "$origin" -X PATCH \
+  "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/content" -H 'content-type: application/json' \
+  -d "{\"locale\":\"en\",\"entries\":[{\"key\":\"home/hero/title\",\"value\":\"edited by a human\",\"expectedVersion\":$version}]}" >/dev/null
+
+# The whole point of drafts: the public must not see this yet.
+curl --silent --fail -H "Authorization: Bearer $read_key" \
+  "http://localhost:${CMS_PORT}/v1/content/proj_smoke" | grep -q '"edited by a human"' && {
+  echo "FAIL: an unpublished draft leaked into the public content API" >&2; exit 1; }
+
+echo "==> publish, and the change reaches the live content API"
+curl --silent --fail --max-time 10 -b "$jar" -H "$origin" -X POST \
+  "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/publish" -H 'content-type: application/json' \
+  -d '{"locale":"en"}' >/dev/null
+live=$(curl --silent --fail -H "Authorization: Bearer $read_key" \
+  "http://localhost:${CMS_PORT}/v1/content/proj_smoke")
+echo "    $live"
+echo "$live" | grep -q '"edited by a human"' || {
+  echo "FAIL: a published edit did not reach the content API" >&2; exit 1; }
+
+echo "==> a second editor saving against a stale version is refused"
+curl --silent -b "$jar" -H "$origin" -X PATCH \
+  "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/content" -H 'content-type: application/json' \
+  -d "{\"locale\":\"en\",\"entries\":[{\"key\":\"home/hero/title\",\"value\":\"stale write\",\"expectedVersion\":$version}]}" |
+  grep -q '"code":"conflict"' || {
+    echo "FAIL: a stale write was accepted, so one editor can silently overwrite another" >&2; exit 1; }
+
 echo "==> smoke passed"

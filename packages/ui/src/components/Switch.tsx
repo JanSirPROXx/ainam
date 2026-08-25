@@ -5,13 +5,13 @@ export type SwitchSize = 'sm' | 'md'
 
 export interface SwitchProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size' | 'onChange' | 'children'> {
-  checked?: boolean
-  defaultChecked?: boolean
-  disabled?: boolean
+  checked?: boolean | undefined
+  defaultChecked?: boolean | undefined
+  disabled?: boolean | undefined
   /** Receives the next boolean, not an event. */
-  onChange?: (next: boolean) => void
-  label?: string
-  size?: SwitchSize
+  onChange?: (next: boolean) => void | undefined
+  label?: string | undefined
+  size?: SwitchSize | undefined
 }
 
 /**

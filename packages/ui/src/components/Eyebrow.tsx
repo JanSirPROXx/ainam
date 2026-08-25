@@ -2,9 +2,9 @@ import type { HTMLAttributes, ReactNode } from 'react'
 import { cx } from '../lib/cx'
 
 export interface EyebrowProps extends HTMLAttributes<HTMLSpanElement> {
-  children?: ReactNode
+  children?: ReactNode | undefined
   /** Prepends a 24px hairline rule. */
-  rule?: boolean
+  rule?: boolean | undefined
 }
 
 /**

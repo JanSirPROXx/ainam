@@ -7,8 +7,8 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'chi
   /** Mono micro type — keep it to a few words; the bubble never wraps. */
   label: string
   /** The trigger. It must carry its own accessible name. */
-  children?: ReactNode
-  side?: TooltipSide
+  children?: ReactNode | undefined
+  side?: TooltipSide | undefined
 }
 
 /**

@@ -3,9 +3,9 @@ import { cx } from '../lib/cx'
 
 export interface CheckboxProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'children'> {
-  label?: string
+  label?: string | undefined
   /** Second, muted line under the label. */
-  description?: string
+  description?: string | undefined
 }
 
 /**

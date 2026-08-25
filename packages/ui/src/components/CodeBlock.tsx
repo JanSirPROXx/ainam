@@ -6,15 +6,15 @@ import { cx } from '../lib/cx'
 const COPY_FEEDBACK_MS = 1200
 
 export interface CodeBlockProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
-  code?: string
+  code?: string | undefined
   /** Shown in the bar when `filename` is absent, uppercased. @default 'tsx' */
-  language?: string
+  language?: string | undefined
   /** Overrides `language` in the bar, shown as written. */
-  filename?: string
+  filename?: string | undefined
   /** @default true */
-  showLineNumbers?: boolean
+  showLineNumbers?: boolean | undefined
   /** @default true */
-  copyable?: boolean
+  copyable?: boolean | undefined
 }
 
 /**

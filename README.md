@@ -51,6 +51,23 @@ pnpm build
 this repository, so cms-server refuses to start with it when `NODE_ENV` is
 `production`.
 
+## Creating the first project
+
+A fresh install has an empty database and no way in — the content API needs a
+key, and a key needs a project. Bootstrap creates both:
+
+```bash
+docker compose exec cms-server node dist/bootstrap.mjs \
+  --org "Acme" --project "Acme web" --slug acme-web --locale en
+```
+
+It prints an `AINAM_PROJECT_ID` and an `AINAM_API_KEY` once — only the key's
+hash is stored, so there is no way to show it again. It refuses to run a second
+time; further projects belong in the dashboard, not in an unauthenticated path.
+
+The bootstrap key carries `schema:write`. Keep it with the developer and issue a
+`content:read` key for the deployed site.
+
 ## Connecting a website
 
 The content schema lives in the website's codebase, not in a dashboard form.

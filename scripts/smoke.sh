@@ -36,6 +36,27 @@ docker compose exec -T postgres psql -U ainam -d ainam -tAc \
     [ "$count" -ge 13 ] || { echo "FAIL: expected at least 13 tables" >&2; exit 1; }
   }
 
+echo "==> bootstrap: the only way into a fresh self-hosted install"
+boot=$(docker compose exec -T cms-server node dist/bootstrap.mjs \
+  --org Smoke --project Smoke --slug smoke-boot --locale en)
+boot_project=$(echo "$boot" | grep AINAM_PROJECT_ID | cut -d= -f2)
+boot_key=$(echo "$boot" | grep AINAM_API_KEY | cut -d= -f2)
+[ -n "$boot_project" ] && [ -n "$boot_key" ] || {
+  echo "FAIL: bootstrap printed no credentials" >&2; exit 1; }
+
+# The credentials it prints have to work immediately — they are the entire
+# onboarding path for someone who just ran `docker compose up`.
+curl --silent --fail --max-time 10 -X POST \
+  -H "Authorization: Bearer $boot_key" -H 'content-type: application/json' \
+  "http://localhost:${CMS_PORT}/v1/schema/${boot_project}" -d '{
+    "defaultLocale":"en","locales":["en"],
+    "schema":{"a/b":{"type":"text","label":"A","required":false,"multiline":false,"default":"works"}}}' >/dev/null || {
+  echo "FAIL: the key bootstrap printed does not work" >&2; exit 1; }
+
+if docker compose exec -T cms-server node dist/bootstrap.mjs >/dev/null 2>&1; then
+  echo "FAIL: bootstrap ran a second time instead of refusing" >&2; exit 1
+fi
+
 echo "==> seed an organisation, a project and two scoped keys"
 mkkey() { node -e "const c=require('crypto');const k='ainam_sk_'+c.randomBytes(32).toString('base64url');console.log(k+' '+c.createHash('sha256').update(k).digest('hex'));"; }
 read -r write_key write_hash <<< "$(mkkey)"

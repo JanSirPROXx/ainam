@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { runInit } from './init'
+import { runGenerate } from './generate'
 import { runPull } from './pull'
 import { runPush } from './push'
 import { USAGE } from './usage'
@@ -24,6 +25,9 @@ async function main(argv: string[]): Promise<number> {
   }
   if (command === 'init') {
     return runInit(process.cwd())
+  }
+  if (command === 'generate') {
+    return runGenerate(process.cwd())
   }
   if (command === 'pull') {
     return runPull(process.cwd())

@@ -63,3 +63,20 @@ describe('generateContentTypes', () => {
     expect(withList).toContain('Array<{')
   })
 })
+
+describe('generated imports', () => {
+  it('imports only the helper types the schema actually uses', () => {
+    const textOnly = generateContentTypes({
+      'a/b': { type: 'text', label: 'A', required: false, multiline: false, default: '' },
+    })
+    // An unused import fails noUnusedLocals, and generated code must never be
+    // the thing that breaks a consumer's build.
+    expect(textOnly).not.toContain("from '@ainam/core'")
+
+    const withImage = generateContentTypes({
+      'a/b': { type: 'image', label: 'A', required: false, alt: true },
+    })
+    expect(withImage).toContain("import type { ImageValue } from '@ainam/core'")
+    expect(withImage).not.toContain('RichTextValue')
+  })
+})

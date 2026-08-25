@@ -1,0 +1,30 @@
+{
+  "name": "@ainam/example-starter-next",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reference template: a Next.js site whose copy is edited in AINAM.",
+  "scripts": {
+    "dev": "next dev --port 3200",
+    "build": "next build",
+    "start": "next start --port 3200",
+    "typecheck": "tsc --noEmit",
+    "ainam:push": "ainam push",
+    "ainam:pull": "ainam pull"
+  },
+  "dependencies": {
+    "@ainam/core": "workspace:*",
+    "@ainam/next": "workspace:*",
+    "@ainam/ui": "workspace:*",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.4",
+    "ainam": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}

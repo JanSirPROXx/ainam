@@ -1,0 +1,13 @@
+{
+  "projectId": "unconfigured",
+  "locale": "en",
+  "generatedAt": "2026-08-25T00:00:00.000Z",
+  "entries": {
+    "home/hero/eyebrow": "AI-native CMS",
+    "home/hero/title": "Content, decoupled.",
+    "home/hero/subtitle": "Ship the site. Hand the copy to whoever owns it.",
+    "home/hero/cta": "Get started",
+    "home/pricing/visible": true,
+    "home/pricing/seats": 3
+  }
+}

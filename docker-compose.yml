@@ -67,6 +67,47 @@ services:
     depends_on:
       cms-server:
         condition: service_healthy
+    healthcheck:
+      # Without this, `--wait` returns as soon as the container starts and a
+      # caller can reach a server that is not yet serving.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # The reference template. It renders from its committed snapshot until
+  # AINAM_PROJECT_ID and AINAM_API_KEY are set, so `docker compose up` hands an
+  # evaluator a running website rather than a curl target — and demonstrates the
+  # build-time fallback by being in it.
+  starter:
+    build:
+      context: .
+      dockerfile: examples/starter-next/Dockerfile
+    environment:
+      AINAM_URL: http://cms-server:8787
+      AINAM_PROJECT_ID: ${AINAM_PROJECT_ID:-}
+      AINAM_API_KEY: ${AINAM_API_KEY:-}
+      AINAM_WEBHOOK_SECRET: ${AINAM_WEBHOOK_SECRET:-}
+    ports:
+      - "${STARTER_PORT:-3200}:3200"
+    depends_on:
+      cms-server:
+        condition: service_healthy
+    healthcheck:
+      # Without this, `--wait` returns as soon as the container starts and a
+      # caller can reach a server that is not yet serving.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3200/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 3s
+      timeout: 3s
+      retries: 20
 
 volumes:
   ainam-postgres:

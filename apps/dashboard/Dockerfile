@@ -13,7 +13,12 @@ RUN pnpm --filter @ainam/dashboard... build
 
 FROM base AS runtime
 WORKDIR /app
-ENV NODE_ENV=production
+# Next's standalone server reads PORT from the environment, not the --port flag
+# in the package script. 3000 is its default, but relying on that is accidental.
+# HOSTNAME as well as PORT: left unset, Next's standalone server binds to the
+# container's own IP rather than all interfaces, so anything checking the
+# service over loopback — a healthcheck, a sidecar — cannot reach it.
+ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
 COPY --from=build /repo/apps/dashboard/.next/standalone ./
 COPY --from=build /repo/apps/dashboard/.next/static ./apps/dashboard/.next/static
 USER node

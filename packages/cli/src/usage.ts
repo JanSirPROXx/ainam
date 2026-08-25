@@ -4,6 +4,7 @@ Usage
   ainam init            Create ainam.config.ts and add the required env keys
   ainam push            Upload the schema in ainam.config.ts to the CMS
   ainam pull            Generate types and a content snapshot per locale
+  ainam generate        Generate types from ainam.config.ts, no server needed
 
 Push options
   --locales <list>          Comma-separated locales, default "en"

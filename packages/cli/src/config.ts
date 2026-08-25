@@ -37,7 +37,7 @@ function requireEnv(name: string): string {
  * The config is TypeScript and is imported directly: Node strips the types, so
  * the CLI needs no transpiler and `ainam` stays dependency-free.
  */
-export async function loadProjectContext(cwd: string): Promise<ProjectContext> {
+export async function loadContentSchema(cwd: string): Promise<ContentSchema> {
   const configPath = join(cwd, CONFIG_FILE)
   try {
     await access(configPath)
@@ -50,7 +50,11 @@ export async function loadProjectContext(cwd: string): Promise<ProjectContext> {
   if (schema === undefined || typeof schema !== 'object') {
     throw new ConfigError(`${CONFIG_FILE} must export the schema as its default export.`)
   }
+  return schema
+}
 
+export async function loadProjectContext(cwd: string): Promise<ProjectContext> {
+  const schema = await loadContentSchema(cwd)
   loadDotEnv(cwd)
   return {
     schema,

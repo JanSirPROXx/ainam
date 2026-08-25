@@ -5,13 +5,17 @@ set -euo pipefail
 
 CMS_PORT="${CMS_PORT:-8787}"
 DASHBOARD_PORT="${DASHBOARD_PORT:-3000}"
-export CMS_PORT DASHBOARD_PORT
+STARTER_PORT="${STARTER_PORT:-3200}"
+export CMS_PORT DASHBOARD_PORT STARTER_PORT
 
 cleanup() { docker compose down -v --remove-orphans >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 
 echo "==> docker compose up"
-docker compose up -d --wait --wait-timeout 300
+# --build, not just up: without it Compose reuses a cached image and the test
+# passes against code that is no longer in the checkout. Cost a debugging
+# session once already.
+docker compose up -d --build --wait --wait-timeout 600
 
 echo "==> GET /health"
 body=$(curl --silent --fail --max-time 10 http://localhost:${CMS_PORT}/health)
@@ -23,6 +27,13 @@ echo "$body" | grep -q '"database":"up"' || {
 
 echo "==> GET /openapi.json"
 curl --silent --fail --max-time 10 http://localhost:${CMS_PORT}/openapi.json >/dev/null
+
+echo "==> GET / on the starter template"
+starter=$(curl --silent --fail --max-time 20 "http://localhost:${STARTER_PORT:-3200}/")
+# Unconfigured, it must still render — from the committed snapshot, which is the
+# same path a configured site takes during an AINAM outage.
+echo "$starter" | grep -q 'Content, decoupled' || {
+  echo "FAIL: the starter did not render its snapshot content" >&2; exit 1; }
 
 echo "==> GET / on the dashboard"
 curl --silent --fail --max-time 20 http://localhost:${DASHBOARD_PORT}/ >/dev/null

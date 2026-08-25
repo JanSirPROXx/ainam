@@ -20,7 +20,7 @@ packages/
   next/          @ainam/next  — App Router adapter.               MIT
   cli/           ainam        — project tooling.                  MIT
 examples/
-  starter-next/  Reference template.
+  starter-next/  Reference template — a site whose copy is edited in AINAM.
 ```
 
 ## Getting started
@@ -32,7 +32,9 @@ docker compose up
 ```
 
 That brings up Postgres, applies migrations, and serves the API on
-http://localhost:8787 and the dashboard on http://localhost:3000. No accounts,
+http://localhost:8787, the dashboard on http://localhost:3000 and the reference
+template on http://localhost:3200 — a real page rendering real content, before
+you have configured anything. No accounts,
 no external services. `./scripts/smoke.sh` asserts exactly this, and CI runs it
 on every push.
 

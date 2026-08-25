@@ -1,16 +1,18 @@
 import {
   type AinamClientConfig,
   type ContentMap,
-  type ContentValue,
   createAinamClient,
 } from '@ainam/core'
 import { contentTag } from './tags'
 
 export interface AinamNextConfig extends Omit<AinamClientConfig, 'fetch'> {}
 
-export interface AinamNextContent {
-  getAll(): Promise<ContentMap>
-  get(key: string): Promise<ContentValue | undefined>
+export interface AinamNextContent<T extends ContentMap = ContentMap> {
+  getAll(): Promise<T>
+  /** Throws if the key is not published. See `@ainam/core` for why that is safe. */
+  get<K extends keyof T & string>(key: K): Promise<T[K]>
+  /** The same read, for a key that may legitimately be absent. */
+  getOptional<K extends keyof T & string>(key: K): Promise<T[K] | undefined>
   /** The cache tag these reads register under. Pass it to `revalidateTag`. */
   tag: string
 }
@@ -26,7 +28,9 @@ export interface AinamNextContent {
  * @example
  * ```ts
  * // lib/ainam.ts
- * export const ainam = createAinamContent({
+ * import type { AinamContent } from '../ainam.gen'
+ *
+ * export const ainam = createAinamContent<AinamContent>({
  *   apiKey: process.env.AINAM_API_KEY!,
  *   projectId: process.env.AINAM_PROJECT_ID!,
  *   locale: 'de',
@@ -35,15 +39,17 @@ export interface AinamNextContent {
  * // app/page.tsx
  * export default async function Page() {
  *   const title = await ainam.get('home/hero/title')
- *   return <h1>{String(title)}</h1>
+ *   return <h1>{title}</h1>
  * }
  * ```
  */
-export function createAinamContent(config: AinamNextConfig): AinamNextContent {
+export function createAinamContent<T extends ContentMap = ContentMap>(
+  config: AinamNextConfig,
+): AinamNextContent<T> {
   const locale = config.locale ?? 'en'
   const tag = contentTag(config.projectId, locale)
 
-  const client = createAinamClient({
+  const client = createAinamClient<T>({
     ...config,
     fetch: (input, init) =>
       fetch(input, { ...init, next: { tags: [tag], revalidate: false } } as RequestInit),
@@ -53,5 +59,6 @@ export function createAinamContent(config: AinamNextConfig): AinamNextContent {
     tag,
     getAll: () => client.getAll(),
     get: (key) => client.get(key),
+    getOptional: (key) => client.getOptional(key),
   }
 }

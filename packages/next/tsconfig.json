@@ -8,18 +8,7 @@
       "DOM"
     ],
     "jsx": "react-jsx",
-    "noEmit": true,
-    "paths": {
-      "@ainam/core": [
-        "../core/src/index.ts"
-      ],
-      "@ainam/schema": [
-        "../schema/src/index.ts"
-      ],
-      "@ainam/schema/types": [
-        "../schema/src/types.ts"
-      ]
-    }
+    "noEmit": true
   },
   "include": [
     "src",

@@ -1,5 +1,7 @@
 import { signWebhookBody } from '@ainam/core'
 import { revalidateTag } from 'next/cache'
+import { digestsMatch } from './digest'
+import { refuseWithoutSecret } from './secret'
 import { contentTag } from './tags'
 
 export interface RevalidateHandlerConfig {
@@ -15,21 +17,6 @@ export interface RevalidateHandlerConfig {
    * webhook route. Pass `{ expire: 0 }` if the default is not aggressive enough.
    */
   profile?: string | { expire?: number }
-}
-
-/**
- * Compares two hex digests without leaking their contents through timing.
- *
- * A plain `===` returns as soon as two bytes differ, which lets an attacker
- * recover a signature one character at a time.
- */
-function digestsMatch(received: string, expected: string): boolean {
-  if (received.length !== expected.length) return false
-  let diff = 0
-  for (let i = 0; i < received.length; i++) {
-    diff |= received.charCodeAt(i) ^ expected.charCodeAt(i)
-  }
-  return diff === 0
 }
 
 /**
@@ -52,6 +39,9 @@ export function createRevalidateHandler(
   config: RevalidateHandlerConfig,
 ): (request: Request) => Promise<Response> {
   return async function handleRevalidate(request: Request): Promise<Response> {
+    const unconfigured = refuseWithoutSecret(config.secret)
+    if (unconfigured) return unconfigured
+
     const signature = request.headers.get('x-ainam-signature')
     if (signature === null) {
       return Response.json({ error: 'Missing x-ainam-signature.' }, { status: 401 })

@@ -41,3 +41,11 @@ effect, which is the only way to load one, and the rule fires on every correct
 no `React` binding to require, so they fire on every correct file. The oxlint
 config schema rejects unknown keys, so the reason is recorded here rather than
 as a comment beside them.
+
+## Rules turned off workspace-wide
+
+`no-await-in-loop` (perf category) — off. Every hit in this repo is a sequential write inside
+one database transaction, where the rule's suggested fix is wrong: `Promise.all` over a single
+transaction connection interleaves statements on a connection that cannot serve them
+concurrently. Leaving the rule on trained us to skim a list of eight warnings on every run,
+which is how a real one gets missed.

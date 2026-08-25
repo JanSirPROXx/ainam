@@ -1,17 +1,28 @@
 'use client'
 
-import type { ContentValue, EditorView, PublishResult, SaveDraftResult } from '@ainam/schema'
-import { Badge, Button, Card, Field, Toast } from '@ainam/ui'
+import type {
+  ContentValue,
+  EditorView,
+  PreviewLink,
+  ProjectSummary,
+  PublishResult,
+  SaveDraftResult,
+} from '@ainam/schema'
+import { hasPermission } from '@ainam/schema'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { AdminApiError, adminFetch } from '@/lib/api'
+import { adminFetch } from '@/lib/api'
 import { count } from '@/lib/plural'
-import { FieldControl } from './FieldControl'
+import { useToast } from '@/lib/toast'
+import { EditorToolbar } from './EditorToolbar'
+import { EntryCard } from './EntryCard'
+import { KeyHistoryDialog } from './KeyHistoryDialog'
+import { publishOutcome } from './publish-outcome'
 
 type Draft = Record<string, ContentValue>
 
 function initialDraft(view: EditorView): Draft {
-  return Object.fromEntries(view.entries.map((e) => [e.key, e.draft?.value ?? null]))
+  return Object.fromEntries(view.entries.map((entry) => [entry.key, entry.draft?.value ?? null]))
 }
 
 /**
@@ -21,17 +32,31 @@ function initialDraft(view: EditorView): Draft {
  * carries the version it was loaded at, which is what lets the server refuse a
  * write that would overwrite someone else's.
  */
-export function ContentEditor({ projectId, view }: { projectId: string; view: EditorView }) {
+export function ContentEditor({
+  projectId,
+  view,
+  project,
+}: {
+  projectId: string
+  view: EditorView
+  project: ProjectSummary
+}) {
   const queryClient = useQueryClient()
+  const toast = useToast()
   const [draft, setDraft] = useState<Draft>(() => initialDraft(view))
-  // `| undefined` explicitly: exactOptionalPropertyTypes distinguishes an absent
-  // property from one set to undefined, and this is assigned from an expression
-  // that yields undefined.
-  const [toast, setToast] = useState<
-    { tone: 'success' | 'error'; title: string; body?: string | undefined } | null
-  >(null)
+  const [historyKey, setHistoryKey] = useState<string | null>(null)
 
-  const dirty = view.entries.filter((e) => JSON.stringify(draft[e.key]) !== JSON.stringify(e.draft?.value ?? null))
+  // A publish or a restore moves both the editor and the history, so both are
+  // invalidated together rather than each caller remembering the other.
+  const refresh = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['content', projectId] }),
+      queryClient.invalidateQueries({ queryKey: ['publishes', projectId] }),
+    ])
+  }
+  const dirty = view.entries.filter(
+    (entry) => JSON.stringify(draft[entry.key]) !== JSON.stringify(entry.draft?.value ?? null),
+  )
 
   const save = useMutation({
     mutationFn: () =>
@@ -39,23 +64,18 @@ export function ContentEditor({ projectId, view }: { projectId: string; view: Ed
         method: 'PATCH',
         body: JSON.stringify({
           locale: view.locale,
-          entries: dirty.map((e) => ({
-            key: e.key,
-            value: draft[e.key] ?? null,
-            expectedVersion: e.draft?.version ?? 0,
+          entries: dirty.map((entry) => ({
+            key: entry.key,
+            value: draft[entry.key] ?? null,
+            expectedVersion: entry.draft?.version ?? 0,
           })),
         }),
       }),
     onSuccess: async (result) => {
-      setToast({ tone: 'success', title: `Saved ${count(result.saved.length, 'change')}` })
-      await queryClient.invalidateQueries({ queryKey: ['content', projectId] })
+      toast.show({ tone: 'success', title: `Saved ${count(result.saved.length, 'change')}` })
+      await refresh()
     },
-    onError: (error: AdminApiError) =>
-      setToast({
-        tone: 'error',
-        title: error.code === 'conflict' ? 'Someone else edited this' : 'Could not save',
-        body: error.message,
-      }),
+    onError: toast.fail('Could not save'),
   })
 
   const publish = useMutation({
@@ -65,75 +85,67 @@ export function ContentEditor({ projectId, view }: { projectId: string; view: Ed
         body: JSON.stringify({ locale: view.locale }),
       }),
     onSuccess: async (result) => {
-      setToast({
-        tone: result.webhook === 'failed' ? 'error' : 'success',
-        title: `Published ${count(result.published.length, 'key')}`,
-        // Named plainly: "published but the page still shows the old text" is
-        // the most confusing thing that can happen to someone editing a site.
-        body:
-          result.webhook === 'failed'
-            ? 'The site was not reachable, so it may still show the previous version.'
-            : result.webhook === 'not-configured'
-              ? 'No webhook is configured, so the site refreshes on its next build.'
-              : undefined,
-      })
-      await queryClient.invalidateQueries({ queryKey: ['content', projectId] })
+      toast.show(publishOutcome(result.published.length, result.webhook))
+      await refresh()
     },
-    onError: (error: AdminApiError) => setToast({ tone: 'error', title: 'Could not publish', body: error.message }),
+    onError: toast.fail('Could not publish'),
+  })
+
+  const preview = useMutation({
+    // Opened before the request, not after: a browser blocks a tab opened from
+    // an already-resolved promise, and the block looks like a dead button.
+    mutationFn: async () => {
+      const tab = window.open('', '_blank')
+      try {
+        const link = await adminFetch<PreviewLink>(
+          `/admin/projects/${projectId}/preview-link?locale=${view.locale}`,
+        )
+        if (tab) tab.location.href = link.url
+        return link
+      } catch (error) {
+        tab?.close()
+        throw error
+      }
+    },
+    onError: toast.fail('Could not open a preview'),
   })
 
   return (
     <div style={{ display: 'grid', gap: 'var(--space-6)' }}>
-      <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
-        <Badge tone={view.unpublishedCount > 0 ? 'warning' : 'success'} dot>
-          {view.unpublishedCount > 0
-            ? `${count(view.unpublishedCount, 'change')} unpublished`
-            : 'Everything published'}
-        </Badge>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 'var(--space-3)' }}>
-          <Button
-            variant="secondary"
-            disabled={dirty.length === 0}
-            loading={save.isPending}
-            onClick={() => save.mutate()}
-          >
-            {dirty.length > 0 ? `Save ${count(dirty.length, 'change')}` : 'Save'}
-          </Button>
-          <Button
-            disabled={view.unpublishedCount === 0 || dirty.length > 0}
-            loading={publish.isPending}
-            onClick={() => publish.mutate()}
-          >
-            Publish
-          </Button>
-        </div>
-      </div>
+      <EditorToolbar
+        project={project}
+        unpublishedCount={view.unpublishedCount}
+        dirtyCount={dirty.length}
+        saving={save.isPending}
+        publishing={publish.isPending}
+        previewing={preview.isPending}
+        onSave={() => save.mutate()}
+        onPublish={() => publish.mutate()}
+        onPreview={() => preview.mutate()}
+      />
 
       {view.entries.map((entry) => (
-        <Card key={entry.key} padding="md">
-          <Field label={entry.field.label} hint={entry.field.description} htmlFor={entry.key}>
-            <FieldControl
-              id={entry.key}
-              field={entry.field}
-              value={draft[entry.key] ?? null}
-              onChange={(value) => setDraft((d) => ({ ...d, [entry.key]: value }))}
-            />
-          </Field>
-          <div style={{ marginTop: 'var(--space-3)', display: 'flex', gap: 'var(--space-3)' }}>
-            <code style={{ font: 'var(--type-code)', color: 'var(--text-faint)' }}>{entry.key}</code>
-            {entry.state === 'unpublished' ? <Badge tone="warning">unpublished</Badge> : null}
-          </div>
-        </Card>
+        <EntryCard
+          key={entry.key}
+          entry={entry}
+          value={draft[entry.key] ?? null}
+          onChange={(value) => setDraft((current) => ({ ...current, [entry.key]: value }))}
+          onOpenHistory={() => setHistoryKey(entry.key)}
+        />
       ))}
 
-      {toast ? (
-        <Toast
-          tone={toast.tone}
-          title={toast.title}
-          description={toast.body}
-          onDismiss={() => setToast(null)}
+      {historyKey ? (
+        <KeyHistoryDialog
+          projectId={projectId}
+          contentKey={historyKey}
+          locale={view.locale}
+          canRestore={hasPermission(project.role, 'content:restore')}
+          onClose={() => setHistoryKey(null)}
+          onRestored={refresh}
         />
       ) : null}
+
+      {toast.node}
     </div>
   )
 }

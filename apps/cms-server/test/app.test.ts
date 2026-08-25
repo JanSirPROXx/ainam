@@ -70,4 +70,37 @@ describe('admin API', () => {
     const body = (await response.json()) as ApiError
     expect(body.error.message).toContain('Bearer')
   })
+
+  it('refuses every history and rollback route without a session', async () => {
+    // Mounted under one prefix so a new admin route cannot be added without
+    // authentication. This asserts that the new ones landed inside it.
+    for (const [method, path] of [
+      ['GET', '/admin/projects/proj_x/versions?key=a/b'],
+      ['GET', '/admin/projects/proj_x/publishes'],
+      ['POST', '/admin/projects/proj_x/restore'],
+      ['POST', '/admin/projects/proj_x/revert'],
+      ['GET', '/admin/projects/proj_x/preview-link'],
+      ['PATCH', '/admin/projects/proj_x'],
+      ['POST', '/admin/projects/proj_x/webhook-secret'],
+    ] as const) {
+      const response = await app.request(path, { method })
+      expect(`${method} ${path} -> ${response.status}`).toBe(`${method} ${path} -> 401`)
+    }
+  })
+})
+
+describe('preview API', () => {
+  it('needs a credential of its own, not the one a site builds with', async () => {
+    const response = await app.request('/v1/preview/content/proj_x')
+    expect(response.status).toBe(401)
+    const body = (await response.json()) as ApiError
+    expect(body.error.message).toContain('Bearer')
+  })
+
+  it('is a separate path, so a content:read key cannot reach it by adding a flag', async () => {
+    // Two paths rather than one with `?draft=1`: a scope can be mounted on a
+    // path prefix, and cannot be mounted on a query parameter.
+    const published = await app.request('/v1/content/proj_x?draft=1')
+    expect(published.status).toBe(401)
+  })
 })

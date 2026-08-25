@@ -17,6 +17,20 @@ import type {
   saveDraftResultSchema,
 } from './editor'
 import type { contentEntrySchema, contentValueSchema, scalarValueSchema } from './content'
+import type {
+  contentVersionPageSchema,
+  contentVersionSchema,
+  publishEventPageSchema,
+  publishEventSchema,
+  restoreResultSchema,
+  restoreVersionRequestSchema,
+  revertPublishRequestSchema,
+} from './history'
+import type {
+  previewLinkSchema,
+  projectSummarySchema,
+  updateProjectRequestSchema,
+} from './project-admin'
 import type { fieldSchema, listFieldSchema, scalarFieldSchema } from './fields'
 import type { contentSchemaSchema, schemaPushRequestSchema, schemaPushResultSchema } from './project'
 import type * as T from './types'
@@ -41,3 +55,23 @@ export type _SaveDraftRequest = Expect<Exact<z.infer<typeof saveDraftRequestSche
 export type _SaveDraftResult = Expect<Exact<z.infer<typeof saveDraftResultSchema>, T.SaveDraftResult>>
 export type _PublishRequest = Expect<Exact<z.infer<typeof publishRequestSchema>, T.PublishRequest>>
 export type _PublishResult = Expect<Exact<z.infer<typeof publishResultSchema>, T.PublishResult>>
+export type _ContentVersion = Expect<Exact<z.infer<typeof contentVersionSchema>, T.ContentVersion>>
+export type _ContentVersionPage = Expect<
+  Exact<z.infer<typeof contentVersionPageSchema>, T.ContentVersionPage>
+>
+export type _PublishEvent = Expect<Exact<z.infer<typeof publishEventSchema>, T.PublishEvent>>
+export type _PublishEventPage = Expect<
+  Exact<z.infer<typeof publishEventPageSchema>, T.PublishEventPage>
+>
+export type _RestoreVersionRequest = Expect<
+  Exact<z.infer<typeof restoreVersionRequestSchema>, T.RestoreVersionRequest>
+>
+export type _RevertPublishRequest = Expect<
+  Exact<z.infer<typeof revertPublishRequestSchema>, T.RevertPublishRequest>
+>
+export type _RestoreResult = Expect<Exact<z.infer<typeof restoreResultSchema>, T.RestoreResult>>
+export type _ProjectSummary = Expect<Exact<z.infer<typeof projectSummarySchema>, T.ProjectSummary>>
+export type _UpdateProjectRequest = Expect<
+  Exact<z.infer<typeof updateProjectRequestSchema>, T.UpdateProjectRequest>
+>
+export type _PreviewLink = Expect<Exact<z.infer<typeof previewLinkSchema>, T.PreviewLink>>

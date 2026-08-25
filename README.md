@@ -63,12 +63,14 @@ docker compose exec cms-server node dist/bootstrap.mjs \
   --org "Acme" --project "Acme web" --slug acme-web --locale en
 ```
 
-It prints an `AINAM_PROJECT_ID` and an `AINAM_API_KEY` once — only the key's
-hash is stored, so there is no way to show it again. It refuses to run a second
-time; further projects belong in the dashboard, not in an unauthenticated path.
+It prints an `AINAM_PROJECT_ID`, an `AINAM_API_KEY` and an
+`AINAM_WEBHOOK_SECRET` once — only the key's hash is stored, so there is no way
+to show it again. It refuses to run a second time; further projects belong in
+the dashboard, not in an unauthenticated path.
 
 The bootstrap key carries `schema:write`. Keep it with the developer and issue a
-`content:read` key for the deployed site.
+`content:read` key for the deployed site. The webhook secret signs both publish
+notifications and preview links, and an owner can replace it under Settings.
 
 ## Connecting a website
 
@@ -105,6 +107,56 @@ its content.
 Keys are scoped. The key in a customer's deployment is `content:read` only, so
 if it leaks it cannot rewrite their schema; `push` needs a `schema:write` key
 the developer keeps.
+
+## Publishing, rollback and preview
+
+Every change is a draft until someone publishes it. A publish is one named
+event: it carries an author, it lists the keys it changed, and it can be undone.
+
+Undo comes in two shapes. **Restore** puts one key back to an earlier version.
+**Revert** undoes a whole publish, by republishing what each of its keys said
+beforehand. Both write the draft as well as the live value — without that, the
+value you just rolled back would sit in the editor and return on your next
+unrelated publish. Both are recorded as new publishes, so the rollback is itself
+undoable.
+
+Preview shows unpublished work on the real site. Point the project's preview URL
+at a route that calls `createPreviewHandler`, and the Preview button opens a
+signed, 15-minute link that turns Next's draft mode on:
+
+```ts
+// app/api/ainam/preview/route.ts
+export const GET = createPreviewHandler({
+  secret: process.env.AINAM_WEBHOOK_SECRET!,
+  projectId: process.env.AINAM_PROJECT_ID!,
+})
+```
+
+Reading drafts needs its own key, carrying `content:read:draft`, passed as
+`previewApiKey`. That is deliberate: the key a site builds with lives in CI and
+in every deploy environment, so it is the one most likely to leak, and
+unpublished work must not be readable with it.
+
+## Inviting people
+
+An organisation is one client site. An agency owner belongs to several and
+switches between them in the topbar.
+
+There are two roles. An **owner** edits and publishes, and manages settings,
+keys and people. An **editor** edits and publishes, and nothing else — that
+split is what lets an agency hand editing to its client without handing over the
+login it uses for every other client.
+
+Invitations and password resets go through `MAIL_TRANSPORT`. It defaults to
+`console`, which prints the message to the server log instead of sending it, so
+a fresh install works with no mail server and no account anywhere. The dashboard
+also shows the invitation link directly, so an owner never has to read a log to
+invite someone. Set `MAIL_TRANSPORT=smtp` and `SMTP_URL` for real delivery.
+
+`SIGNUP_MODE` decides who may create an account. It defaults to `open`; set
+`invite-only` on anything reachable from the internet, and only invited
+addresses can register — apart from the first account on an empty instance,
+which has nobody to invite it.
 
 ## Commands
 

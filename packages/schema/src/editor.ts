@@ -69,5 +69,5 @@ export const publishResultSchema = z.object({
    * "published but the page still shows the old text" is the single most
    * confusing thing that can happen to a customer, and the answer is here.
    */
-  webhook: z.enum(['delivered', 'failed', 'not-configured']),
+  webhook: z.enum(['delivered', 'failed', 'not-configured', 'skipped']),
 })

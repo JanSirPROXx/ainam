@@ -22,9 +22,13 @@ function describeStatus(status: number, projectId: string): AinamError {
   return new AinamError('server', `The CMS server returned ${status}.`, { status })
 }
 
-/** Fetches every published entry for the configured project and locale. */
+/** Fetches every entry for the configured project and locale. */
 export async function fetchContent(config: ResolvedConfig): Promise<ContentMap> {
-  const url = `${config.baseUrl}/v1/content/${encodeURIComponent(config.projectId)}?locale=${encodeURIComponent(config.locale)}`
+  // Two paths rather than a query flag, so the draft reader can be given its
+  // own scope and a leaked build key cannot reach unpublished content by
+  // adding a parameter.
+  const path = config.preview ? '/v1/preview/content' : '/v1/content'
+  const url = `${config.baseUrl}${path}/${encodeURIComponent(config.projectId)}?locale=${encodeURIComponent(config.locale)}`
 
   let response: Response
   try {

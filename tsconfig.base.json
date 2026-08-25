@@ -31,6 +31,9 @@
       "@ainam/schema/types": [
         "./packages/schema/src/types.ts"
       ],
+      "@ainam/schema/access": [
+        "./packages/schema/src/access.ts"
+      ],
       "@ainam/core": [
         "./packages/core/src/index.ts"
       ],

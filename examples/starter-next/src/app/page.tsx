@@ -1,4 +1,5 @@
 import { Badge, Button, Eyebrow, GridBackdrop, Metric, Wordmark } from '@ainam/ui'
+import { draftMode } from 'next/headers'
 import { ainam, isConfigured } from '@/lib/ainam'
 
 /**
@@ -6,6 +7,8 @@ import { ainam, isConfigured } from '@/lib/ainam'
  * that is the point of the template.
  */
 export default async function HomePage() {
+  const previewing = (await draftMode()).isEnabled
+
   const [eyebrow, title, subtitle, cta, showPricing, seats] = await Promise.all([
     ainam.get('home/hero/eyebrow'),
     ainam.get('home/hero/title'),
@@ -28,8 +31,14 @@ export default async function HomePage() {
       >
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Wordmark />
-          <Badge tone={isConfigured ? 'success' : 'warning'} dot>
-            {isConfigured ? 'Live content' : 'Build-time snapshot'}
+          {/* Stated on the page, not just in a cookie: someone looking at an
+              unpublished draft has to be able to tell that is what they see. */}
+          <Badge tone={previewing ? 'info' : isConfigured ? 'success' : 'warning'} dot>
+            {previewing
+              ? 'Preview — unpublished drafts'
+              : isConfigured
+                ? 'Live content'
+                : 'Build-time snapshot'}
           </Badge>
         </header>
 

@@ -127,7 +127,12 @@ export interface SchemaPushResult {
 
 // ---------------------------------------------------------------- api
 
-export type ApiKeyScope = 'content:read' | 'schema:write'
+/**
+ * `content:read:draft` is separate from `content:read` on purpose: the build key
+ * lives in CI and in every deploy environment a customer has, so it is the key
+ * most likely to leak — and it must not be able to read unpublished content.
+ */
+export type ApiKeyScope = 'content:read' | 'content:read:draft' | 'schema:write'
 
 export type ApiErrorCode =
   | 'bad_request'
@@ -207,10 +212,129 @@ export interface PublishRequest {
   keys?: ContentKey[] | undefined
 }
 
-export type WebhookDelivery = 'delivered' | 'failed' | 'not-configured'
+/**
+ * Whether the site was told to refresh.
+ *
+ * `skipped` is its own state rather than a flavour of `delivered`: when nothing
+ * changed there is nothing to notify about, and reporting a delivery that never
+ * happened is exactly the kind of claim that makes "published but the page
+ * still shows the old text" impossible to debug.
+ */
+export type WebhookDelivery = 'delivered' | 'failed' | 'not-configured' | 'skipped'
 
 export interface PublishResult {
   published: ContentKey[]
   publishedAt: string
   webhook: WebhookDelivery
+}
+
+// ---------------------------------------------------------------- history
+
+/** One past published value of one key. */
+export interface ContentVersion {
+  version: number
+  value: ContentValue
+  createdAt: string
+  author: Author
+  /** The publish this value went live in. Shared by every key in that publish. */
+  publishId: Id
+}
+
+/**
+ * A page of a key's history, newest first.
+ *
+ * Keyset rather than offset pagination: history is append-only and read while
+ * it is being written to, and an offset would silently repeat or skip a row
+ * whenever a publish landed between two pages.
+ */
+export interface ContentVersionPage {
+  key: ContentKey
+  locale: Locale
+  versions: ContentVersion[]
+  /** Pass back as `cursor` for the next page. Null when this was the last one. */
+  nextCursor: string | null
+  people: AuthorNames
+}
+
+/**
+ * Display names for the user ids in a page's authors.
+ *
+ * An `Author` carries an id rather than a name so history stays correct when
+ * someone is renamed, and a page listing raw ids would be unreadable. Resolved
+ * per page, including for people who have since left the organisation.
+ */
+export type AuthorNames = Record<Id, string>
+
+/** One publish, as the history tab lists it. */
+export interface PublishEvent {
+  publishId: Id
+  publishedAt: string
+  author: Author
+  keys: ContentKey[]
+}
+
+export interface PublishEventPage {
+  locale: Locale
+  publishes: PublishEvent[]
+  nextCursor: string | null
+  people: AuthorNames
+}
+
+export interface RestoreVersionRequest {
+  locale: Locale
+  key: ContentKey
+  version: number
+}
+
+export interface RevertPublishRequest {
+  publishId: Id
+}
+
+/**
+ * What a restore or a revert put back.
+ *
+ * Both record a new publish rather than rewinding the version counter, so the
+ * rollback is itself in the history and itself undoable.
+ *
+ * `skipped` names keys the operation could not reach — a key introduced by the
+ * publish being reverted has no earlier state to return to, and inventing one
+ * would be worse than saying so.
+ */
+export interface RestoreResult {
+  restored: ContentKey[]
+  skipped: ContentKey[]
+  publishId: Id
+  publishedAt: string
+  webhook: WebhookDelivery
+}
+
+// ---------------------------------------------------------------- project
+
+/** A project as the dashboard lists it. Never carries the webhook secret. */
+export interface ProjectSummary {
+  id: Id
+  organizationId: Id
+  organizationName: string
+  name: string
+  slug: string
+  defaultLocale: Locale
+  locales: Locale[]
+  /** The caller's role in the owning organisation. */
+  role: string
+  webhookUrl: string | null
+  previewUrl: string | null
+}
+
+export interface UpdateProjectRequest {
+  name?: string | undefined
+  /** Called after a publish so the site revalidates. An empty string clears it. */
+  webhookUrl?: string | undefined
+  /** Where the editor's preview link points. An empty string clears it. */
+  previewUrl?: string | undefined
+}
+
+/** A short-lived signed link that puts the customer's site into draft mode. */
+export interface PreviewLink {
+  url: string
+  expiresAt: string
 }

@@ -39,6 +39,12 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-development-only-secret-not-for-any-deployment}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:8787}
       DASHBOARD_ORIGIN: ${DASHBOARD_ORIGIN:-http://localhost:3000}
+      # Console by default, so a clean checkout can invite an editor and reset a
+      # password without a mail server or an account anywhere.
+      MAIL_TRANSPORT: ${MAIL_TRANSPORT:-console}
+      SMTP_URL: ${SMTP_URL:-}
+      MAIL_FROM: ${MAIL_FROM:-AINAM <ainam@localhost>}
+      SIGNUP_MODE: ${SIGNUP_MODE:-open}
     ports:
       - "${CMS_PORT:-8787}:8787"
     depends_on:
@@ -92,6 +98,7 @@ services:
       AINAM_PROJECT_ID: ${AINAM_PROJECT_ID:-}
       AINAM_API_KEY: ${AINAM_API_KEY:-}
       AINAM_WEBHOOK_SECRET: ${AINAM_WEBHOOK_SECRET:-}
+      AINAM_PREVIEW_API_KEY: ${AINAM_PREVIEW_API_KEY:-}
     ports:
       - "${STARTER_PORT:-3200}:3200"
     depends_on:

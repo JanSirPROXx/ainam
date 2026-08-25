@@ -24,6 +24,12 @@ export const projects = pgTable(
     webhookUrl: text('webhook_url'),
     /** Signs the delivery body. Never sent, only used to compute the HMAC. */
     webhookSecret: text('webhook_secret'),
+    /**
+     * Where the editor's preview link points — the route on the customer's site
+     * that turns draft mode on. Null until configured, which is why the preview
+     * control says what to set rather than failing silently.
+     */
+    previewUrl: text('preview_url'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

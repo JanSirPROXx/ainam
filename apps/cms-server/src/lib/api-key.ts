@@ -38,3 +38,13 @@ export function hashesMatch(a: string, b: string): boolean {
   const right = Buffer.from(b, 'utf8')
   return left.length === right.length && timingSafeEqual(left, right)
 }
+
+/**
+ * A shared secret for publish webhooks and preview links.
+ *
+ * Kept in clear rather than hashed, unlike an API key: both sides compute an
+ * HMAC with it, so the server needs the value itself and not a verifier.
+ */
+export function generateWebhookSecret(): string {
+  return `ainam_whsec_${randomBytes(32).toString('base64url')}`
+}

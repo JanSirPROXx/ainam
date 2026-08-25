@@ -9,10 +9,17 @@ export interface WebhookTarget {
   secret: string | null
 }
 
+export interface PublishNotification {
+  projectId: string
+  locale: string
+  published: string[]
+  publishedAt: string
+}
+
 const TIMEOUT_MS = 5000
 
 /**
- * Tells a site that its content changed.
+ * Tells a site that its content changed, when there is something to tell it.
  *
  * Called after the publish transaction commits, never inside it: a site that
  * revalidated mid-transaction would read the old value and cache it as new.
@@ -21,10 +28,11 @@ const TIMEOUT_MS = 5000
  * and rolling it back because a customer's site was briefly down would be worse.
  * The outcome is returned so the dashboard can say so plainly.
  */
-export async function deliverPublishWebhook(
+export async function notifySite(
   target: WebhookTarget,
-  payload: { projectId: string; locale: string; published: string[]; publishedAt: string },
+  payload: PublishNotification,
 ): Promise<WebhookDelivery> {
+  if (payload.published.length === 0) return 'skipped'
   if (!target.url || !target.secret) return 'not-configured'
 
   const body = JSON.stringify(payload)

@@ -3,6 +3,8 @@ import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import type { Database } from '../db/client'
 import type { AppEnv } from '../http/context'
 import { HttpError } from '../http/errors'
+import { projectParams } from '../http/params'
+import { assertKeyOwnsProject } from '../http/project-scope'
 import { createSchemaRepository } from '../repositories/schema'
 import { pushContentSchema } from '../services/schema-push'
 
@@ -16,7 +18,7 @@ const route = createRoute({
     'disappear are reported but keep their stored content.',
   security: [{ apiKey: [] }],
   request: {
-    params: z.object({ projectId: z.string().min(1) }),
+    params: projectParams,
     body: { content: { 'application/json': { schema: schemaPushRequestSchema } } },
   },
   responses: {
@@ -35,7 +37,7 @@ const readRoute = createRoute({
     'Called by `ainam pull` to generate TypeScript types, which is what turns a wrong content ' +
     'key into a compile error rather than a blank section.',
   security: [{ apiKey: [] }],
-  request: { params: z.object({ projectId: z.string().min(1) }) },
+  request: { params: projectParams },
   responses: {
     200: {
       content: {
@@ -57,13 +59,8 @@ export function registerSchemaRoutes(app: OpenAPIHono<AppEnv>, db: Database): vo
 
   app.openapi(readRoute, async (c) => {
     const { projectId } = c.req.valid('param')
-    if (projectId !== c.get('projectId')) {
-      throw new HttpError(
-        404,
-        'not_found',
-        `Project ${projectId} was not found on this server. Check projectId and that the API key belongs to it.`,
-      )
-    }
+    assertKeyOwnsProject(c, projectId)
+
     const stored = await schemas.findByProject(projectId)
     if (!stored) {
       throw new HttpError(
@@ -77,13 +74,7 @@ export function registerSchemaRoutes(app: OpenAPIHono<AppEnv>, db: Database): vo
 
   app.openapi(route, async (c) => {
     const { projectId } = c.req.valid('param')
-    if (projectId !== c.get('projectId')) {
-      throw new HttpError(
-        404,
-        'not_found',
-        `Project ${projectId} was not found on this server. Check projectId and that the API key belongs to it.`,
-      )
-    }
+    assertKeyOwnsProject(c, projectId)
 
     const request = c.req.valid('json')
     if (!request.locales.includes(request.defaultLocale)) {

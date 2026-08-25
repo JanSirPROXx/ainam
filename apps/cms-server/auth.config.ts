@@ -12,6 +12,7 @@
 import { createAuth } from './src/auth'
 import { createDatabase } from './src/db/client'
 import { loadEnv } from './src/env'
+import { createConsoleTransport } from './src/mail/console'
 
 const PLACEHOLDER_DATABASE_URL = 'postgres://ainam:ainam@localhost:5432/ainam'
 
@@ -21,4 +22,5 @@ export const auth = createAuth(
     BETTER_AUTH_SECRET: 'schema-generation-placeholder-value-never-used',
   }),
   createDatabase(PLACEHOLDER_DATABASE_URL),
+  createConsoleTransport(),
 )

@@ -17,6 +17,14 @@ export interface AinamClientConfig {
   fetch?: typeof globalThis.fetch
   /** Request timeout in milliseconds. Defaults to 5000. */
   timeoutMs?: number
+  /**
+   * Read unpublished drafts instead of published content.
+   *
+   * Needs a key carrying `content:read:draft`, which is deliberately not the
+   * key a site builds with — that one lives in CI and in every deploy
+   * environment, and must not be able to see content nobody has published.
+   */
+  preview?: boolean
 }
 
 export interface ResolvedConfig {
@@ -27,6 +35,7 @@ export interface ResolvedConfig {
   snapshot: ContentSnapshot | undefined
   fetch: typeof globalThis.fetch
   timeoutMs: number
+  preview: boolean
 }
 
 const DEFAULT_BASE_URL = 'https://cms.ainam.online'
@@ -65,5 +74,6 @@ export function resolveConfig(config: AinamClientConfig): ResolvedConfig {
     snapshot: config.snapshot,
     fetch: fetchImpl,
     timeoutMs: config.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    preview: config.preview ?? false,
   }
 }

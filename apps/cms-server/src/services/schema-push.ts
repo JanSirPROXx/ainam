@@ -1,7 +1,7 @@
 import type { Author, SchemaPushRequest, SchemaPushResult } from '@ainam/schema'
 import { eq, sql } from 'drizzle-orm'
 import type { Database } from '../db/client'
-import { contentEntries, contentSchemas, projects } from '../db/schema'
+import { contentEntries, contentSchemas, contentVersions, projects } from '../db/schema'
 import { createId } from '../lib/ids'
 import { diffContentSchemas } from '../lib/schema-diff'
 import { seedValueFor } from '../lib/seed-values'
@@ -34,12 +34,17 @@ export async function pushContentSchema(
     const diff = diffContentSchemas(existing?.schema ?? {}, request.schema)
     const now = new Date()
 
+    // JS preserves insertion order for string keys, so this is the order the
+    // developer wrote in ainam.config.ts. Recorded now because JSONB will not
+    // preserve it, and nothing else can reconstruct it later.
+    const keyOrder = Object.keys(request.schema)
+
     await tx
       .insert(contentSchemas)
-      .values({ projectId, schema: request.schema, updatedAt: now })
+      .values({ projectId, schema: request.schema, keyOrder, updatedAt: now })
       .onConflictDoUpdate({
         target: contentSchemas.projectId,
-        set: { schema: request.schema, updatedAt: now },
+        set: { schema: request.schema, keyOrder, updatedAt: now },
       })
 
     await tx
@@ -50,29 +55,55 @@ export async function pushContentSchema(
     // Only newly added keys are seeded. Re-seeding an existing key when its
     // default changes in code would silently overwrite what the customer wrote
     // in the dashboard — the default is a starting point, not a source of truth.
-    const seeded = diff.added.flatMap((key) => {
+    const seeds = diff.added.flatMap((key) => {
       const field = request.schema[key]
       if (!field) return []
       const value = seedValueFor(field)
-      return request.locales.flatMap((locale) =>
-        (['draft', 'published'] as const).map((status) => ({
-          id: createId('entry'),
-          projectId,
-          key,
-          locale,
-          status,
-          value,
-          version: 1,
-          updatedAt: now,
-          updatedBy: PUSH_AUTHOR,
-        })),
-      )
+      return request.locales.map((locale) => ({ key, locale, value }))
     })
 
-    if (seeded.length > 0) {
+    if (seeds.length > 0) {
       // A key removed earlier and re-added keeps its stored content rather than
       // reverting to the default, which is why this does not overwrite.
-      await tx.insert(contentEntries).values(seeded).onConflictDoNothing()
+      await tx
+        .insert(contentEntries)
+        .values(
+          seeds.flatMap((seed) =>
+            (['draft', 'published'] as const).map((status) => ({
+              id: createId('entry'),
+              projectId,
+              key: seed.key,
+              locale: seed.locale,
+              status,
+              value: seed.value,
+              version: 1,
+              updatedAt: now,
+              updatedBy: PUSH_AUTHOR,
+            })),
+          ),
+        )
+        .onConflictDoNothing()
+
+      // The seeded default is a published state like any other, so it gets a
+      // history row. Without one it would be the single state a customer could
+      // never roll back to — the one their site started from.
+      const pushId = createId('pub')
+      await tx
+        .insert(contentVersions)
+        .values(
+          seeds.map((seed) => ({
+            id: createId('ver'),
+            projectId,
+            key: seed.key,
+            locale: seed.locale,
+            version: 1,
+            value: seed.value,
+            createdAt: now,
+            author: PUSH_AUTHOR,
+            publishId: pushId,
+          })),
+        )
+        .onConflictDoNothing()
     }
 
     return diff

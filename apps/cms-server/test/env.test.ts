@@ -52,3 +52,24 @@ describe('loadEnv', () => {
     expect(env.NODE_ENV).toBe('production')
   })
 })
+
+describe('empty variables', () => {
+  const base = {
+    DATABASE_URL: 'postgres://ainam:ainam@localhost:5432/ainam',
+    BETTER_AUTH_SECRET: 'a'.repeat(32),
+  }
+
+  it('treats an empty value as unset, the way Compose renders one', () => {
+    // `SMTP_URL: ${SMTP_URL:-}` is how a Compose file stays usable with and
+    // without a .env, so an empty string has to mean "not configured".
+    const env = loadEnv({ ...base, SMTP_URL: '', MAIL_FROM: '', SIGNUP_MODE: '' })
+    expect(env.SMTP_URL).toBeUndefined()
+    expect(env.MAIL_FROM).toBe('AINAM <ainam@localhost>')
+    expect(env.SIGNUP_MODE).toBe('open')
+  })
+
+  it('refuses smtp with no server rather than dropping mail silently', () => {
+    expect(() => loadEnv({ ...base, MAIL_TRANSPORT: 'smtp', SMTP_URL: '' })).toThrow(/SMTP_URL/)
+    expect(() => loadEnv({ ...base, MAIL_TRANSPORT: 'smtp', SMTP_URL: 'smtps://h' })).not.toThrow()
+  })
+})

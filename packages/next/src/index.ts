@@ -1,5 +1,7 @@
 export { createAinamContent } from './content'
 export type { AinamNextConfig, AinamNextContent } from './content'
+export { createPreviewHandler } from './preview'
+export type { PreviewHandlerConfig } from './preview'
 export { createRevalidateHandler } from './revalidate'
 export type { RevalidateHandlerConfig } from './revalidate'
 export { contentTag } from './tags'

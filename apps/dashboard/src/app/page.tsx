@@ -1,69 +1,54 @@
 'use client'
 
-import { Badge, Card, EmptyState, Eyebrow, Wordmark } from '@ainam/ui'
+import type { ProjectSummary } from '@ainam/schema'
+import { Badge, Card, EmptyState, Eyebrow } from '@ainam/ui'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { PageShell } from '@/components/PageShell'
 import { adminFetch } from '@/lib/api'
-import { useSession } from '@/lib/auth-client'
-
-interface Project {
-  id: string
-  name: string
-  slug: string
-  defaultLocale: string
-  locales: string[]
-  role: string
-}
+import { useActiveOrganization } from '@/lib/auth-client'
+import { useRequireSession } from '@/lib/session'
 
 export default function ProjectsPage() {
-  const router = useRouter()
-  const { data: session, isPending } = useSession()
-
-  useEffect(() => {
-    if (!isPending && !session) router.replace('/sign-in')
-  }, [isPending, session, router])
+  const { ready, email } = useRequireSession()
+  const active = useActiveOrganization()
 
   const projects = useQuery({
     queryKey: ['projects'],
-    enabled: Boolean(session),
-    queryFn: () => adminFetch<{ projects: Project[] }>('/admin/projects'),
+    enabled: ready,
+    queryFn: () => adminFetch<{ projects: ProjectSummary[] }>('/admin/projects'),
   })
 
-  return (
-    <main
-      style={{
-        maxWidth: 'var(--container-md)',
-        margin: '0 auto',
-        padding: 'var(--space-12) var(--gutter-page)',
-        display: 'grid',
-        gap: 'var(--space-8)',
-      }}
-    >
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Wordmark />
-        {session ? <Badge tone="neutral">{session.user.email}</Badge> : null}
-      </header>
+  const all = projects.data?.projects ?? []
+  // Filtered rather than fetched per organisation: the switcher has to feel
+  // instant, and one agency's whole project list is tens of rows, not thousands.
+  const activeId = active.data?.id
+  const visible = activeId ? all.filter((project) => project.organizationId === activeId) : all
 
+  return (
+    <PageShell email={email}>
       <Eyebrow>Projects</Eyebrow>
 
-      {projects.data?.projects.length === 0 ? (
+      {projects.isSuccess && visible.length === 0 ? (
         <EmptyState
-          title="No projects yet"
+          title={all.length === 0 ? 'No projects yet' : 'No projects in this organisation'}
           description="Run ainam push from your website's codebase to create one."
         />
       ) : null}
 
       <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
-        {projects.data?.projects.map((project) => (
+        {visible.map((project) => (
           <Link key={project.id} href={`/projects/${project.id}`} style={{ display: 'block' }}>
-            <Card interactive title={project.name} description={`${project.slug} · ${project.locales.join(', ')}`}>
+            <Card
+              interactive
+              title={project.name}
+              description={`${project.organizationName} · ${project.locales.join(', ')}`}
+            >
               <Badge tone="neutral">{project.role}</Badge>
             </Card>
           </Link>
         ))}
       </div>
-    </main>
+    </PageShell>
   )
 }

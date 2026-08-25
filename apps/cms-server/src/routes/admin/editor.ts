@@ -6,27 +6,22 @@ import {
   saveDraftRequestSchema,
   saveDraftResultSchema,
 } from '@ainam/schema'
-import type { Author } from '@ainam/schema'
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import type { Database } from '../../db/client'
-import type { AppEnv, SessionUser } from '../../http/context'
+import type { AppEnv } from '../../http/context'
 import { HttpError } from '../../http/errors'
 import { createEditorRepository } from '../../repositories/editor'
 import { saveDraft } from '../../services/editor'
-import { requireProject } from '../../services/project-access'
+import { requireProjectPermission } from '../../services/project-access'
 import { publishContent } from '../../services/publish'
-
-const params = z.object({ projectId: z.string().min(1) })
-
-function authorOf(user: SessionUser): Author {
-  return { kind: 'user', id: user.id }
-}
+import { projectParams } from '../../http/params'
+import { authorOf, webhookTargetOf } from './context'
 
 const viewRoute = createRoute({
   method: 'get',
   path: '/admin/projects/{projectId}/content',
   summary: 'Every editable key in one locale, with its draft and published value',
-  request: { params, query: z.object({ locale: localeSchema.optional() }) },
+  request: { params: projectParams, query: z.object({ locale: localeSchema.optional() }) },
   responses: {
     200: {
       content: { 'application/json': { schema: editorViewSchema } },
@@ -43,7 +38,7 @@ const saveRoute = createRoute({
     'All or nothing. A key whose stored version has moved since the editor loaded it is a ' +
     'conflict, and the whole batch is refused.',
   request: {
-    params,
+    params: projectParams,
     body: { content: { 'application/json': { schema: saveDraftRequestSchema } } },
   },
   responses: {
@@ -59,7 +54,7 @@ const publishRoute = createRoute({
   path: '/admin/projects/{projectId}/publish',
   summary: 'Make the draft the live copy',
   request: {
-    params,
+    params: projectParams,
     body: { content: { 'application/json': { schema: publishRequestSchema } } },
   },
   responses: {
@@ -75,7 +70,7 @@ export function registerAdminEditorRoutes(app: OpenAPIHono<AppEnv>, db: Database
 
   app.openapi(viewRoute, async (c) => {
     const { projectId } = c.req.valid('param')
-    const project = await requireProject(db, projectId, c.get('user').id)
+    const project = await requireProjectPermission(db, projectId, c.get('user').id, 'content:edit')
     const { locale } = c.req.valid('query')
 
     const view = await editor.loadView(projectId, locale ?? project.defaultLocale)
@@ -91,18 +86,26 @@ export function registerAdminEditorRoutes(app: OpenAPIHono<AppEnv>, db: Database
 
   app.openapi(saveRoute, async (c) => {
     const { projectId } = c.req.valid('param')
-    await requireProject(db, projectId, c.get('user').id)
+    await requireProjectPermission(db, projectId, c.get('user').id, 'content:edit')
     const result = await saveDraft(db, projectId, c.req.valid('json'), authorOf(c.get('user')))
     return c.json(result)
   })
 
   app.openapi(publishRoute, async (c) => {
     const { projectId } = c.req.valid('param')
-    const project = await requireProject(db, projectId, c.get('user').id)
-    const result = await publishContent(db, projectId, c.req.valid('json'), authorOf(c.get('user')), {
-      url: project.webhookUrl,
-      secret: project.webhookSecret,
-    })
+    const project = await requireProjectPermission(
+      db,
+      projectId,
+      c.get('user').id,
+      'content:publish',
+    )
+    const result = await publishContent(
+      db,
+      projectId,
+      c.req.valid('json'),
+      authorOf(c.get('user')),
+      webhookTargetOf(project),
+    )
     return c.json(result)
   })
 }

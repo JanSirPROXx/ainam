@@ -22,6 +22,20 @@
       "when": 1787671290336,
       "tag": "0002_project_webhooks",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787696903973,
+      "tag": "0003_publish_groups_and_preview",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787699923470,
+      "tag": "0004_schema_key_order",
+      "breakpoints": true
     }
   ]
 }

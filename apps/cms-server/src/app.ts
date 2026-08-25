@@ -5,11 +5,13 @@ import type { Auth } from './auth'
 import type { Database } from './db/client'
 import type { Env } from './env'
 import type { AppEnv } from './http/context'
-import { buildApiError, handleError } from './http/errors'
+import { buildApiError, handleError, refuseInvalidRequest } from './http/errors'
 import { requireApiKey } from './middleware/api-key'
 import { requireSession } from './middleware/session'
 import { registerAdminEditorRoutes } from './routes/admin/editor'
+import { registerAdminHistoryRoutes } from './routes/admin/history'
 import { registerAdminProjectRoutes } from './routes/admin/projects'
+import { registerAdminRollbackRoutes } from './routes/admin/rollback'
 import { registerContentRoutes } from './routes/content'
 import { registerHealthRoutes } from './routes/health'
 import { registerSchemaRoutes } from './routes/schema'
@@ -21,7 +23,7 @@ import { registerSchemaRoutes } from './routes/schema'
  * database without binding a port.
  */
 export function createApp(env: Env, db: Database, auth: Auth): OpenAPIHono<AppEnv> {
-  const app = new OpenAPIHono<AppEnv>()
+  const app = new OpenAPIHono<AppEnv>({ defaultHook: refuseInvalidRequest })
 
   // First, so every later handler and every log line can quote the same id.
   app.use('*', requestId())
@@ -56,8 +58,10 @@ export function createApp(env: Env, db: Database, auth: Auth): OpenAPIHono<AppEn
   app.use('/admin/*', requireSession(auth))
 
   // Scopes are mounted per path prefix, so a read key that leaks from a
-  // customer's deployment cannot be used to rewrite their content schema.
+  // customer's deployment cannot be used to rewrite their content schema, and
+  // the key their site builds with cannot read work nobody has published.
   app.use('/v1/content/*', requireApiKey(db, 'content:read'))
+  app.use('/v1/preview/content/*', requireApiKey(db, 'content:read:draft'))
   app.on('GET', '/v1/schema/*', requireApiKey(db, 'content:read'))
   app.on('POST', '/v1/schema/*', requireApiKey(db, 'schema:write'))
 
@@ -66,6 +70,8 @@ export function createApp(env: Env, db: Database, auth: Auth): OpenAPIHono<AppEn
   registerSchemaRoutes(app, db)
   registerAdminProjectRoutes(app, db)
   registerAdminEditorRoutes(app, db)
+  registerAdminHistoryRoutes(app, db)
+  registerAdminRollbackRoutes(app, db)
 
   app.openAPIRegistry.registerComponent('securitySchemes', 'apiKey', {
     type: 'http',

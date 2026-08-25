@@ -1,5 +1,6 @@
 'use client'
 
+import { accessControl, roles } from '@ainam/schema/access'
 import { organizationClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
 
@@ -12,7 +13,10 @@ import { createAuthClient } from 'better-auth/react'
  */
 export const authClient = createAuthClient({
   baseURL: process.env['NEXT_PUBLIC_CMS_URL'] ?? 'http://localhost:8787',
-  plugins: [organizationClient()],
+  // The same access control the server enforces. Without it the client types
+  // roles against Better Auth's built-in set and refuses to invite an editor.
+  plugins: [organizationClient({ ac: accessControl, roles })],
 })
 
-export const { signIn, signUp, signOut, useSession } = authClient
+export const { signIn, signUp, signOut, useSession, organization, useActiveOrganization, useListOrganizations } =
+  authClient

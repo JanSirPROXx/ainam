@@ -8,5 +8,5 @@ export default defineConfig({
   treeshake: true,
   // React stays external: bundling it would give a consumer two copies and
   // break hooks.
-  external: ['react', 'react/jsx-runtime'],
+  deps: { neverBundle: ['react', 'react/jsx-runtime'] },
 })

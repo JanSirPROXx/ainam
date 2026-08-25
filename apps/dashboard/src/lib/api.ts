@@ -7,12 +7,15 @@ const BASE = process.env['NEXT_PUBLIC_CMS_URL'] ?? 'http://localhost:8787'
 export class AdminApiError extends Error {
   readonly code: ApiError['error']['code']
   readonly requestId: string
+  /** Field-level problems. Present when the server rejected specific values. */
+  readonly details: ApiError['error']['details']
 
   constructor(error: ApiError['error']) {
     super(error.message)
     this.name = 'AdminApiError'
     this.code = error.code
     this.requestId = error.requestId
+    this.details = error.details
   }
 }
 

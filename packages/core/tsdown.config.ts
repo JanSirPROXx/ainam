@@ -9,5 +9,5 @@ export default defineConfig({
   // the real output and break consumers in ways that only show up after publish.
   exports: true,
   treeshake: true,
-  noExternal: ['@ainam/schema'],
+  deps: { alwaysBundle: ['@ainam/schema'] },
 })

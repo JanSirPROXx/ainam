@@ -17,6 +17,10 @@ export const isConfigured = apiKey !== '' && projectId !== ''
 
 export const ainam = createAinamContent<AinamContent>({
   apiKey: apiKey || 'unconfigured',
+  // A second key, carrying content:read:draft. The one above is in every deploy
+  // environment and in CI, so it is the one most likely to leak — and drafts
+  // must not be readable with it.
+  previewApiKey: process.env['AINAM_PREVIEW_API_KEY'] ?? '',
   projectId: projectId || 'unconfigured',
   baseUrl: process.env['AINAM_URL'] ?? 'http://localhost:8787',
   locale: 'en',

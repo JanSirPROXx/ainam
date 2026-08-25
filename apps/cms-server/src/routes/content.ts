@@ -1,11 +1,16 @@
-import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { localeSchema } from '@ainam/schema'
+import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import type { Database } from '../db/client'
 import type { AppEnv } from '../http/context'
 import { HttpError } from '../http/errors'
+import { projectParams } from '../http/params'
+import { assertKeyOwnsProject } from '../http/project-scope'
 import { createContentRepository } from '../repositories/content'
 
-const route = createRoute({
+const query = z.object({ locale: localeSchema.optional() })
+const contentMap = z.record(z.string(), z.unknown())
+
+const publishedRoute = createRoute({
   method: 'get',
   path: '/v1/content/{projectId}',
   summary: 'Published content for one project and locale',
@@ -13,14 +18,29 @@ const route = createRoute({
     'The only endpoint a live site calls. Returns a bare map of content key to value, so a ' +
     'consumer needs no unwrapping and no knowledge of our envelope.',
   security: [{ apiKey: [] }],
-  request: {
-    params: z.object({ projectId: z.string().min(1) }),
-    query: z.object({ locale: localeSchema.optional() }),
-  },
+  request: { params: projectParams, query },
   responses: {
     200: {
-      content: { 'application/json': { schema: z.record(z.string(), z.unknown()) } },
+      content: { 'application/json': { schema: contentMap } },
       description: 'Content keyed by content key.',
+    },
+  },
+})
+
+const previewRoute = createRoute({
+  method: 'get',
+  path: '/v1/preview/content/{projectId}',
+  summary: 'Draft content for one project and locale',
+  description:
+    'What the site would say if everything currently in the editor were published. Keys with no ' +
+    'draft fall back to their published value, so a preview renders a complete page. Needs a key ' +
+    'carrying `content:read:draft` — the build key deliberately cannot read this.',
+  security: [{ apiKey: [] }],
+  request: { params: projectParams, query },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: contentMap } },
+      description: 'Draft content keyed by content key.',
     },
   },
 })
@@ -28,27 +48,28 @@ const route = createRoute({
 export function registerContentRoutes(app: OpenAPIHono<AppEnv>, db: Database): void {
   const content = createContentRepository(db)
 
-  app.openapi(route, async (c) => {
-    const { projectId } = c.req.valid('param')
-
-    // The key decides which project is readable. A mismatch is reported as
-    // "not found" rather than "forbidden": confirming that a project exists to
-    // someone holding a key for a different one is itself a disclosure.
-    if (projectId !== c.get('projectId')) {
-      throw new HttpError(
-        404,
-        'not_found',
-        `Project ${projectId} was not found on this server. Check projectId and that the API key belongs to it.`,
-      )
-    }
-
+  /** The project a key may read comes from the key, never from the URL. */
+  async function resolveProject(projectId: string, requested: string | undefined) {
     const project = await content.findProject(projectId)
     if (!project) {
       throw new HttpError(404, 'not_found', `Project ${projectId} was not found on this server.`)
     }
+    return { project, locale: requested ?? project.defaultLocale }
+  }
 
-    const { locale } = c.req.valid('query')
-    const requested = locale ?? project.defaultLocale
-    return c.json(await content.findPublished(projectId, requested, project.defaultLocale))
+  app.openapi(publishedRoute, async (c) => {
+    const { projectId } = c.req.valid('param')
+    assertKeyOwnsProject(c, projectId)
+
+    const { project, locale } = await resolveProject(projectId, c.req.valid('query').locale)
+    return c.json(await content.findPublished(projectId, locale, project.defaultLocale))
+  })
+
+  app.openapi(previewRoute, async (c) => {
+    const { projectId } = c.req.valid('param')
+    assertKeyOwnsProject(c, projectId)
+
+    const { project, locale } = await resolveProject(projectId, c.req.valid('query').locale)
+    return c.json(await content.findDrafts(projectId, locale, project.defaultLocale))
   })
 }

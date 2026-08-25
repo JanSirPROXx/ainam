@@ -1,6 +1,8 @@
 import type { ApiError, ApiErrorCode, ApiErrorDetail } from '@ainam/schema'
+import type { Hook } from '@hono/zod-openapi'
 import type { Context } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import type { AppEnv } from './context'
 
 /** Thrown by services and routes; the error handler turns it into the envelope. */
 export class HttpError extends Error {
@@ -54,5 +56,30 @@ export function handleError(error: unknown, c: Context): Response {
       requestId,
     ),
     500,
+  )
+}
+
+/**
+ * Turns a failed request validation into the same envelope as everything else.
+ *
+ * Passed to `OpenAPIHono` as its `defaultHook`. Without it `@hono/zod-openapi`
+ * answers in its own `{ success, error }` shape, so every malformed request is
+ * the one response a client cannot branch on — `error.code` is undefined and
+ * there is no request id to quote in a bug report.
+ *
+ * Field paths are carried through, because "which field" is the whole content
+ * of the answer.
+ */
+export const refuseInvalidRequest: Hook<unknown, AppEnv, string, unknown> = (result) => {
+  if (result.success) return
+
+  throw new HttpError(
+    400,
+    'validation_failed',
+    'The request does not match what this endpoint accepts. See details, or /openapi.json.',
+    result.error.issues.map((issue) => ({
+      path: issue.path.join('.') || '(body)',
+      message: issue.message,
+    })),
   )
 }

@@ -2,7 +2,7 @@ import type { ApiKeyScope } from '@ainam/schema'
 import { sql } from 'drizzle-orm'
 import type { Database } from '../db/client'
 import { organizations, projectApiKeys, projects } from '../db/schema'
-import { generateApiKey } from '../lib/api-key'
+import { generateApiKey, generateWebhookSecret } from '../lib/api-key'
 import { createId } from '../lib/ids'
 
 export interface BootstrapRequest {
@@ -17,6 +17,8 @@ export interface BootstrapResult {
   projectId: string
   /** Shown once. Only its hash is stored. */
   apiKey: string
+  /** Signs publish webhooks and preview links. Stored, and rotatable later. */
+  webhookSecret: string
 }
 
 const DEVELOPER_SCOPES: ApiKeyScope[] = ['content:read', 'schema:write']
@@ -48,6 +50,10 @@ export async function bootstrapWorkspace(
     const organizationId = createId('org')
     const projectId = createId('proj')
     const key = generateApiKey()
+    // Generated up front rather than on first use: without it the publish
+    // webhook can never fire and the preview link can never be signed, and
+    // both failures look like a bug rather than a missing setting.
+    const webhookSecret = generateWebhookSecret()
 
     await tx.insert(organizations).values({
       id: organizationId,
@@ -63,6 +69,7 @@ export async function bootstrapWorkspace(
       slug: request.projectSlug,
       defaultLocale: request.defaultLocale,
       locales: [request.defaultLocale],
+      webhookSecret,
     })
 
     await tx.insert(projectApiKeys).values({
@@ -75,6 +82,6 @@ export async function bootstrapWorkspace(
       createdBy: 'bootstrap',
     })
 
-    return { organizationId, projectId, apiKey: key.plaintext }
+    return { organizationId, projectId, apiKey: key.plaintext, webhookSecret }
   })
 }

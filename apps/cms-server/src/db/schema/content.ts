@@ -10,6 +10,15 @@ export const contentSchemas = pgTable('content_schemas', {
     .primaryKey()
     .references(() => projects.id, { onDelete: 'cascade' }),
   schema: jsonb('schema').$type<ContentSchema>().notNull(),
+  /**
+   * The keys in the order the developer declared them.
+   *
+   * Kept beside the schema rather than derived from it: JSONB normalises object
+   * key order — by length, then bytes — so reading the order back out of the
+   * document lists a customer's fields in an order nobody chose. It surfaces as
+   * an editor where the hero subtitle sits between two pricing fields.
+   */
+  keyOrder: jsonb('key_order').$type<string[]>().notNull().default([]),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
@@ -65,6 +74,14 @@ export const contentVersions = pgTable(
     value: jsonb('value').$type<ContentValue>(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     author: jsonb('author').$type<Author>().notNull(),
+    /**
+     * The publish this row went live in, shared by every key in that publish.
+     *
+     * Without it a publish is not an object anyone can point at, and "undo what
+     * I just published" would have to be reconstructed from timestamps — which
+     * is a guess, not an identity.
+     */
+    publishId: text('publish_id').notNull(),
   },
   (table) => [
     uniqueIndex('content_versions_identity_idx').on(
@@ -72,6 +89,15 @@ export const contentVersions = pgTable(
       table.key,
       table.locale,
       table.version,
+    ),
+    // Serves the publish history: keyset pagination reads it in exactly this
+    // order, so a page never repeats or skips a row when a publish lands
+    // between two requests.
+    index('content_versions_publish_idx').on(
+      table.projectId,
+      table.locale,
+      table.createdAt,
+      table.publishId,
     ),
   ],
 )

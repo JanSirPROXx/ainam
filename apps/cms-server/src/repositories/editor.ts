@@ -15,6 +15,20 @@ function toRevision(row: Row | undefined): ContentRevision | null {
   }
 }
 
+/**
+ * The schema's keys, in the order they were declared.
+ *
+ * A key missing from the recorded order is appended rather than dropped: the
+ * order is written by `ainam push`, and a project pushed before the column
+ * existed has none at all. Losing a field from the editor would be far worse
+ * than showing it last.
+ */
+export function orderedKeys(schema: Record<string, unknown>, declared: string[]): string[] {
+  const known = new Set(declared)
+  const rest = Object.keys(schema).filter((key) => !known.has(key))
+  return [...declared.filter((key) => key in schema), ...rest]
+}
+
 /** Whether the draft says something different from what the public sees. */
 function stateOf(draft: ContentRevision | null, published: ContentRevision | null) {
   if (!published) return 'never-published' as const
@@ -29,13 +43,13 @@ export function createEditorRepository(db: Database) {
     /**
      * Everything the editor needs for one locale, in one round trip.
      *
-     * Ordered by the schema rather than by the content rows, so the editor lists
-     * fields in the order the developer declared them and a key with no row yet
-     * still appears.
+     * Driven by the schema rather than by the content rows, so a key with no row
+     * yet still appears — and ordered by the order the developer declared, which
+     * is recorded at push time because JSONB does not preserve it.
      */
     async loadView(projectId: string, locale: string): Promise<EditorView | undefined> {
       const [schemaRow] = await db
-        .select({ schema: contentSchemas.schema })
+        .select({ schema: contentSchemas.schema, keyOrder: contentSchemas.keyOrder })
         .from(contentSchemas)
         .where(eq(contentSchemas.projectId, projectId))
         .limit(1)
@@ -50,7 +64,9 @@ export function createEditorRepository(db: Database) {
       const published = new Map(rows.filter((r) => r.status === 'published').map((r) => [r.key, r]))
 
       const entries: EditorEntry[] = []
-      for (const [key, field] of Object.entries(schemaRow.schema)) {
+      for (const key of orderedKeys(schemaRow.schema, schemaRow.keyOrder)) {
+        const field = schemaRow.schema[key]
+        if (!field) continue
         const draft = toRevision(drafts.get(key))
         const live = toRevision(published.get(key))
         entries.push({ key, field, draft, published: live, state: stateOf(draft, live) })

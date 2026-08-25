@@ -1,7 +1,7 @@
 'use client'
 
 import type { ContentValue, Field } from '@ainam/schema'
-import { Checkbox, Input, Textarea } from '@ainam/ui'
+import { Input, Switch, Textarea } from '@ainam/ui'
 
 export interface FieldControlProps {
   field: Field
@@ -36,13 +36,9 @@ export function FieldControl({ field, value, onChange, id }: FieldControlProps) 
       )
 
     case 'boolean':
-      return (
-        <Checkbox
-          label={field.label}
-          checked={value === true}
-          onChange={(e) => onChange(e.target.checked)}
-        />
-      )
+      // No label of its own: the surrounding Field already renders one, and two
+      // copies of the same sentence read as a rendering bug.
+      return <Switch id={id} checked={value === true} onChange={onChange} />
 
     default:
       return (

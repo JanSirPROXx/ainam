@@ -20,9 +20,41 @@ const envSchema = z.object({
     .stringbool()
     .default(true)
     .describe('Set false when a deploy pipeline applies migrations as its own step.'),
+
+  /**
+   * `console` prints invitations and password resets to stdout. It is the
+   * default so a fresh self-hosted instance can invite someone and reset a
+   * password with no mail server and no external account.
+   */
+  MAIL_TRANSPORT: z.enum(['console', 'smtp']).default('console'),
+  SMTP_URL: z.string().min(1).optional(),
+  MAIL_FROM: z.string().min(1).default('AINAM <ainam@localhost>'),
+
+  /**
+   * `invite-only` refuses to create an account for an email nobody invited,
+   * apart from the first account on an empty instance. Left `open` by default
+   * because a locked instance with no first user is unusable.
+   */
+  SIGNUP_MODE: z.enum(['open', 'invite-only']).default('open'),
 })
 
 export type Env = z.infer<typeof envSchema>
+
+/**
+ * Drops variables that are present but empty.
+ *
+ * Compose, Kubernetes and most deploy platforms render an unset variable as an
+ * empty string rather than omitting it — `SMTP_URL: ${SMTP_URL:-}` is the
+ * documented way to make a Compose file work with and without a .env. A schema
+ * that only understands "absent" therefore rejects the exact configuration
+ * `docker compose up` produces, and the error names a variable the operator
+ * never set.
+ */
+function withoutBlanks(source: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  return Object.fromEntries(
+    Object.entries(source).filter(([, value]) => value !== undefined && value.trim() !== ''),
+  )
+}
 
 /**
  * Reads and validates configuration once, at startup.
@@ -32,7 +64,7 @@ export type Env = z.infer<typeof envSchema>
  * it reaches the one code path that needed the variable.
  */
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
-  const result = envSchema.safeParse(source)
+  const result = envSchema.safeParse(withoutBlanks(source))
   if (!result.success) {
     const problems = result.error.issues
       .map((issue) => `  ${issue.path.join('.') || '(root)'}: ${issue.message}`)
@@ -45,6 +77,13 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     throw new Error(
       'BETTER_AUTH_SECRET is still the development placeholder from .env.example, which is ' +
         'public. Anyone could forge a session. Generate a real one with: openssl rand -base64 32',
+    )
+  }
+
+  if (env.MAIL_TRANSPORT === 'smtp' && !env.SMTP_URL) {
+    throw new Error(
+      'MAIL_TRANSPORT is "smtp" but SMTP_URL is unset, so invitations and password resets ' +
+        'would be accepted and never arrive. Set SMTP_URL, or use MAIL_TRANSPORT=console.',
     )
   }
 

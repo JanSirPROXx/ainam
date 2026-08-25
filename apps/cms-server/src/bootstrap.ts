@@ -29,10 +29,14 @@ try {
 
   AINAM_PROJECT_ID=${result.projectId}
   AINAM_API_KEY=${result.apiKey}
+  AINAM_WEBHOOK_SECRET=${result.webhookSecret}
 
 Copy these into your website's .env now — the key is not stored in a form we
 can show again. It carries content:read and schema:write, so keep it out of
 anything you deploy and issue a read-only key for the site itself.
+
+The webhook secret signs both publish notifications and preview links. Point
+the project's webhook at your site to make a publish reach it without a deploy.
 `)
   process.exit(0)
 } catch (error) {

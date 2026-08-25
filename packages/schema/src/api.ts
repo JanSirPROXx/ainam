@@ -24,8 +24,12 @@ export const apiErrorCodeSchema = z.enum([
  * A read key ends up in a customer's deployment environment and can leak; it
  * must not be able to rewrite the content schema. Push therefore needs its own
  * scope, held only by a key the developer keeps.
+ *
+ * Reading drafts is separate for the same reason in the other direction: the
+ * build key is in CI and in every deploy environment, so it is the one most
+ * likely to leak, and unpublished content must not be reachable with it.
  */
-export const apiKeyScopeSchema = z.enum(['content:read', 'schema:write'])
+export const apiKeyScopeSchema = z.enum(['content:read', 'content:read:draft', 'schema:write'])
 
 export const apiErrorSchema = z.object({
   error: z.object({

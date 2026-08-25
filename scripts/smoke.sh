@@ -70,6 +70,15 @@ echo "    $published"
 echo "$published" | grep -q '"home/hero/title":"seeded copy"' || {
   echo "FAIL: push did not seed the declared default" >&2; exit 1; }
 
+echo "==> the schema reads back, which is what ainam pull generates types from"
+stored=$(curl --silent --fail --max-time 10 -H "Authorization: Bearer $read_key" \
+  "http://localhost:${CMS_PORT}/v1/schema/proj_smoke")
+echo "$stored" | grep -q '"home/hero/title"' || {
+  echo "FAIL: pushed schema did not read back" >&2; exit 1; }
+# A read key is enough to pull: generating types is not a privileged action.
+echo "$stored" | grep -q '"defaultLocale":"en"' || {
+  echo "FAIL: schema response is missing its locales" >&2; exit 1; }
+
 echo "==> a read-only key may not push"
 curl --silent -X POST -H "Authorization: Bearer $read_key" -H 'content-type: application/json' \
   "http://localhost:${CMS_PORT}/v1/schema/proj_smoke" \

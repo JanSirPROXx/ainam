@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { runInit } from './init'
+import { runPull } from './pull'
 import { runPush } from './push'
 import { USAGE } from './usage'
 
@@ -23,6 +24,9 @@ async function main(argv: string[]): Promise<number> {
   }
   if (command === 'init') {
     return runInit(process.cwd())
+  }
+  if (command === 'pull') {
+    return runPull(process.cwd())
   }
   if (command === 'push') {
     const locales = readOption(argv, '--locales')?.split(',') ?? ['en']

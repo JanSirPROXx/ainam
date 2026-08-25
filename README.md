@@ -58,7 +58,23 @@ The content schema lives in the website's codebase, not in a dashboard form.
 ```bash
 npx ainam init     # writes ainam.config.ts and the env keys it needs
 npx ainam push     # uploads the schema
+npx ainam pull     # generates types and a content snapshot per locale
 ```
+
+`pull` writes `ainam.gen.ts`. Pass it to the client and a wrong content key
+stops being a blank section on the page and becomes a compile error:
+
+```ts
+import type { AinamContent } from './ainam.gen'
+
+const ainam = createAinamClient<AinamContent>({ /* … */ })
+
+const title = await ainam.get('home/hero/title')  // string
+await ainam.get('home/hero/titel')                // error, and it lists the real keys
+```
+
+It also writes `ainam-snapshot.<locale>.json`. Pass that as `snapshot` and the
+site keeps rendering when AINAM is unreachable.
 
 Keys declared in `ainam.config.ts` carry a `default`, and `push` seeds it into
 both the draft and the published copy — so the site renders the copy the

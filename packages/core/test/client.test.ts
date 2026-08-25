@@ -38,6 +38,32 @@ describe('reading content', () => {
     await expect(client.get('home/hero/title')).resolves.toBe('Content, decoupled')
   })
 
+  it('throws on a missing key, naming what to do about it', async () => {
+    // Safe to throw only because push seeds a value for every key in the
+    // schema, which is what lets the generated accessors be non-nullable.
+    const client = createAinamClient({ ...BASE, fetch: respondWith({}) })
+    await expect(client.get('home/hero/title')).rejects.toMatchObject({ code: 'not_found' })
+    await expect(client.get('home/hero/title')).rejects.toThrowError(/ainam push/)
+  })
+
+  it('returns undefined from getOptional for a key that may be absent', async () => {
+    const client = createAinamClient({ ...BASE, fetch: respondWith({}) })
+    await expect(client.getOptional('maybe/here')).resolves.toBeUndefined()
+  })
+
+  it('types each key from the generated map', async () => {
+    type Site = { 'home/hero/title': string; 'home/pricing/visible': boolean }
+
+    const client = createAinamClient<Site>({
+      ...BASE,
+      fetch: respondWith({ 'home/hero/title': 'typed', 'home/pricing/visible': true }),
+    })
+
+    const title: string = await client.get('home/hero/title')
+    const visible: boolean = await client.get('home/pricing/visible')
+    expect([title, visible]).toEqual(['typed', true])
+  })
+
   it('deduplicates concurrent reads into one request', async () => {
     const fetchImpl = respondWith({ 'a/b/c': 'once' })
     const client = createAinamClient({ ...BASE, fetch: fetchImpl })

@@ -5,6 +5,7 @@ import { Badge, Button, Card, Field, Toast } from '@ainam/ui'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { AdminApiError, adminFetch } from '@/lib/api'
+import { count } from '@/lib/plural'
 import { FieldControl } from './FieldControl'
 
 type Draft = Record<string, ContentValue>
@@ -46,7 +47,7 @@ export function ContentEditor({ projectId, view }: { projectId: string; view: Ed
         }),
       }),
     onSuccess: async (result) => {
-      setToast({ tone: 'success', title: `Saved ${result.saved.length} changes` })
+      setToast({ tone: 'success', title: `Saved ${count(result.saved.length, 'change')}` })
       await queryClient.invalidateQueries({ queryKey: ['content', projectId] })
     },
     onError: (error: AdminApiError) =>
@@ -66,7 +67,7 @@ export function ContentEditor({ projectId, view }: { projectId: string; view: Ed
     onSuccess: async (result) => {
       setToast({
         tone: result.webhook === 'failed' ? 'error' : 'success',
-        title: `Published ${result.published.length} keys`,
+        title: `Published ${count(result.published.length, 'key')}`,
         // Named plainly: "published but the page still shows the old text" is
         // the most confusing thing that can happen to someone editing a site.
         body:
@@ -85,7 +86,9 @@ export function ContentEditor({ projectId, view }: { projectId: string; view: Ed
     <div style={{ display: 'grid', gap: 'var(--space-6)' }}>
       <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
         <Badge tone={view.unpublishedCount > 0 ? 'warning' : 'success'} dot>
-          {view.unpublishedCount > 0 ? `${view.unpublishedCount} unpublished` : 'Everything published'}
+          {view.unpublishedCount > 0
+            ? `${count(view.unpublishedCount, 'change')} unpublished`
+            : 'Everything published'}
         </Badge>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 'var(--space-3)' }}>
           <Button
@@ -94,7 +97,7 @@ export function ContentEditor({ projectId, view }: { projectId: string; view: Ed
             loading={save.isPending}
             onClick={() => save.mutate()}
           >
-            {dirty.length > 0 ? `Save ${dirty.length} changes` : 'Save'}
+            {dirty.length > 0 ? `Save ${count(dirty.length, 'change')}` : 'Save'}
           </Button>
           <Button
             disabled={view.unpublishedCount === 0 || dirty.length > 0}

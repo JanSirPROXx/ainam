@@ -3,6 +3,10 @@ import type { NextConfig } from 'next'
 
 const config: NextConfig = {
   reactStrictMode: true,
+  // Next writes its own AGENTS.md and CLAUDE.md into the app directory on dev.
+  // This repository already has a CLAUDE.md that says something different, and
+  // a second one three levels down is worse than none.
+  agentRules: false,
   // Standalone bundles only the traced dependencies, which keeps the container
   // small and means the runtime stage needs no package manager at all.
   output: 'standalone',

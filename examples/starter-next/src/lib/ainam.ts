@@ -1,5 +1,5 @@
-import { createAinamContent } from '@ainam/next'
-import snapshot from '../../ainam-snapshot.en.json'
+import { contentSnapshot, createAinamContent } from '@ainam/next'
+import snapshotFile from '../../ainam-snapshot.en.json'
 import type { AinamContent } from '../../ainam.gen'
 
 const apiKey = process.env['AINAM_API_KEY'] ?? ''
@@ -24,5 +24,7 @@ export const ainam = createAinamContent<AinamContent>({
   projectId: projectId || 'unconfigured',
   baseUrl: process.env['AINAM_URL'] ?? 'http://localhost:8787',
   locale: 'en',
-  snapshot,
+  // Narrowed rather than cast: TypeScript widens the string literals in an
+  // imported .json, and this checks the shape while restoring the type.
+  snapshot: contentSnapshot(snapshotFile),
 })

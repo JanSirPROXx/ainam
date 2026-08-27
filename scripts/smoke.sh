@@ -461,4 +461,141 @@ echo "$answer" | grep -q 'AINAM_WEBHOOK_SECRET' || {
   "http://localhost:${STARTER_PORT}/api/ainam/preview?exit=1")" = "307" ] || {
   echo "FAIL: a visitor cannot leave draft mode on an unconfigured site" >&2; exit 1; }
 
+# ---------------------------------------------------------------- M5
+
+echo "==> object storage is up and the bucket exists"
+docker compose exec -T garage /garage bucket list 2>/dev/null | grep -q "${STORAGE_BUCKET:-ainam}" || {
+  echo "FAIL: the bucket was not created, so no upload can succeed" >&2; exit 1; }
+
+# This suite always starts from a wiped volume, so it would never meet the state
+# a developer meets on their second `docker compose up`. Running the bootstrap
+# again against a configured cluster is that state, and it failed hard until the
+# layout step learned to skip itself.
+docker compose run --rm garage-init >/dev/null 2>&1 || {
+  echo "FAIL: the storage bootstrap is not repeatable, so a second compose up breaks" >&2
+  exit 1; }
+
+echo "==> upload an image; the header decides the format, not the filename"
+work=$(mktemp -d)
+# A 1x1 PNG, written as bytes rather than generated, so this needs no image
+# library on the machine running the smoke test.
+printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' \
+  | base64 -d > "$work/logo.png"
+
+asset=$(curl --silent --fail-with-body -b "$jar" -H "$origin" -X POST \
+  "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/assets" -F "file=@$work/logo.png")
+echo "    $asset"
+asset_id=$(echo "$asset" | json 'v.id')
+asset_url=$(echo "$asset" | json 'v.url')
+[ -n "$asset_id" ] || { echo "FAIL: the upload returned no asset" >&2; exit 1; }
+
+# Re-encoded, never passed through: what a browser gets is a WebP this server
+# produced, not bytes a caller supplied.
+echo "$asset" | grep -q '"mimeType":"image/webp"' || {
+  echo "FAIL: the upload was not re-encoded: $asset" >&2; exit 1; }
+
+echo "==> the image comes from the bucket, not through cms-server"
+echo "    $asset_url"
+case "$asset_url" in
+  *:${GARAGE_WEB_PORT:-3902}/*) ;;
+  *) echo "FAIL: the image URL does not point at the bucket: $asset_url" >&2; exit 1 ;;
+esac
+[ "$(curl --silent -o /dev/null -w '%{http_code}' "$asset_url")" = "200" ] || {
+  echo "FAIL: the bucket did not serve the image to an anonymous request" >&2; exit 1; }
+
+echo "==> the same file uploaded twice is one asset"
+again=$(curl --silent --fail-with-body -b "$jar" -H "$origin" -X POST \
+  "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/assets" -F "file=@$work/logo.png" | json 'v.id')
+[ "$again" = "$asset_id" ] || {
+  echo "FAIL: re-uploading the same image made a second asset ($again vs $asset_id)" >&2; exit 1; }
+
+echo "==> an SVG is refused, whatever it is called"
+printf '%s' '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><script>alert(1)</script></svg>' \
+  > "$work/payload.png"
+refusal=$(curl --silent -b "$jar" -H "$origin" -X POST \
+  "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/assets" -F "file=@$work/payload.png")
+echo "    $refusal"
+# Named ".png" and still refused: the decoded header is what decides.
+echo "$refusal" | grep -q 'script' || {
+  echo "FAIL: an SVG named .png was accepted, which is stored XSS on the customer site" >&2; exit 1; }
+
+echo "==> an oversized upload is refused, naming the limit"
+head -c 21000000 /dev/zero > "$work/huge.png"
+oversized=$(curl --silent -b "$jar" -H "$origin" -X POST \
+  "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/assets" -F "file=@$work/huge.png")
+echo "$oversized" | grep -q '20 MB' || {
+  echo "FAIL: an oversized upload was not refused with the limit: $oversized" >&2; exit 1; }
+
+echo "==> an image reaches the live site with its intrinsic dimensions"
+curl --silent --fail --max-time 10 -X POST \
+  -H "Authorization: Bearer $write_key" -H 'content-type: application/json' \
+  "http://localhost:${CMS_PORT}/v1/schema/proj_smoke" -d '{
+    "defaultLocale":"en","locales":["en"],"schema":{
+      "home/hero/title":{"type":"text","label":"T","required":true,"multiline":false,"default":"seeded copy"},
+      "home/hero/image":{"type":"image","label":"Hero","required":false,"alt":true},
+      "home/about/body":{"type":"richText","label":"About","required":false,"default":"Placeholder."}}}' >/dev/null
+
+image_version=$(admin "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/content" |
+  json "v.entries.find(e=>e.key==='home/hero/image').draft.version")
+admin -X PATCH "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/content" \
+  -d "{\"locale\":\"en\",\"entries\":[{\"key\":\"home/hero/image\",\"value\":{\"assetId\":\"$asset_id\",\"alt\":\"A logo\"},\"expectedVersion\":$image_version}]}" >/dev/null
+admin -X POST "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/publish" -d '{"locale":"en"}' >/dev/null
+
+live=$(curl --silent --fail -H "Authorization: Bearer $read_key" \
+  "http://localhost:${CMS_PORT}/v1/content/proj_smoke")
+# The content row holds only the id and the alt text; the URL and the dimensions
+# are spliced in, which is what lets storage move without rewriting content.
+echo "$live" | json "JSON.stringify(v['home/hero/image'])" | grep -q '"width":1' || {
+  echo "FAIL: the published image carries no intrinsic dimensions: $live" >&2; exit 1; }
+echo "$live" | json "v['home/hero/image'].url" | grep -q "$asset_id" || {
+  echo "FAIL: the published image has no resolvable URL" >&2; exit 1; }
+
+echo "==> rich text is refused when it carries formatting the site cannot render"
+body_version=$(admin "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/content" |
+  json "v.entries.find(e=>e.key==='home/about/body').draft.version")
+bad=$(admin_expect_error -X PATCH "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/content" \
+  -d "{\"locale\":\"en\",\"entries\":[{\"key\":\"home/about/body\",\"value\":{\"type\":\"doc\",\"content\":[{\"type\":\"iframe\"}]},\"expectedVersion\":$body_version}]}")
+echo "$bad" | grep -q '"code":"validation_failed"' || {
+  echo "FAIL: a node no renderer knows was accepted into content: $bad" >&2; exit 1; }
+
+# And a link that would run script, which is the same check on a mark.
+script_link=$(admin_expect_error -X PATCH "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/content" \
+  -d "{\"locale\":\"en\",\"entries\":[{\"key\":\"home/about/body\",\"value\":{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"x\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"javascript:alert(1)\"}}]}]}]},\"expectedVersion\":$body_version}]}")
+echo "$script_link" | grep -q '"code":"validation_failed"' || {
+  echo "FAIL: a javascript: link was accepted into content" >&2; exit 1; }
+
+echo "==> a value of the wrong kind is refused for its field"
+# The edit path never checked this before M5: `contentValueSchema` proves the
+# body is a content value, not that it fits the field it was sent for.
+wrong=$(admin_expect_error -X PATCH "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/content" \
+  -d "{\"locale\":\"en\",\"entries\":[{\"key\":\"home/hero/title\",\"value\":42,\"expectedVersion\":1}]}")
+echo "$wrong" | grep -q '"code":"validation_failed"' || {
+  echo "FAIL: a number was accepted into a text field: $wrong" >&2; exit 1; }
+
+echo "==> an owner mints the key a deployment reads with"
+minted=$(admin -X POST "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/api-keys" \
+  -d '{"name":"production","scopes":["content:read"]}')
+minted_key=$(echo "$minted" | json 'v.key')
+[ -n "$minted_key" ] || { echo "FAIL: creating a key returned nothing usable: $minted" >&2; exit 1; }
+curl --silent --fail -H "Authorization: Bearer $minted_key" \
+  "http://localhost:${CMS_PORT}/v1/content/proj_smoke" >/dev/null || {
+  echo "FAIL: a key minted in the dashboard cannot read content" >&2; exit 1; }
+
+# Revoking takes effect on the next request, not on the next restart.
+key_id=$(echo "$minted" | json 'v.id')
+admin -X DELETE "http://localhost:${CMS_PORT}/admin/projects/proj_smoke/api-keys/${key_id}" >/dev/null
+curl --silent -H "Authorization: Bearer $minted_key" \
+  "http://localhost:${CMS_PORT}/v1/content/proj_smoke" | grep -q '"code":"unauthorized"' || {
+  echo "FAIL: a revoked key still reads content" >&2; exit 1; }
+
+echo "==> deleting a project takes its stored objects with it"
+before=$(docker compose exec -T garage /garage bucket info "${STORAGE_BUCKET:-ainam}" 2>/dev/null | awk '/Objects:/ { print $2 }')
+admin -X DELETE "http://localhost:${CMS_PORT}/admin/projects/proj_smoke" >/dev/null
+after=$(docker compose exec -T garage /garage bucket info "${STORAGE_BUCKET:-ainam}" 2>/dev/null | awk '/Objects:/ { print $2 }')
+echo "    objects: $before -> $after"
+# The rows cascade on their own; the bytes do not, and stranded bytes surface
+# only as a storage invoice for content nobody can reach.
+[ "${after:-1}" -lt "${before:-0}" ] || {
+  echo "FAIL: deleting a project left its objects in the bucket" >&2; exit 1; }
+
 echo "==> smoke passed"

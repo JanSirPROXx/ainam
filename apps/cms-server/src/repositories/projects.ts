@@ -68,6 +68,11 @@ export function createProjectRepository(db: Database) {
       await db.update(projects).set(patch).where(eq(projects.id, projectId))
     },
 
+    /** Content, history, keys and asset rows go with it, by cascade. */
+    async remove(projectId: string): Promise<void> {
+      await db.delete(projects).where(eq(projects.id, projectId))
+    },
+
     /**
      * Replaces the secret that signs publishes and preview links.
      *

@@ -1,8 +1,8 @@
-import type { Author, ContentValue } from '@ainam/schema'
+import { type Author, type ContentValue, documentsMatch } from '@ainam/schema'
 import { and, eq } from 'drizzle-orm'
 import type { Database } from '../db/client'
 import { contentEntries, contentVersions } from '../db/schema'
-import { documentsMatch } from '../lib/canonical-json'
+
 import { createId } from '../lib/ids'
 
 export interface StoredEntry {

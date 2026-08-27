@@ -2,6 +2,7 @@ import type { Author, SaveDraftRequest, SaveDraftResult } from '@ainam/schema'
 import type { Database } from '../db/client'
 import { HttpError } from '../http/errors'
 import { createEditorRepository } from '../repositories/editor'
+import { findSchemaMismatches } from './schema-fit'
 
 /**
  * Saves a batch of draft edits, or none of them.
@@ -20,6 +21,20 @@ export async function saveDraft(
   const editor = createEditorRepository(db)
 
   return db.transaction(async (tx) => {
+    // Checked here rather than trusted: `contentValueSchema` proves the body is
+    // *a* content value, not that it is one this field accepts. Without this a
+    // number lands in a text field and the site's generated types are a lie.
+    const mismatches = await findSchemaMismatches(tx as unknown as Database, projectId, request.entries)
+    if (mismatches.length > 0) {
+      throw new HttpError(
+        422,
+        'validation_failed',
+        `${mismatches.length === 1 ? 'One value does' : `${mismatches.length} values do`} not fit ` +
+          'the field they were sent for.',
+        mismatches.map(({ key, problem }) => ({ path: key, message: problem })),
+      )
+    }
+
     const saved: SaveDraftResult['saved'] = []
     const conflicts: string[] = []
 

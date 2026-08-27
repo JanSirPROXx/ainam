@@ -36,6 +36,13 @@
       "when": 1787699923470,
       "tag": "0004_schema_key_order",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787866879567,
+      "tag": "0005_asset_metadata",
+      "breakpoints": true
     }
   ]
 }

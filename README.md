@@ -137,6 +137,39 @@ Reading drafts needs its own key, carrying `content:read:draft`, passed as
 in every deploy environment, so it is the one most likely to leak, and
 unpublished work must not be readable with it.
 
+## Images and rich text
+
+Uploads are re-encoded rather than passed through. The format is decided by
+decoding the header — never the filename, never the declared type — and SVG is
+refused, because it can carry script that would then run on your own site. What
+lands in the bucket is one EXIF-stripped WebP, capped on the long edge, with the
+original's dimensions recorded so a layout can reserve the space:
+
+```tsx
+const hero = await ainam.get('home/hero/image')
+const props = ainamImageProps(hero)   // { src, width, height, alt } | null
+return props ? <img {...props} /> : null
+```
+
+Content stores only the asset id and its alt text. The URL is spliced in per
+response, so moving storage or putting a CDN in front of it changes nothing that
+was written — and `ainam pull` inherits absolute URLs, so the build-time
+snapshot still renders images with AINAM entirely down.
+
+Rich text is stored as a node tree, never as HTML, and the set of nodes is fixed
+in one place. The editor is configured from that list and both renderers map
+over it, so formatting cannot exist that the site has no way to display:
+
+```tsx
+import { AinamRichText } from '@ainam/next'
+
+const body = await ainam.get('home/about/body')
+return <AinamRichText value={body} className="prose" />
+```
+
+`renderRichTextToHtml` returns a string for consumers who are not on React.
+Both escape text and both drop a link whose scheme could run script.
+
 ## Inviting people
 
 An organisation is one client site. An agency owner belongs to several and

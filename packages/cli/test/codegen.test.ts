@@ -28,7 +28,7 @@ describe('generateContentTypes', () => {
   })
 
   it('types an image as nullable, since it is the one kind without a default', () => {
-    expect(output).toContain('"home/hero/image": ImageValue | null')
+    expect(output).toContain('"home/hero/image": ResolvedImage | null')
   })
 
   it('sorts keys so a regenerated file differs only where the schema did', () => {
@@ -59,7 +59,7 @@ describe('generateContentTypes', () => {
       },
     })
     expect(withList).toContain('"alt": string')
-    expect(withList).toContain('"src": ImageValue | null')
+    expect(withList).toContain('"src": ResolvedImage | null')
     expect(withList).toContain('Array<{')
   })
 })
@@ -76,7 +76,7 @@ describe('generated imports', () => {
     const withImage = generateContentTypes({
       'a/b': { type: 'image', label: 'A', required: false, alt: true },
     })
-    expect(withImage).toContain("import type { ImageValue } from '@ainam/core'")
+    expect(withImage).toContain("import type { ResolvedImage } from '@ainam/core'")
     expect(withImage).not.toContain('RichTextValue')
   })
 })

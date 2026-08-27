@@ -1,3 +1,4 @@
+import { validateRichTextDoc } from './rich-text'
 import type { ContentValue, Field, ScalarField, ScalarValue } from './types'
 
 /**
@@ -43,7 +44,10 @@ function validateScalar(field: ScalarField, value: ScalarValue | ContentValue): 
     }
 
     case 'richText':
-      return isRichText(value) ? null : expected('rich text', value)
+      // Checked node by node, not just "is it a document": the editor offers a
+      // fixed set of formatting, and a node outside it has nothing to render it
+      // on the customer's site.
+      return isRichText(value) ? validateRichTextDoc(value) : expected('rich text', value)
 
     case 'image':
       // Null is the legitimate state of an image nobody has uploaded yet, which

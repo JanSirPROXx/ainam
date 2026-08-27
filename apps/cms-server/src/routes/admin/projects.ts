@@ -10,8 +10,10 @@ import type { AppEnv } from '../../http/context'
 import { projectParams } from '../../http/params'
 import { generateWebhookSecret } from '../../lib/api-key'
 import { createProjectRepository, toProjectSummary } from '../../repositories/projects'
+import { deleteProjectObjects } from '../../services/assets/delete-objects'
 import { createPreviewLink } from '../../services/preview-link'
 import { requireProject, requireProjectPermission } from '../../services/project-access'
+import type { Storage } from '../../storage'
 
 const listRoute = createRoute({
   method: 'get',
@@ -69,6 +71,22 @@ const secretRoute = createRoute({
   },
 })
 
+const deleteRoute = createRoute({
+  method: 'delete',
+  path: '/admin/projects/{projectId}',
+  summary: 'Delete a project and everything in it',
+  description:
+    'Removes the content, its history, its keys and its uploaded images. There is no undo, and ' +
+    'any site still reading with one of its keys stops receiving content.',
+  request: { params: projectParams },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: z.object({ deleted: z.boolean() }) } },
+      description: 'The project is gone.',
+    },
+  },
+})
+
 const previewRoute = createRoute({
   method: 'get',
   path: '/admin/projects/{projectId}/preview-link',
@@ -82,7 +100,11 @@ const previewRoute = createRoute({
   },
 })
 
-export function registerAdminProjectRoutes(app: OpenAPIHono<AppEnv>, db: Database): void {
+export function registerAdminProjectRoutes(
+  app: OpenAPIHono<AppEnv>,
+  db: Database,
+  storage?: Storage | undefined,
+): void {
   const projects = createProjectRepository(db)
 
   app.openapi(listRoute, async (c) => {
@@ -117,6 +139,19 @@ export function registerAdminProjectRoutes(app: OpenAPIHono<AppEnv>, db: Databas
     const webhookSecret = generateWebhookSecret()
     await projects.setWebhookSecret(projectId, webhookSecret)
     return c.json({ webhookSecret })
+  })
+
+  app.openapi(deleteRoute, async (c) => {
+    const { projectId } = c.req.valid('param')
+    await requireProjectPermission(db, projectId, c.get('user').id, 'project:manage')
+
+    // Objects first: the row cascade takes the asset records with it, and once
+    // they are gone nothing knows which bytes belonged to this project. The
+    // keys are one prefix precisely so this is a single call.
+    await deleteProjectObjects(storage, projectId)
+    await projects.remove(projectId)
+
+    return c.json({ deleted: true })
   })
 
   app.openapi(previewRoute, async (c) => {

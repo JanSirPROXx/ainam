@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useState } from 'react'
 import { adminFetch } from '@/lib/api'
 import { useToast } from '@/lib/toast'
+import { ApiKeysPanel } from './ApiKeysPanel'
 import { RevealedSecret } from './RevealedSecret'
 
 /**
@@ -60,6 +61,13 @@ export function ProjectSettings({ project }: { project: ProjectSummary }) {
             <Input id="project-name" value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
           <Field
+            label="Locales"
+            htmlFor="project-locales"
+            hint="Declared in ainam.config.ts and set by ainam push, so the code stays the source of truth."
+          >
+            <Input id="project-locales" readOnly value={project.locales.join(', ')} />
+          </Field>
+          <Field
             label="Webhook URL"
             htmlFor="webhook-url"
             hint="Called after every publish so the site refreshes without a deploy. Usually /api/ainam/revalidate."
@@ -110,6 +118,14 @@ export function ProjectSettings({ project }: { project: ProjectSummary }) {
             Create a new secret
           </Button>
         </div>
+      </Card>
+
+      <Card
+        title="API keys"
+        description="What a deployment reads with. Each one is shown exactly once."
+        padding="md"
+      >
+        <ApiKeysPanel projectId={project.id} />
       </Card>
 
       {toast.node}

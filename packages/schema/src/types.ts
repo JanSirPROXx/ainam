@@ -27,9 +27,40 @@ export interface RichTextValue {
   content: unknown[]
 }
 
+/** What the editor writes and what a content row stores. */
 export interface ImageValue {
   assetId: Id
   alt: string
+}
+
+/**
+ * An image as the content API returns it.
+ *
+ * A content row stores only `{ assetId, alt }`: a URL written into content
+ * would go stale the moment storage moves, or the bucket gets a CDN in front
+ * of it. The rest is spliced in per response — which also means `ainam pull`
+ * inherits absolute URLs, so the build-time snapshot still renders images with
+ * cms-server entirely down.
+ */
+export interface ResolvedImage extends ImageValue {
+  url: string
+  /** The stored image's own dimensions, so a layout can reserve the space. */
+  width: number
+  height: number
+  /**
+   * A srcSet ladder. Optional and unpopulated for now: its only consumer is
+   * `srcSet`, and Next derives one from a single high-resolution original.
+   * Declared here so adding it later is additive rather than breaking.
+   */
+  variants?: ImageVariant[] | undefined
+  /** An inline placeholder, for the same reason. */
+  placeholder?: string | undefined
+}
+
+export interface ImageVariant {
+  url: string
+  width: number
+  height: number
 }
 
 export type ScalarValue = string | number | boolean | null | RichTextValue | ImageValue
@@ -337,4 +368,45 @@ export interface UpdateProjectRequest {
 export interface PreviewLink {
   url: string
   expiresAt: string
+}
+
+// ---------------------------------------------------------------- assets
+
+/** An uploaded image, as the dashboard's picker lists it. */
+export interface AssetSummary {
+  id: Id
+  filename: string
+  mimeType: string
+  byteSize: number
+  width: number
+  height: number
+  url: string
+  createdAt: string
+}
+
+export interface AssetPage {
+  assets: AssetSummary[]
+  /** Total bytes this project has stored, so a quota can be shown before one bites. */
+  storedBytes: number
+}
+
+/** What creating an API key returns. The key itself is shown exactly once. */
+export interface CreatedApiKey {
+  id: Id
+  name: string
+  scopes: ApiKeyScope[]
+  prefix: string
+  /** Shown once. Only its hash is stored. */
+  key: string
+}
+
+/** An API key as the settings screen lists it. Never the key itself. */
+export interface ApiKeySummary {
+  id: Id
+  name: string
+  scopes: ApiKeyScope[]
+  prefix: string
+  lastUsedAt: string | null
+  createdAt: string
+  revokedAt: string | null
 }

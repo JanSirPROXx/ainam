@@ -29,6 +29,46 @@ services:
       timeout: 3s
       retries: 30
 
+  # S3-compatible object storage for uploaded images.
+  #
+  # Garage rather than MinIO: MinIO's last open-source release was October 2025
+  # and the project moved its attention to a commercial product, while Garage
+  # ships regularly and is built for exactly this — one small self-hosted node.
+  # The ObjectStore port means the choice is configuration either way.
+  garage:
+    image: dxflrs/garage:v2.3.0
+    volumes:
+      - ./docker/garage/garage.toml:/etc/garage.toml:ro
+      - ainam-garage-meta:/var/lib/garage/meta
+      - ainam-garage-data:/var/lib/garage/data
+    ports:
+      # 3900 is the S3 API, 3902 serves objects to browsers.
+      - "${GARAGE_S3_PORT:-3900}:3900"
+      - "${GARAGE_WEB_PORT:-3902}:3902"
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  # Assigns the layout and creates the bucket and key. A fresh node holds no
+  # data until this has run, and the failure without it reads like a network
+  # fault rather than an unconfigured cluster.
+  garage-init:
+    build:
+      context: ./docker/garage
+    volumes:
+      - ./docker/garage/garage.toml:/etc/garage.toml:ro
+    environment:
+      GARAGE_RPC_HOST: garage:3901
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-ainam}
+      STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID:-GK0000000000000000000001}
+      STORAGE_SECRET_ACCESS_KEY: ${STORAGE_SECRET_ACCESS_KEY:-0000000000000000000000000000000000000000000000000000000000000001}
+    depends_on:
+      garage:
+        condition: service_healthy
+    restart: "no"
+
   cms-server:
     build:
       context: .
@@ -45,11 +85,24 @@ services:
       SMTP_URL: ${SMTP_URL:-}
       MAIL_FROM: ${MAIL_FROM:-AINAM <ainam@localhost>}
       SIGNUP_MODE: ${SIGNUP_MODE:-open}
+      # The in-network endpoint the server talks to.
+      STORAGE_ENDPOINT: http://garage:3900
+      STORAGE_REGION: garage
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-ainam}
+      STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID:-GK0000000000000000000001}
+      STORAGE_SECRET_ACCESS_KEY: ${STORAGE_SECRET_ACCESS_KEY:-0000000000000000000000000000000000000000000000000000000000000001}
+      STORAGE_FORCE_PATH_STYLE: "true"
+      # The browser-reachable address, which is deliberately not the endpoint
+      # above. Confusing the two is the classic self-hosting failure, and it
+      # surfaces as a silently blank image rather than an error.
+      STORAGE_PUBLIC_URL: ${STORAGE_PUBLIC_URL:-http://localhost:3902}
     ports:
       - "${CMS_PORT:-8787}:8787"
     depends_on:
       postgres:
         condition: service_healthy
+      garage-init:
+        condition: service_completed_successfully
     healthcheck:
       # No curl in the runtime image, and adding one to serve a healthcheck
       # would be a package we ship to every self-hoster for our convenience.
@@ -118,3 +171,5 @@ services:
 
 volumes:
   ainam-postgres:
+  ainam-garage-meta:
+  ainam-garage-data:

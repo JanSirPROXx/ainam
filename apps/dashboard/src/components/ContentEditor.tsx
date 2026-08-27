@@ -8,7 +8,7 @@ import type {
   PublishResult,
   SaveDraftResult,
 } from '@ainam/schema'
-import { hasPermission } from '@ainam/schema'
+import { documentsMatch, hasPermission } from '@ainam/schema'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { adminFetch } from '@/lib/api'
@@ -54,8 +54,12 @@ export function ContentEditor({
       queryClient.invalidateQueries({ queryKey: ['publishes', projectId] }),
     ])
   }
+  // Order-insensitive, because the saved value comes back through a JSONB
+  // column that normalises object key order at every level of nesting. A raw
+  // JSON.stringify comparison never clears after saving rich text or an image,
+  // which leaves the editor permanently dirty and Publish disabled.
   const dirty = view.entries.filter(
-    (entry) => JSON.stringify(draft[entry.key]) !== JSON.stringify(entry.draft?.value ?? null),
+    (entry) => !documentsMatch(draft[entry.key] ?? null, entry.draft?.value ?? null),
   )
 
   const save = useMutation({
@@ -127,6 +131,7 @@ export function ContentEditor({
       {view.entries.map((entry) => (
         <EntryCard
           key={entry.key}
+          projectId={projectId}
           entry={entry}
           value={draft[entry.key] ?? null}
           onChange={(value) => setDraft((current) => ({ ...current, [entry.key]: value }))}

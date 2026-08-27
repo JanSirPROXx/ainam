@@ -87,7 +87,12 @@ describe('createAinamContent', () => {
     )
     const ainam = createAinamContent({
       ...config,
-      snapshot: { generatedAt: '2026-08-01T00:00:00.000Z', entries: { 'home/hero/title': 'stale' } },
+      snapshot: {
+        projectId: 'proj_smoke',
+        locale: 'en',
+        generatedAt: '2026-08-01T00:00:00.000Z',
+        entries: { 'home/hero/title': 'stale' },
+      },
     })
 
     await expect(ainam.get('home/hero/title')).rejects.toThrow()

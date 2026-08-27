@@ -1,3 +1,4 @@
+import { AinamRichText, ainamImageProps } from '@ainam/next'
 import { Badge, Button, Eyebrow, GridBackdrop, Metric, Wordmark } from '@ainam/ui'
 import { draftMode } from 'next/headers'
 import { ainam, isConfigured } from '@/lib/ainam'
@@ -9,14 +10,20 @@ import { ainam, isConfigured } from '@/lib/ainam'
 export default async function HomePage() {
   const previewing = (await draftMode()).isEnabled
 
-  const [eyebrow, title, subtitle, cta, showPricing, seats] = await Promise.all([
+  const [eyebrow, title, subtitle, cta, showPricing, seats, hero, about] = await Promise.all([
     ainam.get('home/hero/eyebrow'),
     ainam.get('home/hero/title'),
     ainam.get('home/hero/subtitle'),
     ainam.get('home/hero/cta'),
     ainam.get('home/pricing/visible'),
     ainam.get('home/pricing/seats'),
+    ainam.get('home/hero/image'),
+    ainam.get('home/about/body'),
   ])
+
+  // Props, not a component: @ainam/core has no runtime dependencies, so it
+  // hands over what an <img> needs and the site decides how to render it.
+  const image = ainamImageProps(hero)
 
   return (
     <GridBackdrop glow>
@@ -52,6 +59,27 @@ export default async function HomePage() {
           <div>
             <Button size="lg">{cta}</Button>
           </div>
+        </section>
+
+        {/* Closes up entirely when nobody has uploaded one — the only field
+            kind with no default, so the site has to handle its absence. */}
+        {image ? (
+          <img
+            {...image}
+            style={{
+              width: '100%',
+              height: 'auto',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border-subtle)',
+            }}
+          />
+        ) : null}
+
+        <section style={{ display: 'grid', gap: 'var(--space-5)', maxWidth: 680 }}>
+          <Eyebrow>About</Eyebrow>
+          {/* React elements, not dangerouslySetInnerHTML: the renderer only
+              emits the nodes the editor offers, and React does the escaping. */}
+          <AinamRichText value={about} />
         </section>
 
         {/* A section the owner can switch off from the dashboard, no deploy. */}

@@ -7,6 +7,8 @@ import type { Database } from '../db/client'
 import type { Env } from '../env'
 import type { MailTransport } from '../mail'
 import { invitationMessage, passwordResetMessage } from '../mail/messages'
+import { deleteOrganizationObjects } from '../services/assets/delete-objects'
+import type { Storage } from '../storage'
 import { refuseUninvitedSignUp } from './signup'
 
 /** Long enough for someone to notice the mail, short enough to expire a stale one. */
@@ -23,7 +25,12 @@ const INVITATION_TTL_SECONDS = 7 * 24 * 60 * 60
  * ours. Both settings shape the generated tables, so changing either after the
  * first migration ships is a data migration on a customer's database.
  */
-export function createAuth(env: Env, db: Database, mailer: MailTransport) {
+export function createAuth(
+  env: Env,
+  db: Database,
+  mailer: MailTransport,
+  storage?: Storage | undefined,
+) {
   return betterAuth({
     appName: 'AINAM',
     secret: env.BETTER_AUTH_SECRET,
@@ -66,6 +73,15 @@ export function createAuth(env: Env, db: Database, mailer: MailTransport) {
         roles,
         creatorRole: 'owner',
         invitationExpiresIn: INVITATION_TTL_SECONDS,
+        organizationHooks: {
+          // Deleting an organisation cascades to its projects and their asset
+          // rows, but object storage knows nothing about foreign keys. Without
+          // this the bytes stay, and the only place that ever surfaces is a
+          // storage invoice for content nobody can reach.
+          beforeDeleteOrganization: async ({ organization: deleted }) => {
+            await deleteOrganizationObjects(db, storage, deleted.id)
+          },
+        },
         sendInvitationEmail: async (data) => {
           await mailer.send(
             invitationMessage({

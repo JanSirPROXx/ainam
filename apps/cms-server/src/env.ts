@@ -36,6 +36,35 @@ const envSchema = z.object({
    * because a locked instance with no first user is unusable.
    */
   SIGNUP_MODE: z.enum(['open', 'invite-only']).default('open'),
+
+  /**
+   * S3-compatible object storage for uploaded images.
+   *
+   * Optional as a group: leave the bucket unset and the server runs without
+   * media, refusing uploads with a message naming these variables. Endpoint and
+   * path-style addressing are configuration, not constants, so MinIO, Garage,
+   * R2 and S3 are a `.env` change rather than a code change.
+   */
+  STORAGE_BUCKET: z.string().min(1).optional(),
+  STORAGE_REGION: z.string().min(1).default('us-east-1'),
+  STORAGE_ENDPOINT: z.url().optional(),
+  STORAGE_ACCESS_KEY_ID: z.string().min(1).optional(),
+  STORAGE_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+  STORAGE_FORCE_PATH_STYLE: z.stringbool().default(true),
+
+  /**
+   * Where a browser reaches the bucket.
+   *
+   * Set it and image URLs bypass this server entirely — the production path.
+   * Leave it unset and images stream through the content API, which works with
+   * no bucket policy and no CDN account, and makes this server a single point
+   * of failure for the customer's images.
+   *
+   * This is the browser-reachable address, which is not the in-network
+   * endpoint. Confusing the two is the classic self-hosting failure and it
+   * surfaces as a silently blank image.
+   */
+  STORAGE_PUBLIC_URL: z.url().optional(),
 })
 
 export type Env = z.infer<typeof envSchema>
@@ -77,6 +106,19 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     throw new Error(
       'BETTER_AUTH_SECRET is still the development placeholder from .env.example, which is ' +
         'public. Anyone could forge a session. Generate a real one with: openssl rand -base64 32',
+    )
+  }
+
+  const storageParts = [
+    env.STORAGE_BUCKET,
+    env.STORAGE_ACCESS_KEY_ID,
+    env.STORAGE_SECRET_ACCESS_KEY,
+  ]
+  if (storageParts.some(Boolean) && !storageParts.every(Boolean)) {
+    throw new Error(
+      'Object storage is half-configured. STORAGE_BUCKET, STORAGE_ACCESS_KEY_ID and ' +
+        'STORAGE_SECRET_ACCESS_KEY are set together or not at all — set all three, or none to ' +
+        'run without image uploads.',
     )
   }
 

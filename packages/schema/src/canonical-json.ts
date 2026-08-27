@@ -2,11 +2,15 @@
  * Serialises a value with object keys in a stable order.
  *
  * Everything compared here has been through a JSONB column, and JSONB does not
- * preserve key order — it normalises. Comparing raw `JSON.stringify` output
- * therefore reports unchanged documents as different, which makes a schema diff
- * useless and makes every publish write a history row saying the same thing
- * twice. Order-insensitive comparison is not an optimisation; it is the
- * difference between a correct answer and a wrong one.
+ * preserve key order — it normalises, at every level of nesting. Comparing raw
+ * `JSON.stringify` output therefore reports unchanged documents as different.
+ *
+ * Shared by both apps because both got this wrong independently: the server
+ * reported every key as changed on every schema push, and the dashboard's
+ * unsaved-changes check never cleared after saving rich text, which left
+ * Publish disabled and the edit unpublishable. Order-insensitive comparison is
+ * not an optimisation here; it is the difference between a correct answer and a
+ * wrong one.
  */
 export function canonicalize(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'null'

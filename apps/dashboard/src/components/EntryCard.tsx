@@ -5,6 +5,7 @@ import { Badge, Button, Card, Field } from '@ainam/ui'
 import { FieldControl } from './FieldControl'
 
 export interface EntryCardProps {
+  projectId: string
   entry: EditorEntry
   value: ContentValue
   onChange: (value: ContentValue) => void
@@ -18,11 +19,17 @@ export interface EntryCardProps {
  * developer greps for when the person editing says "the second headline" — and
  * it is the only address the two of them share.
  */
-export function EntryCard({ entry, value, onChange, onOpenHistory }: EntryCardProps) {
+export function EntryCard({ projectId, entry, value, onChange, onOpenHistory }: EntryCardProps) {
   return (
     <Card padding="md">
       <Field label={entry.field.label} hint={entry.field.description} htmlFor={entry.key}>
-        <FieldControl id={entry.key} field={entry.field} value={value} onChange={onChange} />
+        <FieldControl
+          id={entry.key}
+          projectId={projectId}
+          field={entry.field}
+          value={value}
+          onChange={onChange}
+        />
       </Field>
       <div
         style={{

@@ -1,0 +1,37 @@
+# Garage for the local evaluation stack.
+#
+# One node, one replica, on-disk metadata — the smallest thing that speaks S3.
+# A real deployment sizes this properly; nothing here is a recommendation for
+# one, and every secret below is public in this repository.
+
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "sqlite"
+
+# One node means one copy. Garage refuses this unless it is stated explicitly,
+# which is the right default for a system whose job is not losing data.
+replication_factor = 1
+
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "garage:3901"
+# Development only, and published in a public repository. A real deployment
+# generates one with: openssl rand -hex 32
+# Exactly 32 bytes of hex, which Garage checks at startup.
+rpc_secret = "0000000000000000000000000000000000000000000000000000000000000042"
+
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "[::]:3900"
+root_domain = ".s3.garage.localhost"
+
+[s3_web]
+# Anonymous reads come from here, not from the S3 API — Garage has no
+# public-read ACL, and website mode is how an object becomes fetchable by a
+# browser that cannot sign a request.
+bind_addr = "[::]:3902"
+root_domain = ".web.garage.localhost"
+index_document = "index.html"
+
+[admin]
+api_bind_addr = "[::]:3903"
+admin_token = "development-only-admin-token"

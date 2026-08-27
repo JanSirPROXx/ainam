@@ -8,6 +8,39 @@
     "home/hero/subtitle": "Ship the site. Hand the copy to whoever owns it.",
     "home/hero/cta": "Get started",
     "home/pricing/visible": true,
-    "home/pricing/seats": 3
+    "home/pricing/seats": 3,
+    "home/hero/image": null,
+    "home/about/body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Every word on this page comes from AINAM. "
+            },
+            {
+              "type": "text",
+              "marks": [
+                {
+                  "type": "bold"
+                }
+              ],
+              "text": "Including this one."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Edit it in the dashboard and publish \u2014 no deploy, no developer."
+            }
+          ]
+        }
+      ]
+    }
   }
 }

@@ -50,4 +50,18 @@ export default defineContentSchema({
     required: false,
     default: 3,
   },
+  'home/hero/image': {
+    type: 'image',
+    label: 'Hero image',
+    description: 'Shown beside the headline. Leave it empty and the section closes up.',
+    required: false,
+    alt: true,
+  },
+  'home/about/body': {
+    type: 'richText',
+    label: 'About',
+    description: 'A few paragraphs. Formatting is limited to what the site can render.',
+    required: false,
+    default: 'Edit this from the dashboard. Nothing here is hardcoded.',
+  },
 })

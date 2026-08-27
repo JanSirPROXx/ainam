@@ -2,16 +2,22 @@
 //
 // Regenerate after the schema changes. Passing this to createAinamClient turns
 // a wrong content key into a compile error.
+import type { ResolvedImage, RichTextValue } from '@ainam/core'
+
 
 // A type alias, not an interface: TypeScript gives an alias an implicit index
 // signature but withholds one from an interface, so an interface fails the
 // `T extends ContentMap` constraint on createAinamClient and every consumer
 // would see that error on every build.
 export type AinamContent = {
+  /** About — A few paragraphs. Formatting is limited to what the site can render. */
+  "home/about/body": RichTextValue
   /** Primary button */
   "home/hero/cta": string
   /** Hero eyebrow */
   "home/hero/eyebrow": string
+  /** Hero image — Shown beside the headline. Leave it empty and the section closes up. */
+  "home/hero/image": ResolvedImage | null
   /** Hero subtitle — The second line. Keep it to one sentence. */
   "home/hero/subtitle": string
   /** Hero title */

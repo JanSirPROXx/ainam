@@ -1,4 +1,4 @@
-import { and, eq, isNull, or, sql } from 'drizzle-orm'
+import { and, desc, eq, isNull, or, sql } from 'drizzle-orm'
 import type { ApiKeyScope } from '@ainam/schema'
 import type { Database } from '../db/client'
 import { projectApiKeys } from '../db/schema'
@@ -39,6 +39,47 @@ export function createApiKeyRepository(db: Database) {
         )
         .limit(1)
       return row
+    },
+
+    /** Newest first, revoked ones included: a revoked key stays auditable. */
+    async listForProject(projectId: string) {
+      return db
+        .select({
+          id: projectApiKeys.id,
+          name: projectApiKeys.name,
+          scopes: projectApiKeys.scopes,
+          prefix: projectApiKeys.prefix,
+          lastUsedAt: projectApiKeys.lastUsedAt,
+          createdAt: projectApiKeys.createdAt,
+          revokedAt: projectApiKeys.revokedAt,
+        })
+        .from(projectApiKeys)
+        .where(eq(projectApiKeys.projectId, projectId))
+        .orderBy(desc(projectApiKeys.createdAt))
+    },
+
+    async create(record: typeof projectApiKeys.$inferInsert) {
+      const [row] = await db.insert(projectApiKeys).values(record).returning()
+      return row as typeof projectApiKeys.$inferSelect
+    },
+
+    /**
+     * Marks a key revoked. Scoped to the project, so a key id guessed from
+     * elsewhere cannot be revoked through someone else's project.
+     */
+    async revoke(projectId: string, keyId: string): Promise<boolean> {
+      const rows = await db
+        .update(projectApiKeys)
+        .set({ revokedAt: new Date() })
+        .where(
+          and(
+            eq(projectApiKeys.id, keyId),
+            eq(projectApiKeys.projectId, projectId),
+            isNull(projectApiKeys.revokedAt),
+          ),
+        )
+        .returning({ id: projectApiKeys.id })
+      return rows.length > 0
     },
 
     /**

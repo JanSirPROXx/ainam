@@ -13,6 +13,10 @@
       "import": "./dist/access.mjs",
       "require": "./dist/access.cjs"
     },
+    "./rich-text": {
+      "import": "./dist/rich-text.mjs",
+      "require": "./dist/rich-text.cjs"
+    },
     "./types": {
       "import": "./dist/types.mjs",
       "require": "./dist/types.cjs"

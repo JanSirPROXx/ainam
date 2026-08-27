@@ -32,6 +32,8 @@ import type {
   updateProjectRequestSchema,
 } from './project-admin'
 import type { fieldSchema, listFieldSchema, scalarFieldSchema } from './fields'
+import type { apiKeySummarySchema, createdApiKeySchema } from './api-keys'
+import type { assetPageSchema, assetSummarySchema, resolvedImageSchema } from './media'
 import type { contentSchemaSchema, schemaPushRequestSchema, schemaPushResultSchema } from './project'
 import type * as T from './types'
 
@@ -75,3 +77,8 @@ export type _UpdateProjectRequest = Expect<
   Exact<z.infer<typeof updateProjectRequestSchema>, T.UpdateProjectRequest>
 >
 export type _PreviewLink = Expect<Exact<z.infer<typeof previewLinkSchema>, T.PreviewLink>>
+export type _ResolvedImage = Expect<Exact<z.infer<typeof resolvedImageSchema>, T.ResolvedImage>>
+export type _AssetSummary = Expect<Exact<z.infer<typeof assetSummarySchema>, T.AssetSummary>>
+export type _AssetPage = Expect<Exact<z.infer<typeof assetPageSchema>, T.AssetPage>>
+export type _CreatedApiKey = Expect<Exact<z.infer<typeof createdApiKeySchema>, T.CreatedApiKey>>
+export type _ApiKeySummary = Expect<Exact<z.infer<typeof apiKeySummarySchema>, T.ApiKeySummary>>

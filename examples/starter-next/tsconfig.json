@@ -33,6 +33,9 @@
       "@ainam/schema/types": [
         "../../packages/schema/src/types.ts"
       ],
+      "@ainam/schema/rich-text": [
+        "../../packages/schema/src/rich-text.ts"
+      ],
       "@ainam/schema/access": [
         "../../packages/schema/src/access.ts"
       ],

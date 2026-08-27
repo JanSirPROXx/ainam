@@ -11,6 +11,8 @@ import type { Database } from '../../db/client'
 import type { AppEnv } from '../../http/context'
 import { HttpError } from '../../http/errors'
 import { createEditorRepository } from '../../repositories/editor'
+import { createImageResolver } from '../../services/assets/resolve-images'
+import type { Storage } from '../../storage'
 import { saveDraft } from '../../services/editor'
 import { requireProjectPermission } from '../../services/project-access'
 import { publishContent } from '../../services/publish'
@@ -65,7 +67,11 @@ const publishRoute = createRoute({
   },
 })
 
-export function registerAdminEditorRoutes(app: OpenAPIHono<AppEnv>, db: Database): void {
+export function registerAdminEditorRoutes(
+  app: OpenAPIHono<AppEnv>,
+  db: Database,
+  storage: Storage | undefined,
+): void {
   const editor = createEditorRepository(db)
 
   app.openapi(viewRoute, async (c) => {
@@ -81,7 +87,21 @@ export function registerAdminEditorRoutes(app: OpenAPIHono<AppEnv>, db: Database
         `Project ${projectId} has no content schema yet. Run "ainam push" from the website's codebase.`,
       )
     }
-    return c.json(view)
+    // Resolved here too, so the editor can show the image someone is about to
+    // replace rather than an asset id they have no way to recognise.
+    const values = view.entries.flatMap((entry) =>
+      [entry.draft?.value, entry.published?.value].filter((value) => value !== undefined),
+    )
+    const resolve = await createImageResolver(db, storage, projectId, values)
+
+    return c.json({
+      ...view,
+      entries: view.entries.map((entry) => ({
+        ...entry,
+        draft: entry.draft ? { ...entry.draft, value: resolve(entry.draft.value) } : null,
+        published: entry.published ? { ...entry.published, value: resolve(entry.published.value) } : null,
+      })),
+    })
   })
 
   app.openapi(saveRoute, async (c) => {

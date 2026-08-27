@@ -1,4 +1,6 @@
+import { MAX_UPLOAD_BYTES, describeBytes } from '@ainam/schema'
 import { OpenAPIHono } from '@hono/zod-openapi'
+import { bodyLimit } from 'hono/body-limit'
 import { cors } from 'hono/cors'
 import { requestId } from 'hono/request-id'
 import type { Auth } from './auth'
@@ -8,13 +10,17 @@ import type { AppEnv } from './http/context'
 import { buildApiError, handleError, refuseInvalidRequest } from './http/errors'
 import { requireApiKey } from './middleware/api-key'
 import { requireSession } from './middleware/session'
+import { registerAdminApiKeyRoutes } from './routes/admin/api-keys'
+import { registerAdminAssetRoutes } from './routes/admin/assets'
 import { registerAdminEditorRoutes } from './routes/admin/editor'
 import { registerAdminHistoryRoutes } from './routes/admin/history'
 import { registerAdminProjectRoutes } from './routes/admin/projects'
 import { registerAdminRollbackRoutes } from './routes/admin/rollback'
+import { registerAssetRoutes } from './routes/assets'
 import { registerContentRoutes } from './routes/content'
 import { registerHealthRoutes } from './routes/health'
 import { registerSchemaRoutes } from './routes/schema'
+import type { Storage } from './storage'
 
 /**
  * Assembles the HTTP surface.
@@ -22,7 +28,12 @@ import { registerSchemaRoutes } from './routes/schema'
  * Kept separate from `index.ts` so tests can build an app against a throwaway
  * database without binding a port.
  */
-export function createApp(env: Env, db: Database, auth: Auth): OpenAPIHono<AppEnv> {
+export function createApp(
+  env: Env,
+  db: Database,
+  auth: Auth,
+  storage?: Storage | undefined,
+): OpenAPIHono<AppEnv> {
   const app = new OpenAPIHono<AppEnv>({ defaultHook: refuseInvalidRequest })
 
   // First, so every later handler and every log line can quote the same id.
@@ -57,6 +68,25 @@ export function createApp(env: Env, db: Database, auth: Auth): OpenAPIHono<AppEn
 
   app.use('/admin/*', requireSession(auth))
 
+  // Refused while streaming, before anything is buffered: without this the
+  // server holds a whole oversized upload in memory only to reject it, which is
+  // the shape of a trivially cheap denial of service.
+  app.use(
+    '/admin/projects/:projectId/assets',
+    bodyLimit({
+      maxSize: MAX_UPLOAD_BYTES,
+      onError: (c) =>
+        c.json(
+          buildApiError(
+            'bad_request',
+            `That file is over the ${describeBytes(MAX_UPLOAD_BYTES)} limit.`,
+            c.get('requestId'),
+          ),
+          413,
+        ),
+    }),
+  )
+
   // Scopes are mounted per path prefix, so a read key that leaks from a
   // customer's deployment cannot be used to rewrite their content schema, and
   // the key their site builds with cannot read work nobody has published.
@@ -66,10 +96,13 @@ export function createApp(env: Env, db: Database, auth: Auth): OpenAPIHono<AppEn
   app.on('POST', '/v1/schema/*', requireApiKey(db, 'schema:write'))
 
   registerHealthRoutes(app, db)
-  registerContentRoutes(app, db)
+  registerContentRoutes(app, db, storage)
+  registerAssetRoutes(app, db, storage)
   registerSchemaRoutes(app, db)
-  registerAdminProjectRoutes(app, db)
-  registerAdminEditorRoutes(app, db)
+  registerAdminProjectRoutes(app, db, storage)
+  registerAdminEditorRoutes(app, db, storage)
+  registerAdminAssetRoutes(app, db, storage)
+  registerAdminApiKeyRoutes(app, db)
   registerAdminHistoryRoutes(app, db)
   registerAdminRollbackRoutes(app, db)
 

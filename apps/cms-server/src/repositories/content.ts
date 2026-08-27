@@ -23,7 +23,12 @@ interface Row {
 function mergeByPrecedence(rows: Row[], rank: (row: Row) => number): ContentMap {
   const content: ContentMap = {}
   for (const row of [...rows].sort((a, b) => rank(a) - rank(b))) {
-    if (row.value !== null) content[row.key] = row.value
+    // A null row still claims its key, but never overwrites a value a
+    // lower-precedence locale supplied. That keeps the translation fallback
+    // working while making an image nobody has uploaded present-and-null —
+    // which is what the generated type promises, and what stops `get()`
+    // throwing on the one field kind that legitimately has no value.
+    if (row.value !== null || !(row.key in content)) content[row.key] = row.value
   }
   return content
 }

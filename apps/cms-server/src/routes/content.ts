@@ -6,6 +6,8 @@ import { HttpError } from '../http/errors'
 import { projectParams } from '../http/params'
 import { assertKeyOwnsProject } from '../http/project-scope'
 import { createContentRepository } from '../repositories/content'
+import { resolveImages } from '../services/assets/resolve-images'
+import type { Storage } from '../storage'
 
 const query = z.object({ locale: localeSchema.optional() })
 const contentMap = z.record(z.string(), z.unknown())
@@ -45,7 +47,11 @@ const previewRoute = createRoute({
   },
 })
 
-export function registerContentRoutes(app: OpenAPIHono<AppEnv>, db: Database): void {
+export function registerContentRoutes(
+  app: OpenAPIHono<AppEnv>,
+  db: Database,
+  storage: Storage | undefined,
+): void {
   const content = createContentRepository(db)
 
   /** The project a key may read comes from the key, never from the URL. */
@@ -62,7 +68,8 @@ export function registerContentRoutes(app: OpenAPIHono<AppEnv>, db: Database): v
     assertKeyOwnsProject(c, projectId)
 
     const { project, locale } = await resolveProject(projectId, c.req.valid('query').locale)
-    return c.json(await content.findPublished(projectId, locale, project.defaultLocale))
+    const published = await content.findPublished(projectId, locale, project.defaultLocale)
+    return c.json(await resolveImages(db, storage, projectId, published))
   })
 
   app.openapi(previewRoute, async (c) => {
@@ -70,6 +77,7 @@ export function registerContentRoutes(app: OpenAPIHono<AppEnv>, db: Database): v
     assertKeyOwnsProject(c, projectId)
 
     const { project, locale } = await resolveProject(projectId, c.req.valid('query').locale)
-    return c.json(await content.findDrafts(projectId, locale, project.defaultLocale))
+    const drafts = await content.findDrafts(projectId, locale, project.defaultLocale)
+    return c.json(await resolveImages(db, storage, projectId, drafts))
   })
 }

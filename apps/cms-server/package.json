@@ -19,6 +19,7 @@
   "dependencies": {
     "@ainam/core": "workspace:*",
     "@ainam/schema": "workspace:*",
+    "@aws-sdk/client-s3": "3.1113.0",
     "@hono/node-server": "2.1.1",
     "@hono/zod-openapi": "1.6.1",
     "better-auth": "1.7.1",
@@ -26,6 +27,7 @@
     "hono": "4.13.3",
     "nodemailer": "9.0.5",
     "pg": "8.23.0",
+    "sharp": "0.35.4",
     "zod": "4.4.3"
   },
   "devDependencies": {

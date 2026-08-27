@@ -1,11 +1,10 @@
 import type { Author, ContentValue, RestoreResult } from '@ainam/schema'
-import { validateContentValue } from '@ainam/schema'
-import { eq, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import type { Database } from '../db/client'
-import { contentSchemas } from '../db/schema'
 import { HttpError } from '../http/errors'
 import { createId } from '../lib/ids'
 import { createPublishingRepository } from '../repositories/publishing'
+import { findSchemaMismatches } from './schema-fit'
 import { type WebhookTarget, notifySite } from './webhook'
 
 export interface RestoredValue {
@@ -41,7 +40,7 @@ export async function applyRollback(db: Database, rollback: Rollback): Promise<R
 
   const result = await db.transaction(async (tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${projectId}))`)
-    await refuseValuesTheSchemaNoLongerAccepts(tx as unknown as Database, projectId, rollback.values)
+    await refuseVersionsTheSchemaNoLongerAccepts(tx as unknown as Database, projectId, rollback.values)
 
     const publishing = createPublishingRepository(tx as unknown as Database)
     const publishedAt = new Date()
@@ -81,42 +80,23 @@ export async function applyRollback(db: Database, rollback: Rollback): Promise<R
  * before anything is written, so a revert is all-or-nothing like every other
  * multi-key write.
  */
-async function refuseValuesTheSchemaNoLongerAccepts(
+async function refuseVersionsTheSchemaNoLongerAccepts(
   tx: Database,
   projectId: string,
   values: RestoredValue[],
 ): Promise<void> {
-  const [stored] = await tx
-    .select({ schema: contentSchemas.schema })
-    .from(contentSchemas)
-    .where(eq(contentSchemas.projectId, projectId))
-    .limit(1)
-  if (!stored) {
-    throw new HttpError(
-      404,
-      'not_found',
-      `Project ${projectId} has no content schema. Run "ainam push" from the website's codebase.`,
-    )
-  }
+  const mismatches = await findSchemaMismatches(tx, projectId, values)
+  if (mismatches.length === 0) return
 
-  const problems = values.flatMap(({ key, value, version }) => {
-    const field = stored.schema[key]
-    if (!field) {
-      return [{ path: key, message: `"${key}" is no longer in the schema, so it cannot be restored.` }]
-    }
-    const problem = validateContentValue(field, value)
-    return problem
-      ? [{ path: key, message: `Version ${version} does not fit the current field. ${problem}` }]
-      : []
-  })
-
-  if (problems.length > 0) {
-    throw new HttpError(
-      422,
-      'validation_failed',
-      `${problems.length === 1 ? 'One key has' : `${problems.length} keys have`} changed type since ` +
-        'that version was written. Push a schema that accepts these values, or restore a different version.',
-      problems,
-    )
-  }
+  const byKey = new Map(values.map((value) => [value.key, value.version]))
+  throw new HttpError(
+    422,
+    'validation_failed',
+    `${mismatches.length === 1 ? 'One key has' : `${mismatches.length} keys have`} changed type since ` +
+      'that version was written. Push a schema that accepts these values, or restore a different version.',
+    mismatches.map(({ key, problem }) => ({
+      path: key,
+      message: `Version ${byKey.get(key)} does not fit the current field. ${problem}`,
+    })),
+  )
 }

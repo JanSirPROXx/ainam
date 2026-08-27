@@ -2,3 +2,68 @@
    imported before Tailwind so a utility can still override a component rule. */
 @import "@ainam/ui/styles.css";
 @import "tailwindcss";
+
+/* The rich-text control.
+ *
+ * Here rather than in @ainam/ui because TipTap owns the markup inside
+ * `.ProseMirror` and the design system does not: a component in the bundle
+ * would have to style elements it never renders. Every value is a token, so the
+ * control still belongs to the same system. */
+.ainam-richtext {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-input);
+  overflow: hidden;
+}
+
+.ainam-richtext__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.ainam-richtext__body .ProseMirror {
+  min-height: 140px;
+  padding: var(--space-4) var(--space-5);
+  font: var(--type-body);
+  color: var(--text-body);
+  outline: none;
+}
+
+.ainam-richtext__body .ProseMirror > * + * {
+  margin-top: var(--space-4);
+}
+
+.ainam-richtext__body .ProseMirror h2 {
+  font: var(--type-heading);
+  letter-spacing: var(--ls-heading);
+}
+
+.ainam-richtext__body .ProseMirror h3 {
+  font: var(--type-body);
+  font-weight: var(--fw-medium);
+}
+
+.ainam-richtext__body .ProseMirror ul,
+.ainam-richtext__body .ProseMirror ol {
+  padding-left: var(--space-6);
+  list-style: revert;
+}
+
+.ainam-richtext__body .ProseMirror blockquote {
+  padding-left: var(--space-5);
+  border-left: 2px solid var(--border-strong);
+  color: var(--text-muted);
+}
+
+.ainam-richtext__body .ProseMirror code {
+  font: var(--type-code);
+  color: var(--text-body);
+}
+
+.ainam-richtext__body .ProseMirror a {
+  color: var(--text-body);
+  text-decoration: underline;
+}

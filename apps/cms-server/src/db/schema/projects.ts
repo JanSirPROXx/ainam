@@ -1,4 +1,4 @@
-import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import { bigint, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { organizations } from './auth'
 
 /**
@@ -30,6 +30,13 @@ export const projects = pgTable(
      * control says what to set rather than failing silently.
      */
     previewUrl: text('preview_url'),
+    /**
+     * Bytes this project has in storage.
+     *
+     * Kept as a running total rather than summed on demand so a quota can later
+     * be enforced from configuration instead of a Cloud-only fork.
+     */
+    storedBytes: bigint('stored_bytes', { mode: 'number' }).notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

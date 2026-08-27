@@ -1,5 +1,4 @@
-import type { ContentSchema, SchemaPushResult } from '@ainam/schema'
-import { canonicalize } from './canonical-json'
+import { type ContentSchema, type SchemaPushResult, canonicalize } from '@ainam/schema'
 
 /**
  * Compares the pushed schema against what the project had.

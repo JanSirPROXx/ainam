@@ -2,7 +2,7 @@
   "name": "@ainam/next",
   "version": "0.0.0",
   "type": "module",
-  "description": "AINAM adapter for the Next.js App Router \u2014 cached reads, webhook revalidation, preview mode.",
+  "description": "AINAM adapter for the Next.js App Router — cached reads, webhook revalidation, preview mode, and rich-text rendering.",
   "license": "MIT",
   "sideEffects": false,
   "files": [
@@ -19,11 +19,15 @@
     "@ainam/core": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^16.0.0"
+    "next": "^16.0.0",
+    "react": "^19.0.0"
   },
   "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.4",
     "next": "16.3.2",
     "react": "19.2.8",
+    "react-dom": "19.2.8",
     "tsdown": "0.22.14",
     "typescript": "6.0.3",
     "vitest": "4.1.11"

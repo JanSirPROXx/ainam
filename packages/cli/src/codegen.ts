@@ -12,8 +12,11 @@ function typeOfScalar(field: ScalarField): string {
     case 'number':
       return 'number'
     case 'image':
-      // The one kind with no default, so the site has to handle its absence.
-      return 'ImageValue | null'
+      // Resolved, not stored: the content API splices in the URL and the
+      // intrinsic dimensions, so a site can lay out the space before the image
+      // loads. Nullable because this is the one kind with no default, so the
+      // site has to handle an image nobody has uploaded yet.
+      return 'ResolvedImage | null'
   }
 }
 
@@ -53,7 +56,7 @@ export function generateContentTypes(schema: ContentSchema): string {
   // unconditionally makes the generated file fail `noUnusedLocals` in any
   // project that has it on — generated code must never be the thing that breaks
   // someone's build.
-  const helpers = ['ImageValue', 'RichTextValue'].filter((name) => entries.includes(name))
+  const helpers = ['ResolvedImage', 'RichTextValue'].filter((name) => entries.includes(name))
   const importLine =
     helpers.length > 0 ? `import type { ${helpers.join(', ')} } from '@ainam/core'\n\n` : ''
 

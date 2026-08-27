@@ -48,3 +48,30 @@ export async function adminFetch<T>(path: string, init?: RequestInit): Promise<T
 
   return (await response.json()) as T
 }
+
+/**
+ * Uploads a file to the admin API.
+ *
+ * Separate from `adminFetch` because the browser has to set `content-type`
+ * itself: a multipart body carries a boundary in that header, and a hand-set
+ * one produces a request the server cannot parse.
+ */
+export async function adminUpload<T>(path: string, file: File): Promise<T> {
+  const body = new FormData()
+  body.set('file', file)
+
+  const response = await fetch(`${BASE}${path}`, { method: 'POST', credentials: 'include', body })
+
+  if (!response.ok) {
+    const failure = (await response.json().catch(() => null)) as ApiError | null
+    throw new AdminApiError(
+      failure?.error ?? {
+        code: 'internal',
+        message: `The server returned ${response.status}.`,
+        requestId: 'unknown',
+      },
+    )
+  }
+
+  return (await response.json()) as T
+}

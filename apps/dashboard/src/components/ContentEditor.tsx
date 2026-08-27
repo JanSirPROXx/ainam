@@ -1,29 +1,23 @@
 'use client'
 
 import type {
-  ContentValue,
   EditorView,
   PreviewLink,
   ProjectSummary,
   PublishResult,
   SaveDraftResult,
 } from '@ainam/schema'
-import { documentsMatch, hasPermission } from '@ainam/schema'
+import { hasPermission } from '@ainam/schema'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { adminFetch } from '@/lib/api'
+import { type Draft, initialDraft, unsavedEntries } from '@/lib/editor-state'
 import { count } from '@/lib/plural'
 import { useToast } from '@/lib/toast'
 import { EditorToolbar } from './EditorToolbar'
 import { EntryCard } from './EntryCard'
 import { KeyHistoryDialog } from './KeyHistoryDialog'
 import { publishOutcome } from './publish-outcome'
-
-type Draft = Record<string, ContentValue>
-
-function initialDraft(view: EditorView): Draft {
-  return Object.fromEntries(view.entries.map((entry) => [entry.key, entry.draft?.value ?? null]))
-}
 
 /**
  * The editing surface for one locale.
@@ -54,13 +48,7 @@ export function ContentEditor({
       queryClient.invalidateQueries({ queryKey: ['publishes', projectId] }),
     ])
   }
-  // Order-insensitive, because the saved value comes back through a JSONB
-  // column that normalises object key order at every level of nesting. A raw
-  // JSON.stringify comparison never clears after saving rich text or an image,
-  // which leaves the editor permanently dirty and Publish disabled.
-  const dirty = view.entries.filter(
-    (entry) => !documentsMatch(draft[entry.key] ?? null, entry.draft?.value ?? null),
-  )
+  const dirty = unsavedEntries(view, draft)
 
   const save = useMutation({
     mutationFn: () =>

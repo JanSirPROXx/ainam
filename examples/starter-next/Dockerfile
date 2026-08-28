@@ -3,6 +3,10 @@
 # exactly as a real consumer would consume the published ones.
 FROM node:24-alpine AS base
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
+# Next collects build and dev telemetry by default and has no config-file key
+# to turn it off — only this variable, or a machine-global opt-in file. Set in
+# the base stage so the build and the runtime both inherit it.
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN corepack enable
 
 FROM base AS build

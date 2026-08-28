@@ -5,6 +5,9 @@ export default defineConfig({
   test: {
     // The components under test render, so they need a DOM.
     environment: 'jsdom',
+    // Vitest owns `test/`, Playwright owns `e2e/`. Without this Vitest picks up
+    // the browser spec and fails on Playwright's own API.
+    include: ['test/**/*.test.{ts,tsx}'],
     globals: false,
     setupFiles: ['./test/setup.ts'],
     /**

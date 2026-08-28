@@ -15,7 +15,6 @@
   "dependencies": {
     "@ainam/core": "workspace:*",
     "@ainam/next": "workspace:*",
-    "@ainam/ui": "workspace:*",
     "next": "16.3.2",
     "react": "19.2.8",
     "react-dom": "19.2.8"

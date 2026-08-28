@@ -38,6 +38,9 @@ export default defineContentSchema({
 
 const ENV_TEMPLATE = `
 # AINAM — https://github.com/JanSirPROXx/ainam
+# Your cms-server origin: https://cms.ainam.online on AINAM Cloud, or wherever
+# you run it yourself. There is no default — it decides where your key goes.
+AINAM_URL=
 AINAM_API_KEY=
 AINAM_PROJECT_ID=
 AINAM_WEBHOOK_SECRET=
@@ -73,6 +76,8 @@ export async function runInit(cwd: string): Promise<number> {
   await appendFile(envExamplePath, ENV_TEMPLATE, 'utf8')
   process.stdout.write(`Added AINAM keys to .env.example\n`)
 
-  process.stdout.write('\nNext: set AINAM_API_KEY and AINAM_PROJECT_ID in your .env file.\n')
+  process.stdout.write(
+    '\nNext: set AINAM_URL, AINAM_API_KEY and AINAM_PROJECT_ID in your .env file.\n',
+  )
   return 0
 }

@@ -2,8 +2,17 @@
   "name": "@ainam/next",
   "version": "0.0.0",
   "type": "module",
-  "description": "AINAM adapter for the Next.js App Router — cached reads, webhook revalidation, preview mode, and rich-text rendering.",
+  "description": "AINAM adapter for the Next.js App Router \u2014 cached reads, webhook revalidation, preview mode, and rich-text rendering.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JanSirPROXx/ainam.git",
+    "directory": "packages/next"
+  },
+  "homepage": "https://github.com/JanSirPROXx/ainam#readme",
+  "bugs": {
+    "url": "https://github.com/JanSirPROXx/ainam/issues"
+  },
   "sideEffects": false,
   "files": [
     "dist"
@@ -13,7 +22,8 @@
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepack": "pnpm run build"
   },
   "dependencies": {
     "@ainam/core": "workspace:*"
@@ -32,6 +42,9 @@
     "typescript": "6.0.3",
     "vitest": "4.1.11"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
@@ -41,5 +54,8 @@
       "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

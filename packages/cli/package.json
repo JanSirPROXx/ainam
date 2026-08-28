@@ -4,6 +4,15 @@
   "type": "module",
   "description": "AINAM command line interface \u2014 scaffold a project, push its content schema, pull generated types.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JanSirPROXx/ainam.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/JanSirPROXx/ainam#readme",
+  "bugs": {
+    "url": "https://github.com/JanSirPROXx/ainam/issues"
+  },
   "bin": {
     "ainam": "./dist/index.mjs"
   },
@@ -15,7 +24,8 @@
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepack": "pnpm run build"
   },
   "dependencies": {
     "@ainam/core": "workspace:*"
@@ -25,5 +35,8 @@
     "tsdown": "0.22.14",
     "typescript": "6.0.3",
     "vitest": "4.1.11"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

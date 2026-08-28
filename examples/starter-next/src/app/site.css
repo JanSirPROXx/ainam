@@ -1,0 +1,118 @@
+/* The template's own styles.
+ *
+ * Deliberately not AINAM's design system: this is what a customer clones, and a
+ * reference site that renders our wordmark and our components is showing them
+ * our brand instead of theirs. Plain CSS, no build step, meant to be deleted
+ * and replaced. */
+
+:root {
+  --ink: #0b0b0c;
+  --paper: #fafafa;
+  --muted: #6b6b70;
+  --line: #e4e4e7;
+  --radius: 10px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #fafafa;
+    --paper: #0b0b0c;
+    --muted: #9a9aa2;
+    --line: #26262b;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 17px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.site {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 72px 24px;
+  display: grid;
+  gap: 56px;
+}
+
+.site__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.site__brand {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.badge {
+  font: 400 12.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
+.eyebrow {
+  font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+h1 {
+  font-size: clamp(34px, 6vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+h1 span {
+  color: var(--muted);
+}
+
+.button {
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.hero__image {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+.prose > * + * {
+  margin-top: 16px;
+}
+
+.metric {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.metric__label {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.metric__value {
+  font-size: 34px;
+  letter-spacing: -0.02em;
+}

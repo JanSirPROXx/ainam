@@ -48,3 +48,7 @@ yarn-error.log*
 # --- OS ---
 .DS_Store
 Thumbs.db
+
+# Playwright output: traces and screenshots from a failed run.
+apps/dashboard/test-results/
+apps/dashboard/playwright-report/

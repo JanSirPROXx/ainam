@@ -2,19 +2,24 @@
   "name": "@ainam/ui",
   "version": "0.0.0",
   "type": "module",
-  "description": "The AINAM design system as React components and CSS tokens.",
+  "description": "AINAM design system. Internal: used by the dashboard and our own surfaces, never published \u2014 a customer template should show their brand, not ours.",
   "license": "MIT",
-  "sideEffects": ["*.css"],
-  "files": ["dist", "styles"],
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    },
-    "./styles.css": "./styles/index.css",
-    "./tokens.css": "./styles/tokens.css",
-    "./package.json": "./package.json"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JanSirPROXx/ainam.git",
+    "directory": "packages/ui"
   },
+  "homepage": "https://github.com/JanSirPROXx/ainam#readme",
+  "bugs": {
+    "url": "https://github.com/JanSirPROXx/ainam/issues"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist",
+    "styles"
+  ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
@@ -28,5 +33,15 @@
     "react": "19.2.8",
     "tsdown": "0.22.14",
     "typescript": "6.0.3"
-  }
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./styles/index.css",
+    "./tokens.css": "./styles/tokens.css",
+    "./package.json": "./package.json"
+  },
+  "private": true
 }

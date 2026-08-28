@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Next collects build telemetry by default, and CI builds it on every push.
+# Nothing this project runs should report to a third party without being asked.
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -24,14 +29,44 @@ jobs:
           path: ~/.local/share/pnpm/store
           key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: pnpm-
-      # --frozen-lockfile also enforces the supply-chain policy, so a lockfile
-      # entry published within the minimum release age fails here rather than
-      # reaching a deployment.
+      # --frozen-lockfile installs exactly what was committed, so CI cannot
+      # quietly resolve a different version than the author saw. The
+      # minimum-release-age gate is pnpm's own default and applies when a
+      # dependency is added locally — not here, which is why the lockfile is the
+      # thing under review.
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm build
+      # After the build, because it measures what would actually ship. The two
+      # promises it checks — no runtime dependencies, small declaration files —
+      # have each been broken once by a change that looked unrelated.
+      - run: node scripts/check-sdk-budget.mjs
       - run: pnpm test
+
+  e2e:
+    name: Editor end to end
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      # Playwright ships no postinstall, so the browser is an explicit step.
+      # Chromium only: this proves the flow works, not that it works in five
+      # engines, and the extra browsers have never found a defect here.
+      - run: pnpm --filter @ainam/dashboard exec playwright install --with-deps chromium
+      # Drives the real stack through a browser: sign in, edit, publish, verify
+      # against the content API, roll back, verify the draft went back too.
+      - run: pnpm --filter @ainam/dashboard test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-trace
+          path: apps/dashboard/test-results/
+          retention-days: 7
 
   smoke:
     name: docker compose up

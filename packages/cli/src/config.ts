@@ -60,6 +60,9 @@ export async function loadProjectContext(cwd: string): Promise<ProjectContext> {
     schema,
     apiKey: requireEnv('AINAM_API_KEY'),
     projectId: requireEnv('AINAM_PROJECT_ID'),
-    baseUrl: (process.env['AINAM_URL'] ?? 'https://cms.ainam.online').replace(/\/+$/, ''),
+    // Required, and deliberately not defaulted: a default decides where a
+    // developer's schema and key go, and `push` would silently send both to
+    // whoever that default names.
+    baseUrl: requireEnv('AINAM_URL').replace(/\/+$/, ''),
   }
 }

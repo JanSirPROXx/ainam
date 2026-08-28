@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import '@ainam/ui/styles.css'
+import './site.css'
 
 export const metadata: Metadata = {
   title: 'AINAM starter',

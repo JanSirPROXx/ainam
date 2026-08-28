@@ -23,6 +23,15 @@ const ALLOWED_FONT = /^var\(--font-(?:sans|mono)\)$/
 /** Files that are allowed to contain raw values, because they define them. */
 const TOKEN_SOURCES = ['packages/ui/styles/tokens/']
 
+/**
+ * Surfaces the design system does not govern.
+ *
+ * `examples/` is a template a customer clones and replaces. Holding it to our
+ * tokens would mean shipping them a starting point styled as AINAM rather than
+ * as themselves — which is the reason it stopped importing `@ainam/ui` at all.
+ */
+const NOT_OURS = ['examples/']
+
 function* walk(dir) {
   for (const entry of readdirSync(dir)) {
     if (entry === 'node_modules' || entry === 'dist' || entry === '.next' || entry === '.git') continue
@@ -37,6 +46,7 @@ const violations = []
 for (const path of walk(ROOT)) {
   const rel = relative(ROOT, path)
   if (TOKEN_SOURCES.some((prefix) => rel.startsWith(prefix))) continue
+  if (NOT_OURS.some((prefix) => rel.startsWith(prefix))) continue
 
   const isStyleFile = rel.endsWith('.css')
   const isComponent = rel.endsWith('.tsx')

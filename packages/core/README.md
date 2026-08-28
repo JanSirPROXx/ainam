@@ -43,10 +43,20 @@ Pass a build-time snapshot and the client falls back to it whenever the API is
 unreachable, so the site keeps rendering:
 
 ```ts
-import snapshot from './ainam-snapshot.json'
+import snapshotFile from './ainam-snapshot.en.json'
+import { contentSnapshot, createAinamClient } from '@ainam/core'
 
-const ainam = createAinamClient({ /* … */ snapshot })
+const ainam = createAinamClient({
+  baseUrl: process.env.AINAM_URL!,
+  apiKey: process.env.AINAM_API_KEY!,
+  projectId: process.env.AINAM_PROJECT_ID!,
+  snapshot: contentSnapshot(snapshotFile),
+})
 ```
+
+`ainam pull` writes one snapshot per locale, so the filename carries the locale.
+`contentSnapshot()` narrows it: TypeScript widens the string literals in an imported `.json`,
+which stops a rich-text value matching its type.
 
 ## Licence
 

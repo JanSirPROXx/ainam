@@ -4,6 +4,15 @@
   "type": "module",
   "description": "Framework-agnostic client for the AINAM content API.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JanSirPROXx/ainam.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/JanSirPROXx/ainam#readme",
+  "bugs": {
+    "url": "https://github.com/JanSirPROXx/ainam/issues"
+  },
   "sideEffects": false,
   "files": [
     "dist"
@@ -13,13 +22,17 @@
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepack": "pnpm run build"
   },
   "devDependencies": {
     "@ainam/schema": "workspace:*",
     "tsdown": "0.22.14",
     "typescript": "6.0.3",
     "vitest": "4.1.11"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -30,5 +43,8 @@
       "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

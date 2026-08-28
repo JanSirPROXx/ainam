@@ -19,6 +19,7 @@ packages/
   core/          @ainam/core  — framework-agnostic client.        MIT
   next/          @ainam/next  — App Router adapter.               MIT
   cli/           ainam        — project tooling.                  MIT
+  ui/            Design system. Internal, never published.         MIT
 examples/
   starter-next/  Reference template — a site whose copy is edited in AINAM.
 ```
@@ -197,7 +198,7 @@ which has nobody to invite it.
 pnpm dev          # every app in watch mode
 pnpm build        # build all workspaces in dependency order
 pnpm typecheck    # tsc --noEmit everywhere
-pnpm lint         # oxlint
+pnpm lint         # oxlint, design tokens, and that no workspace is silently untested
 pnpm test         # vitest
 pnpm db:generate  # generate a migration from the Drizzle schema
 pnpm db:migrate   # apply pending migrations
@@ -206,6 +207,33 @@ pnpm db:migrate   # apply pending migrations
 `cms-server` applies pending migrations at startup, which is what makes
 `docker compose up` a single step. Set `RUN_MIGRATIONS_ON_START=false` where a
 deploy pipeline runs them as its own stage instead.
+
+## Telemetry
+
+AINAM collects nothing. No analytics, no crash reporting, no usage counters, no
+phone-home on startup. There is no opt-out because there is nothing to opt out
+of, and every claim below is checkable against a line in this repository.
+
+What the dependencies do, and where each is turned off:
+
+| Collector | Default | Where it is disabled |
+|---|---|---|
+| Next.js build and dev telemetry | on | `NEXT_TELEMETRY_DISABLED=1` in both Next `Dockerfile`s, in `docker-compose.yml`, and workflow-wide in `.github/workflows/ci.yml` |
+| Better Auth | on | `telemetry: { enabled: false }` in `apps/cms-server/src/auth/index.ts` |
+| drizzle-kit | none at the pinned version | nothing to disable — `drizzle-kit@0.31.10` contains no telemetry code |
+
+Two things this does **not** cover, stated because a claim with a silent
+exception is worse than no claim:
+
+- **`@ainam/ui` loads Geist from Google Fonts.** Any page using the design system
+  makes the visitor's browser fetch `fonts.googleapis.com`, which sends their IP
+  and user agent to Google. This affects our dashboard. It does not affect a site
+  built from `examples/starter-next`, which uses its own styles and no webfont.
+  Self-hosting the files removes it; see the substitution note in
+  `packages/ui/styles/tokens/fonts.css`.
+- **The SDK talks to whichever server you configure.** `baseUrl` and `AINAM_URL`
+  are required and have no default, precisely so that no code path can send your
+  content or your API key somewhere you did not name.
 
 ## Licence
 

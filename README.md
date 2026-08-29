@@ -22,6 +22,7 @@ packages/
   ui/            Design system. Internal, never published.         MIT
 examples/
   starter-next/  Reference template — a site whose copy is edited in AINAM.
+  marketing-next/ Our own marketing site, running on AINAM.
 ```
 
 ## Getting started
@@ -33,11 +34,11 @@ docker compose up
 ```
 
 That brings up Postgres, applies migrations, and serves the API on
-http://localhost:8787, the dashboard on http://localhost:3000 and the reference
-template on http://localhost:3200 — a real page rendering real content, before
-you have configured anything. No accounts,
-no external services. `./scripts/smoke.sh` asserts exactly this, and CI runs it
-on every push.
+http://localhost:8787, the dashboard on http://localhost:3000, the reference
+template on http://localhost:3200 and our own marketing site on
+http://localhost:3300 — real pages rendering real content, before you have
+configured anything. No accounts, no external services. `./scripts/smoke.sh`
+asserts exactly this, and CI runs it on every push.
 
 To work on the code you also need Node 24 (see `.nvmrc`) and pnpm, which
 `corepack enable` provides at the version this repository pins:

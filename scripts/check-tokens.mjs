@@ -26,11 +26,14 @@ const TOKEN_SOURCES = ['packages/ui/styles/tokens/']
 /**
  * Surfaces the design system does not govern.
  *
- * `examples/` is a template a customer clones and replaces. Holding it to our
+ * `starter-next` is a template a customer clones and replaces. Holding it to our
  * tokens would mean shipping them a starting point styled as AINAM rather than
  * as themselves — which is the reason it stopped importing `@ainam/ui` at all.
+ *
+ * `marketing-next` is deliberately not in this list: it is our own site, it does
+ * import `@ainam/ui`, and it is the one example that has to look like us.
  */
-const NOT_OURS = ['examples/']
+const NOT_OURS = ['examples/starter-next/']
 
 function* walk(dir) {
   for (const entry of readdirSync(dir)) {

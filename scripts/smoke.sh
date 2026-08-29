@@ -6,11 +6,12 @@ set -euo pipefail
 CMS_PORT="${CMS_PORT:-8787}"
 DASHBOARD_PORT="${DASHBOARD_PORT:-3000}"
 STARTER_PORT="${STARTER_PORT:-3200}"
+MARKETING_PORT="${MARKETING_PORT:-3300}"
 # Derived rather than hardcoded further down: Better Auth checks the Origin on
 # every state-changing call, so claiming an origin the server does not trust
 # fails every sign-in — and does so only when someone overrides the port.
 DASHBOARD_ORIGIN="${DASHBOARD_ORIGIN:-http://localhost:${DASHBOARD_PORT}}"
-export CMS_PORT DASHBOARD_PORT STARTER_PORT DASHBOARD_ORIGIN
+export CMS_PORT DASHBOARD_PORT STARTER_PORT MARKETING_PORT DASHBOARD_ORIGIN
 
 # SMOKE_KEEP=1 leaves the stack running after a failure, so the state that broke
 # can be inspected instead of reconstructed.
@@ -46,6 +47,20 @@ starter=$(curl --silent --fail --max-time 20 "http://localhost:${STARTER_PORT:-3
 # same path a configured site takes during an AINAM outage.
 echo "$starter" | grep -q 'Content, decoupled' || {
   echo "FAIL: the starter did not render its snapshot content" >&2; exit 1; }
+
+echo "==> GET / on the marketing site"
+marketing=$(curl --silent --fail --max-time 20 "http://localhost:${MARKETING_PORT}/")
+# Our own site, on the same fallback path as a customer's: unconfigured in this
+# stack, so it must render from its committed snapshot.
+echo "$marketing" | grep -q 'The AI-native CMS layer' || {
+  echo "FAIL: the marketing site did not render its snapshot content" >&2; exit 1; }
+# The section toggles default to off, and a site that ignored them would show a
+# logo wall and a quote with nobody in them. `if`, not `grep ... && { }`: under
+# `set -e` the latter aborts the run on the passing case, where grep finds
+# nothing and the list returns non-zero.
+if echo "$marketing" | grep -q 'Teams shipping content with AINAM'; then
+  echo "FAIL: the logo wall rendered while home/logos/visible is false" >&2; exit 1
+fi
 
 echo "==> GET / on the dashboard"
 curl --silent --fail --max-time 20 http://localhost:${DASHBOARD_PORT}/ >/dev/null

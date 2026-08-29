@@ -1,0 +1,62 @@
+{
+  "extends": "../../tsconfig.base.json",
+  // NOTE: "paths" does not merge with the base config — declaring it here
+  // replaces the base's mappings entirely. The @ainam entries are repeated for
+  // that reason, not by accident. Removing one breaks `tsc` on a clean checkout
+  // where nothing has been built yet, which CI is and a developer's machine
+  // usually is not.
+  "compilerOptions": {
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@ainam/schema": [
+        "../../packages/schema/src/index.ts"
+      ],
+      "@ainam/schema/types": [
+        "../../packages/schema/src/types.ts"
+      ],
+      "@ainam/schema/rich-text": [
+        "../../packages/schema/src/rich-text.ts"
+      ],
+      "@ainam/schema/access": [
+        "../../packages/schema/src/access.ts"
+      ],
+      "@ainam/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@ainam/next": [
+        "../../packages/next/src/index.ts"
+      ],
+      "@ainam/ui": [
+        "../../packages/ui/src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

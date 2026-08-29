@@ -1,0 +1,34 @@
+{
+  "name": "@ainam/example-marketing-next",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The AINAM marketing site — our own site, running on AINAM.",
+  "scripts": {
+    "dev": "next dev --port 3300",
+    "build": "next build",
+    "start": "next start --port 3300",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "ainam:push": "ainam push",
+    "ainam:pull": "ainam pull"
+  },
+  "dependencies": {
+    "@ainam/core": "workspace:*",
+    "@ainam/next": "workspace:*",
+    "@ainam/ui": "workspace:*",
+    "lucide-react": "1.31.0",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.4",
+    "ainam": "workspace:*",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

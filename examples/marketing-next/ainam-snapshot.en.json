@@ -1,0 +1,152 @@
+{
+  "projectId": "unconfigured",
+  "locale": "en",
+  "generatedAt": "2026-08-28T12:33:10.481Z",
+  "entries": {
+    "footer/links": [
+      {
+        "href": "#product",
+        "group": "Product",
+        "label": "Overview"
+      },
+      {
+        "href": "#how",
+        "group": "Product",
+        "label": "How it works"
+      },
+      {
+        "href": "#publish",
+        "group": "Product",
+        "label": "Publishing"
+      },
+      {
+        "href": "https://github.com/JanSirPROXx/ainam",
+        "group": "Developers",
+        "label": "Source"
+      },
+      {
+        "href": "https://github.com/JanSirPROXx/ainam#getting-started",
+        "group": "Developers",
+        "label": "Quickstart"
+      },
+      {
+        "href": "https://github.com/JanSirPROXx/ainam#getting-started",
+        "group": "Developers",
+        "label": "Self-hosting"
+      },
+      {
+        "href": "https://github.com/JanSirPROXx/ainam/blob/main/LICENSE",
+        "group": "Legal",
+        "label": "Licence"
+      },
+      {
+        "href": "https://github.com/JanSirPROXx/ainam/blob/main/SECURITY.md",
+        "group": "Legal",
+        "label": "Security"
+      }
+    ],
+    "footer/status/label": "all systems normal",
+    "footer/status/visible": false,
+    "footer/tagline": "The AI-native CMS layer for React and Next.js.",
+    "home/cta/primary": "Start free",
+    "home/cta/secondary": "Read the source",
+    "home/cta/subtitle": "Self-host it, or let us run it.",
+    "home/cta/title": "Content, decoupled.",
+    "home/features/body": "The schema is defined in code and generated back as types, so a wrong content key is a compile error rather than a blank section.",
+    "home/features/eyebrow": "What you get",
+    "home/features/items": [
+      {
+        "body": "Define content next to the components that render it. Run ainam pull and the types come back down.",
+        "icon": "file-code",
+        "title": "Code-first schema"
+      },
+      {
+        "body": "Upload once. Format is read from the file header, never the filename, and the URL is resolved per request.",
+        "icon": "image",
+        "title": "Images and assets"
+      },
+      {
+        "body": "Every publish is a version. Roll back to any of them in one click.",
+        "icon": "history",
+        "title": "Version history"
+      },
+      {
+        "body": "Drafts are readable through their own credential and their own path, never the site key.",
+        "icon": "eye",
+        "title": "Preview before publish"
+      },
+      {
+        "body": "A boolean field switches a whole section off. No deploy, no feature flag service.",
+        "icon": "toggle-left",
+        "title": "Section toggles"
+      },
+      {
+        "body": "Locale is in the model from the first migration. Adding a language is never a data migration.",
+        "icon": "globe",
+        "title": "Locales as data"
+      }
+    ],
+    "home/features/title": "Content that lives beside your components",
+    "home/hero/announcement/tag": "new",
+    "home/hero/announcement/text": "Roll back a publish from the dashboard",
+    "home/hero/announcement/visible": true,
+    "home/hero/body": "Install one package. Every string, image, label and section in your app becomes editable from the AINAM dashboard \u2014 no redeploy.",
+    "home/hero/cta/primary": "Start free",
+    "home/hero/cta/secondary": "Read the docs",
+    "home/hero/install": "npm install ainam",
+    "home/hero/subtitle": "for React and Next.js",
+    "home/hero/title": "The AI-native CMS layer",
+    "home/how/body": "AINAM ships as an npm package. The key in your environment points the app at a project, and the project holds all of its content.",
+    "home/how/eyebrow": "How it works",
+    "home/how/steps": [
+      {
+        "body": "One dependency, no runtime dependencies of its own.",
+        "code": "$ npm install ainam @ainam/next",
+        "title": "Install the package",
+        "filename": "terminal"
+      },
+      {
+        "body": "The content schema lives in your codebase. Push it, and pull the types back down.",
+        "code": "$ ainam push\n$ ainam pull",
+        "title": "Push your schema",
+        "filename": "terminal"
+      },
+      {
+        "body": "Text, images, rich text and whole sections \u2014 changed, previewed, published.",
+        "code": "",
+        "title": "Edit from the dashboard",
+        "filename": ""
+      }
+    ],
+    "home/how/title": "One package, one key, every project",
+    "home/logos/label": "Teams shipping content with AINAM",
+    "home/logos/names": [],
+    "home/logos/visible": false,
+    "home/publish/body": "Every change is a draft. Preview it on the real site, publish when it reads right, and roll the whole set back if it does not.",
+    "home/publish/eyebrow": "Draft and publish",
+    "home/publish/title": "Nothing reaches the site until you say so",
+    "home/testimonial/name": "",
+    "home/testimonial/quote": "",
+    "home/testimonial/role": "",
+    "home/testimonial/visible": false,
+    "nav/cta": "Get started",
+    "nav/links": [
+      {
+        "href": "#product",
+        "label": "Product"
+      },
+      {
+        "href": "#how",
+        "label": "How it works"
+      },
+      {
+        "href": "#publish",
+        "label": "Publishing"
+      },
+      {
+        "href": "https://github.com/JanSirPROXx/ainam",
+        "label": "Source"
+      }
+    ]
+  }
+}

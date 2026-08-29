@@ -2,8 +2,9 @@
 # always work — a broken Compose setup is a broken build.
 #
 # Every value below has a default, so this runs with or without a .env file.
-# Host ports are overridable — POSTGRES_PORT, CMS_PORT, DASHBOARD_PORT — because
-# 3000 and 5432 are commonly already taken on a developer's machine.
+# Host ports are overridable — POSTGRES_PORT, CMS_PORT, DASHBOARD_PORT,
+# STARTER_PORT, MARKETING_PORT — because 3000 and 5432 are commonly already
+# taken on a developer's machine.
 # NODE_ENV stays at development here: the placeholder secret in .env.example is
 # public, and cms-server refuses to start with it when NODE_ENV=production. A
 # real deployment sets both.
@@ -167,6 +168,41 @@ services:
         - node
         - -e
         - "fetch('http://localhost:3200/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # Our own marketing site, running on AINAM like a customer's would.
+  #
+  # It renders from its committed snapshot until AINAM_MARKETING_PROJECT_ID and
+  # AINAM_MARKETING_API_KEY are set, so `docker compose up` shows the finished
+  # site rather than an error — and dogfoods the build-time fallback by being in
+  # it. Point it at a real project with `ainam push` from examples/marketing-next.
+  marketing:
+    build:
+      context: .
+      dockerfile: examples/marketing-next/Dockerfile
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Baked into the markup at build time, so they are build args in a real
+      # deployment. Compose only ever serves the local stack.
+      NEXT_PUBLIC_DASHBOARD_URL: ${NEXT_PUBLIC_DASHBOARD_URL:-http://localhost:3000}
+      AINAM_URL: http://cms-server:8787
+      AINAM_PROJECT_ID: ${AINAM_MARKETING_PROJECT_ID:-}
+      AINAM_API_KEY: ${AINAM_MARKETING_API_KEY:-}
+      AINAM_WEBHOOK_SECRET: ${AINAM_MARKETING_WEBHOOK_SECRET:-}
+      AINAM_PREVIEW_API_KEY: ${AINAM_MARKETING_PREVIEW_API_KEY:-}
+    ports:
+      - "${MARKETING_PORT:-3300}:3300"
+    depends_on:
+      cms-server:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3300/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
       interval: 3s
       timeout: 3s
       retries: 20

@@ -1,0 +1,454 @@
+/* Page-level layout for the marketing site.
+ *
+ * Components come from @ainam/ui; this file only positions them and styles the
+ * plain elements the system has no component for — headings, links, the grid a
+ * section lays its children on. Every value is a token, checked by
+ * scripts/check-tokens.mjs. */
+@import "@ainam/ui/styles.css";
+
+body {
+  background: var(--bg-page);
+  color: var(--text-body);
+  font: var(--fw-regular) var(--fs-body-md) / var(--lh-body) var(--font-sans);
+  letter-spacing: var(--ls-body);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--fs-body-sm);
+  transition: var(--transition-control);
+}
+
+.link:hover {
+  color: var(--text-primary);
+}
+
+.shell {
+  max-width: var(--container-lg);
+  margin: 0 auto;
+  padding-inline: var(--space-7);
+}
+
+/* Sections are separated by a hairline, never by an alternating background. */
+.section {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.section__inner {
+  padding-block: var(--section-y);
+}
+
+.section[id] {
+  scroll-margin-top: calc(var(--topbar-h) + var(--space-5));
+}
+
+.section__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 620px;
+}
+
+.section__title {
+  margin: 0;
+  font: var(--fw-medium) var(--fs-display-sm) / var(--lh-heading) var(--font-sans);
+  letter-spacing: var(--ls-display);
+  color: var(--text-primary);
+}
+
+.section__body {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.section__grid {
+  margin-top: var(--space-11);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+/* ---------------------------------------------------------------- topbar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--topbar-h);
+  border-bottom: 1px solid var(--border-subtle);
+  /* An alpha of the page ink rather than a second black: the backdrop filter
+     has to show the grid moving underneath it. */
+  background: color-mix(in srgb, var(--ink-1000) 72%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.topbar__inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-9);
+}
+
+.topbar__nav {
+  display: flex;
+  gap: var(--space-7);
+  flex: 1;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* ---------------------------------------------------------------- hero */
+.hero {
+  padding: var(--space-13) 0 var(--space-12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-7);
+  text-align: center;
+}
+
+.hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 26px;
+  padding: 0 var(--space-4) 0 var(--space-2);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  font: var(--fw-regular) var(--fs-caption) / 1 var(--font-sans);
+  color: var(--text-muted);
+}
+
+.hero__title {
+  margin: 0;
+  max-width: 860px;
+  font: var(--fw-medium) var(--fs-display-xl) / var(--lh-display) var(--font-sans);
+  letter-spacing: var(--ls-display);
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+
+/* The second line completes the thought and drops back. */
+.hero__title span {
+  color: var(--text-faint);
+}
+
+.hero__body {
+  margin: 0;
+  max-width: 560px;
+  font-size: var(--fs-body-lg);
+  color: var(--text-muted);
+}
+
+/* Shared by the hero and the closing block: the same pair of buttons, one
+   primary and one secondary, at each end of the page. */
+.actions {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.hero__install {
+  font: var(--type-code);
+  font-size: var(--fs-caption);
+  color: var(--text-faint);
+}
+
+/* ---------------------------------------------------------------- sdk tabs */
+.sdk {
+  margin-top: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.sdk__tabs {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+}
+
+.sdk__tab {
+  height: 26px;
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text-muted);
+  font: var(--fw-medium) var(--fs-caption) / 1 var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.sdk__tab:hover {
+  color: var(--text-primary);
+}
+
+.sdk__tab[aria-selected="true"] {
+  background: var(--ink-700);
+  color: var(--text-primary);
+}
+
+.sdk__code {
+  width: 100%;
+  max-width: 720px;
+}
+
+/* ---------------------------------------------------------------- logos */
+.logos {
+  margin-top: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.logos__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-11);
+  opacity: 0.5;
+}
+
+.logos__name {
+  font: var(--fw-medium) var(--fs-body-sm) / 1 var(--font-mono);
+  letter-spacing: var(--ls-eyebrow);
+  color: var(--text-body);
+}
+
+/* ---------------------------------------------------------------- steps */
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.step__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+}
+
+.step__no {
+  font: var(--fw-medium) var(--fs-body-sm) / 1 var(--font-mono);
+  color: var(--text-faint);
+}
+
+.step__title {
+  margin: 0;
+  font: var(--fw-medium) var(--fs-heading-sm) / var(--lh-heading) var(--font-sans);
+  color: var(--text-primary);
+}
+
+.step__body {
+  margin: 0;
+  font-size: var(--fs-body-sm);
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- features */
+.feature__icon {
+  display: grid;
+  place-items: center;
+  width: var(--space-8);
+  height: var(--space-8);
+  margin-bottom: var(--space-6);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--icon-default);
+}
+
+.feature__title {
+  margin: 0 0 var(--space-3);
+  font: var(--fw-medium) var(--fs-heading-sm) / var(--lh-heading) var(--font-sans);
+  letter-spacing: var(--ls-heading);
+  color: var(--text-primary);
+}
+
+.feature__body {
+  margin: 0;
+  font-size: var(--fs-body-sm);
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- publishing */
+.publish {
+  position: relative;
+  overflow: hidden;
+}
+
+.publish__glow {
+  position: absolute;
+  inset: 0;
+  background: var(--glow-hero);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.publish__grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+.publish__card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.publish__card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.publish__key {
+  font: var(--type-code);
+  font-size: var(--fs-caption);
+  color: var(--text-faint);
+}
+
+/* ---------------------------------------------------------------- quote */
+.quote {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  text-align: center;
+}
+
+.quote__text {
+  margin: 0;
+  font: var(--fw-regular) var(--fs-heading-lg) / 1.45 var(--font-sans);
+  letter-spacing: var(--ls-heading);
+  color: var(--text-primary);
+  text-wrap: pretty;
+}
+
+.quote__by {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.quote__name {
+  font: var(--fw-medium) var(--fs-body-sm) / var(--lh-tight) var(--font-sans);
+  color: var(--text-primary);
+}
+
+.quote__role {
+  font: var(--type-caption);
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- closing */
+.closing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-7);
+  text-align: center;
+}
+
+.closing__title {
+  margin: 0;
+  font: var(--fw-medium) var(--fs-display-md) / var(--lh-display) var(--font-sans);
+  letter-spacing: var(--ls-display);
+  color: var(--text-primary);
+}
+
+.closing__title span {
+  color: var(--text-faint);
+}
+
+/* ---------------------------------------------------------------- footer */
+.footer {
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Flex, not grid: the number of columns comes from the content — a new heading
+   in `footer/links` creates one — and an auto-fit track list cannot resolve
+   next to the brand column's flexible track. */
+.footer__grid {
+  padding: var(--space-11) 0 var(--space-8);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-9);
+}
+
+.footer__brand {
+  flex: 1 1 240px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.footer__col {
+  flex: 1 1 120px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.footer__heading {
+  font: var(--type-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.footer__tagline {
+  margin: 0;
+  max-width: 220px;
+  font: var(--type-caption);
+  letter-spacing: var(--ls-body);
+  color: var(--text-muted);
+}
+
+.footer__bottom {
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  font: var(--type-caption);
+  color: var(--text-faint);
+}
+
+/* ---------------------------------------------------------------- narrow */
+@media (max-width: 900px) {
+  .section__grid,
+  .publish__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar__nav {
+    display: none;
+  }
+
+  .hero__title {
+    font-size: var(--fs-display-md);
+  }
+}

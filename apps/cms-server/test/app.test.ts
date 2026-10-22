@@ -82,6 +82,7 @@ describe('admin API', () => {
       ['GET', '/admin/projects/proj_x/preview-link'],
       ['PATCH', '/admin/projects/proj_x'],
       ['POST', '/admin/projects/proj_x/webhook-secret'],
+      ['POST', '/admin/projects'],
     ] as const) {
       const response = await app.request(path, { method })
       expect(`${method} ${path} -> ${response.status}`).toBe(`${method} ${path} -> 401`)

@@ -1,4 +1,4 @@
-import { ROLE_DESCRIPTIONS, isAinamRole } from '@ainam/schema'
+import { OWNER_ROLE, ROLE_DESCRIPTIONS, isAinamRole } from '@ainam/schema'
 import { accessControl, roles } from '@ainam/schema/access'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
@@ -71,7 +71,7 @@ export function createAuth(
         // an invitation can carry is always a role our routes recognise.
         ac: accessControl,
         roles,
-        creatorRole: 'owner',
+        creatorRole: OWNER_ROLE,
         invitationExpiresIn: INVITATION_TTL_SECONDS,
         organizationHooks: {
           // Deleting an organisation cascades to its projects and their asset

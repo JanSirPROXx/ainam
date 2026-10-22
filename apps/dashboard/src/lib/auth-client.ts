@@ -20,3 +20,15 @@ export const authClient = createAuthClient({
 
 export const { signIn, signUp, signOut, useSession, organization, useActiveOrganization, useListOrganizations } =
   authClient
+
+/**
+ * Re-reads the organisation list.
+ *
+ * The client refreshes it by itself after its own `organization.create` call.
+ * A project created through the admin API makes its organisation on the server,
+ * so nothing on this side fires, and the topbar switcher would not list the new
+ * organisation until a reload.
+ */
+export function refreshOrganizations(): void {
+  authClient.$store.notify('$listOrg')
+}

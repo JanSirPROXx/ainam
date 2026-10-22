@@ -356,6 +356,10 @@ export interface ProjectSummary {
   previewUrl: string | null
 }
 
+export interface CreateProjectRequest {
+  name: string
+}
+
 export interface UpdateProjectRequest {
   name?: string | undefined
   /** Called after a publish so the site revalidates. An empty string clears it. */

@@ -1,7 +1,9 @@
-import type { ProjectSummary, UpdateProjectRequest } from '@ainam/schema'
+import { OWNER_ROLE, type ProjectSummary, type UpdateProjectRequest } from '@ainam/schema'
 import { and, eq } from 'drizzle-orm'
 import type { Database } from '../db/client'
 import { members, organizations, projects } from '../db/schema'
+import { generateWebhookSecret } from '../lib/api-key'
+import { createId } from '../lib/ids'
 
 /**
  * A project as the server holds it.
@@ -28,8 +30,71 @@ const columns = {
   previewUrl: projects.previewUrl,
 }
 
+export interface NewWorkspace {
+  organizationName: string
+  organizationSlug: string
+  projectName: string
+  projectSlug: string
+  defaultLocale: string
+  /** Becomes the organisation's owner. Without one, nobody can open the project in the dashboard. */
+  ownerUserId?: string | undefined
+}
+
+export interface CreatedWorkspace {
+  organizationId: string
+  projectId: string
+  webhookSecret: string
+}
+
 export function createProjectRepository(db: Database) {
   return {
+    /**
+     * Inserts an organisation, its first project and, when given, the owner.
+     *
+     * Takes the database handle the caller chose, so a caller that needs more to
+     * succeed or fail with it — bootstrap also issues a key — can pass a
+     * transaction. Called on its own it is three inserts that must not be left
+     * half done, so callers wrap it.
+     */
+    async createWithOrganization(input: NewWorkspace): Promise<CreatedWorkspace> {
+      const organizationId = createId('org')
+      const projectId = createId('proj')
+      // Generated up front rather than on first use: without it the publish
+      // webhook can never fire and the preview link can never be signed, and
+      // both failures look like a bug rather than a missing setting.
+      const webhookSecret = generateWebhookSecret()
+      const now = new Date()
+
+      await db.insert(organizations).values({
+        id: organizationId,
+        name: input.organizationName,
+        slug: input.organizationSlug,
+        createdAt: now,
+      })
+
+      if (input.ownerUserId) {
+        await db.insert(members).values({
+          id: createId('mem'),
+          organizationId,
+          userId: input.ownerUserId,
+          role: OWNER_ROLE,
+          createdAt: now,
+        })
+      }
+
+      await db.insert(projects).values({
+        id: projectId,
+        organizationId,
+        name: input.projectName,
+        slug: input.projectSlug,
+        defaultLocale: input.defaultLocale,
+        locales: [input.defaultLocale],
+        webhookSecret,
+      })
+
+      return { organizationId, projectId, webhookSecret }
+    },
+
     /**
      * Projects the user can reach, by way of the organisations they belong to.
      *

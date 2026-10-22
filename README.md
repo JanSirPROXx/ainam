@@ -58,17 +58,29 @@ this repository, so cms-server refuses to start with it when `NODE_ENV` is
 ## Creating the first project
 
 A fresh install has an empty database and no way in — the content API needs a
-key, and a key needs a project. Bootstrap creates both:
+key, and a key needs a project. Bootstrap creates both, and the account that
+owns them:
 
 ```bash
 docker compose exec cms-server node dist/bootstrap.mjs \
-  --org "Acme" --project "Acme web" --slug acme-web --locale en
+  --email you@example.com --org "Acme" --project "Acme web" --slug acme-web --locale en
 ```
 
 It prints an `AINAM_PROJECT_ID`, an `AINAM_API_KEY` and an
 `AINAM_WEBHOOK_SECRET` once — only the key's hash is stored, so there is no way
-to show it again. It refuses to run a second time; further projects belong in
-the dashboard, not in an unauthenticated path.
+to show it again.
+
+`--email` makes that person the owner. If the address has no account yet,
+bootstrap creates one with a generated password and prints it once; if it
+already has one — you signed up in the dashboard first — the account is simply
+attached. Leave `--email` out and the project exists but nobody can open it in
+the dashboard, which bootstrap says in its output.
+
+It refuses to run a second time, because every project after the first belongs
+in the dashboard rather than behind an unauthenticated command. **New project**
+creates the project together with an organisation of its own, with you as its
+owner. It has no key yet: create one under Settings, a `schema:write` key for
+the developer who runs `ainam push` and a `content:read` key for the site.
 
 The bootstrap key carries `schema:write`. Keep it with the developer and issue a
 `content:read` key for the deployed site. The webhook secret signs both publish

@@ -38,6 +38,14 @@ export type AinamPermission = {
 
 export type AinamRole = 'owner' | 'editor'
 
+/**
+ * The role of whoever creates an organisation or its first project.
+ *
+ * Named so the rule "the creator owns it" is written once: the organisation
+ * plugin and our own project creation would otherwise each spell it out.
+ */
+export const OWNER_ROLE = 'owner' as const satisfies AinamRole
+
 /** In the order they are offered when inviting someone: most capable first. */
 export const AINAM_ROLES: readonly AinamRole[] = ['owner', 'editor']
 

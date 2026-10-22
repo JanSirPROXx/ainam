@@ -27,6 +27,7 @@ import type {
   revertPublishRequestSchema,
 } from './history'
 import type {
+  createProjectRequestSchema,
   previewLinkSchema,
   projectSummarySchema,
   updateProjectRequestSchema,
@@ -73,6 +74,9 @@ export type _RevertPublishRequest = Expect<
 >
 export type _RestoreResult = Expect<Exact<z.infer<typeof restoreResultSchema>, T.RestoreResult>>
 export type _ProjectSummary = Expect<Exact<z.infer<typeof projectSummarySchema>, T.ProjectSummary>>
+export type _CreateProjectRequest = Expect<
+  Exact<z.infer<typeof createProjectRequestSchema>, T.CreateProjectRequest>
+>
 export type _UpdateProjectRequest = Expect<
   Exact<z.infer<typeof updateProjectRequestSchema>, T.UpdateProjectRequest>
 >

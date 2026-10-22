@@ -76,7 +76,7 @@ docker compose exec -T postgres psql -U ainam -d ainam -tAc \
 
 echo "==> bootstrap: the only way into a fresh self-hosted install"
 boot=$(docker compose exec -T cms-server node dist/bootstrap.mjs \
-  --org Smoke --project Smoke --slug smoke-boot --locale en)
+  --org Smoke --project Smoke --slug smoke-boot --locale en --email bootstrap-owner@example.test)
 boot_project=$(echo "$boot" | grep AINAM_PROJECT_ID | cut -d= -f2)
 boot_key=$(echo "$boot" | grep AINAM_API_KEY | cut -d= -f2)
 [ -n "$boot_project" ] && [ -n "$boot_key" ] || {
@@ -94,6 +94,28 @@ curl --silent --fail --max-time 10 -X POST \
 if docker compose exec -T cms-server node dist/bootstrap.mjs >/dev/null 2>&1; then
   echo "FAIL: bootstrap ran a second time instead of refusing" >&2; exit 1
 fi
+
+echo "==> the bootstrap owner can sign in and sees the project, and can create another"
+# The defect this guards: bootstrap once created an organisation with no member,
+# so the first person to open the dashboard saw an empty list for good, and the
+# empty state told them to create a project there was no way to create.
+boot_password=$(echo "$boot" | grep 'password:' | awk '{print $2}')
+[ -n "$boot_password" ] || { echo "FAIL: bootstrap --email printed no password" >&2; exit 1; }
+boot_jar=$(mktemp)
+curl --silent --fail --max-time 10 -c "$boot_jar" -X POST -H "Origin: ${DASHBOARD_ORIGIN}" \
+  "http://localhost:${CMS_PORT}/api/auth/sign-in/email" -H 'content-type: application/json' \
+  -d "{\"email\":\"bootstrap-owner@example.test\",\"password\":\"$boot_password\"}" >/dev/null || {
+  echo "FAIL: the password bootstrap printed does not sign in" >&2; exit 1; }
+curl --silent --fail --max-time 10 -b "$boot_jar" "http://localhost:${CMS_PORT}/admin/projects" |
+  grep -q "$boot_project" || {
+    echo "FAIL: the bootstrap owner cannot see the project bootstrap created" >&2; exit 1; }
+created=$(curl --silent --fail-with-body --max-time 10 -b "$boot_jar" -X POST \
+  -H "Origin: ${DASHBOARD_ORIGIN}" -H 'content-type: application/json' \
+  "http://localhost:${CMS_PORT}/admin/projects" -d '{"name":"Created in the dashboard"}')
+echo "$created" | grep -q '"slug":"created-in-the-dashboard"' || {
+  echo "FAIL: POST /admin/projects did not create the project: $created" >&2; exit 1; }
+echo "$created" | grep -q '"role":"owner"' || {
+  echo "FAIL: the creator is not the owner of the project they created" >&2; exit 1; }
 
 echo "==> seed an organisation, a project and two scoped keys"
 mkkey() { node -e "const c=require('crypto');const k='ainam_sk_'+c.randomBytes(32).toString('base64url');console.log(k+' '+c.createHash('sha256').update(k).digest('hex'));"; }

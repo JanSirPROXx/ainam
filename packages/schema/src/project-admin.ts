@@ -21,6 +21,15 @@ export const projectSummarySchema = z.object({
   previewUrl: z.string().nullable(),
 })
 
+/**
+ * Only a name: locales and the default locale are declared in the website's
+ * `ainam.config.ts` and set by `ainam push`, so asking for them here would give
+ * the dashboard a second source of truth for something the code owns.
+ */
+export const createProjectRequestSchema = z.object({
+  name: z.string().trim().min(1, 'Give the project a name.').max(120),
+})
+
 /** An empty string clears a URL; omitting the field leaves it untouched. */
 const clearableUrl = z.union([z.url(), z.literal('')]).optional()
 

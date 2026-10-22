@@ -1,4 +1,5 @@
 import {
+  createProjectRequestSchema,
   localeSchema,
   previewLinkSchema,
   projectSummarySchema,
@@ -11,6 +12,7 @@ import { projectParams } from '../../http/params'
 import { generateWebhookSecret } from '../../lib/api-key'
 import { createProjectRepository, toProjectSummary } from '../../repositories/projects'
 import { deleteProjectObjects } from '../../services/assets/delete-objects'
+import { createProjectForUser } from '../../services/create-project'
 import { createPreviewLink } from '../../services/preview-link'
 import { requireProject, requireProjectPermission } from '../../services/project-access'
 import type { Storage } from '../../storage'
@@ -25,6 +27,22 @@ const listRoute = createRoute({
         'application/json': { schema: z.object({ projects: z.array(projectSummarySchema) }) },
       },
       description: "Projects reachable through the user's organisation memberships.",
+    },
+  },
+})
+
+const createProjectRoute = createRoute({
+  method: 'post',
+  path: '/admin/projects',
+  summary: 'Create a project in an organisation of its own',
+  description:
+    'The caller becomes the owner of a new organisation holding the project. Declare its content ' +
+    'from the website with `ainam push`, using a key created under the project\'s settings.',
+  request: { body: { content: { 'application/json': { schema: createProjectRequestSchema } } } },
+  responses: {
+    201: {
+      content: { 'application/json': { schema: projectSummarySchema } },
+      description: 'The project, with the caller as its owner.',
     },
   },
 })
@@ -113,6 +131,12 @@ export function registerAdminProjectRoutes(
     // webhook secret, and handing it to the browser would publish it to anyone
     // who opens devtools.
     return c.json({ projects: rows.map(toProjectSummary) })
+  })
+
+  app.openapi(createProjectRoute, async (c) => {
+    const userId = c.get('user').id
+    const projectId = await createProjectForUser(db, userId, c.req.valid('json'))
+    return c.json(toProjectSummary(await requireProject(db, projectId, userId)), 201)
   })
 
   app.openapi(readRoute, async (c) => {

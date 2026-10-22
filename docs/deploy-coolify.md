@@ -45,6 +45,11 @@ In Coolify: your project, New resource, Public repository.
 | Base directory | `/` |
 | Docker Compose location | `/docker-compose.coolify.yml` |
 
+Check the **Build pack** field twice. Coolify offers Railpack first, and left there it builds the
+whole repository on the server. That runs a 4 GB host out of memory within minutes, and everything
+else on it stops answering until the kernel kills the build. With the right setting the page lists
+five services: `postgres`, `garage`, `garage-init`, `cms-server` and `dashboard`.
+
 Then, under General, Build pipeline, turn on **Preserve repository during deployment**. The stack
 mounts `docker/garage/garage.toml` from the repository, and without this the file is gone by the
 time Garage starts. Docker creates a directory in its place and the deploy fails with
@@ -80,17 +85,34 @@ Optional variables, all with a default:
 and upload images to it, with no storage limit. Switch it to `invite-only` before you share the
 address.
 
-## 4. Set the two addresses
+## 4. Set the addresses
 
-Under Domains, give the two services an address each. The port is part of the address in this
-field, and it is the container's port, not a public one.
+Each address is entered twice: once as a domain, so the proxy routes to it, and once as a variable,
+so the stack knows its own address.
+
+Under Domains, give the two services an address each. Write `https://` and no port: Coolify routes
+to the port each service declares.
 
 | Service | Domain |
 |---|---|
-| `cms-server` | `https://cms.example.com:8787` |
-| `dashboard` | `https://dashboard.example.com:3000` |
+| `cms-server` | `https://cms.example.com` |
+| `dashboard` | `https://dashboard.example.com` |
 
-Leave the other three without a domain. They are not reachable from outside, and should not be.
+Then, under Environment variables, set the three addresses the stack reads:
+
+```text
+BETTER_AUTH_URL=https://cms.example.com
+CMS_PUBLIC_URL=https://cms.example.com
+DASHBOARD_ORIGIN=https://dashboard.example.com
+```
+
+The variables repeat the domains on purpose. Coolify does not reliably pass a domain on to another
+service as a variable, and an empty address does not fail on its own: the dashboard falls back to
+`localhost` and sends every visitor's requests to their own machine. The deploy stops if one of the
+three is missing.
+
+Leave the other three services without a domain. They are not reachable from outside, and should not
+be.
 
 ## 5. Connect GitHub
 
@@ -106,6 +128,14 @@ gh secret set COOLIFY_TOKEN --repo JanSirPROXx/ainam
 missing as a warning, without failing.
 
 ## 6. Deploy, and sign in
+
+Before you press Deploy, open the resource page again and check three things. A setting that did
+not save looks exactly like one that did, until the deploy.
+
+- **Build pack** reads Docker Compose, and the five services are listed.
+- **Domains** shows the two addresses you typed. If it shows one ending in `.sslip.io` that you did
+  not type, the save did not stick: enter it again and save.
+- **Environment variables** holds the three secrets from step 3 and the three addresses from step 4.
 
 Press Deploy in Coolify, or run the Deploy workflow again. The first start takes a few minutes:
 Garage assigns its layout, cms-server applies the migrations, and the proxy requests the
@@ -140,14 +170,20 @@ resource's environment variables.
 
 ## When something is wrong
 
+**The server stops answering during a deploy.** Open the Deployment Logs. If they mention Railpack
+or Nixpacks, Coolify is building the repository instead of pulling images: the Build pack is wrong.
+Set it to Docker Compose, as step 2 says. The kernel ends the build after a few minutes and the
+server recovers by itself, which is why it can look like a one-off.
+
 **The dashboard loads and every request fails.** Open the browser's network tab. If the requests go
-to `localhost:8787`, `CMS_PUBLIC_URL` did not reach the container. It is filled from the `cms-server`
-domain in step 4, so check that domain is set and that you redeployed after setting it.
+to `localhost:8787`, `CMS_PUBLIC_URL` did not reach the container. Check the variables in step 4
+and deploy again.
 
 **You sign in and are signed out on the next click.** The two addresses do not share a parent
 domain, or one of them is `http`. Both must be `https` subdomains of one domain.
 
-**The deploy stops with "required variable is missing".** One of the three values in step 3 is empty.
+**The deploy stops with "required variable is missing".** One of the six values in steps 3 and 4 is
+empty. The message names it.
 
 **Garage fails with "not a directory".** **Preserve repository during deployment** is off. Turn it
 on, as step 2 says, and deploy again.

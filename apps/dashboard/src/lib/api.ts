@@ -1,8 +1,7 @@
 'use client'
 
 import type { ApiError } from '@ainam/schema'
-
-const BASE = process.env['NEXT_PUBLIC_CMS_URL'] ?? 'http://localhost:8787'
+import { cmsUrl } from './runtime-config'
 
 export class AdminApiError extends Error {
   readonly code: ApiError['error']['code']
@@ -27,7 +26,7 @@ export class AdminApiError extends Error {
  * message is for a person, never for a condition.
  */
 export async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${BASE}${path}`, {
+  const response = await fetch(`${cmsUrl()}${path}`, {
     ...init,
     // Without this the session cookie is not sent cross-origin and every call
     // is a 401 that looks like a login bug.
@@ -60,7 +59,7 @@ export async function adminUpload<T>(path: string, file: File): Promise<T> {
   const body = new FormData()
   body.set('file', file)
 
-  const response = await fetch(`${BASE}${path}`, { method: 'POST', credentials: 'include', body })
+  const response = await fetch(`${cmsUrl()}${path}`, { method: 'POST', credentials: 'include', body })
 
   if (!response.ok) {
     const failure = (await response.json().catch(() => null)) as ApiError | null

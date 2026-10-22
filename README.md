@@ -193,6 +193,13 @@ invite someone. Set `MAIL_TRANSPORT=smtp` and `SMTP_URL` for real delivery.
 addresses can register — apart from the first account on an empty instance,
 which has nobody to invite it.
 
+## Deploying
+
+`docker compose up` is for trying AINAM on your own machine: it publishes Postgres and storage on
+host ports, with credentials that are public in this repository. For a server, use
+`docker-compose.coolify.yml` and follow [docs/deploy-coolify.md](docs/deploy-coolify.md). CI
+publishes the images and redeploys on every merge to `main`.
+
 ## Commands
 
 ```bash

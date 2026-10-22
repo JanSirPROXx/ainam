@@ -1,0 +1,134 @@
+name: Deploy
+
+# Publishes the three images the production stack runs, then asks Coolify to roll
+# them out. See docs/deploy-coolify.md for the one-time setup.
+#
+# It starts from the CI workflow instead of from the push itself, so a commit
+# that fails lint, tests, the end-to-end run or the Compose smoke never reaches
+# the server. A manual run skips that wait on purpose: it is how a commit that
+# is already known to be good gets deployed again.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# One at a time, and never cancelled halfway: an interrupted rollout is worse
+# than a queued one.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  images:
+    name: Publish ${{ matrix.image }}
+    # `push` and the same repository, not just a branch called main. A fork can
+    # name its branch main, and its pull request would then start this workflow
+    # with this repository's secrets in reach of code nobody here has reviewed.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - image: cms-server
+            context: .
+            dockerfile: apps/cms-server/Dockerfile
+          - image: dashboard
+            context: .
+            dockerfile: apps/dashboard/Dockerfile
+          - image: garage-init
+            context: docker/garage
+            dockerfile: docker/garage/Dockerfile
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # The commit CI just verified. For a workflow_run, github.sha is the tip
+          # of the default branch, which may already be a newer, unverified one.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Name the build
+        id: build
+        run: |
+          sha="${{ github.event.workflow_run.head_sha || github.sha }}"
+          echo "short=${sha::7}" >> "$GITHUB_OUTPUT"
+          # `latest` is what the server runs, so only main may move it. A manual
+          # run from another branch still publishes an image, under its commit.
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "is_main=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_main=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tags and labels
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/ainam-${{ matrix.image }}
+          # The commit tag is what a rollback pins. Without it the previous
+          # version exists only as a digest nobody wrote down.
+          tags: |
+            type=raw,value=sha-${{ steps.build.outputs.short }}
+            type=raw,value=latest,enable=${{ steps.build.outputs.is_main == 'true' }}
+
+      # amd64 only: the server this runs on is x86, and an arm64 build would
+      # double a build nobody pulls.
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  deploy:
+    name: Roll out on Coolify
+    needs: images
+    # Only main is ever deployed. A branch run publishes images and stops here.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Trigger the deploy webhook
+        env:
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          # A repository that has not been connected yet should publish its
+          # images, say what is missing, and stay green: it is not broken, it is
+          # not finished. A warning is visible on the run; a failure is not
+          # something anyone should learn to ignore.
+          if [ -z "$COOLIFY_WEBHOOK" ] || [ -z "$COOLIFY_TOKEN" ]; then
+            echo "::warning title=Nothing was deployed::COOLIFY_WEBHOOK or COOLIFY_TOKEN is not set. The images were published. See docs/deploy-coolify.md."
+            exit 0
+          fi
+
+          # --fail-with-body: a 401 from a revoked token has to fail this step,
+          # and its message has to land in the log.
+          curl --fail-with-body --silent --show-error --max-time 60 \
+            --request POST "$COOLIFY_WEBHOOK" \
+            --header "Authorization: Bearer $COOLIFY_TOKEN"
+          echo
+          echo "Coolify accepted the deploy."

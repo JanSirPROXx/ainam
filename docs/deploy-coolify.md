@@ -45,6 +45,11 @@ In Coolify: your project, New resource, Public repository.
 | Base directory | `/` |
 | Docker Compose location | `/docker-compose.coolify.yml` |
 
+Then, under General, Build pipeline, turn on **Preserve repository during deployment**. The stack
+mounts `docker/garage/garage.toml` from the repository, and without this the file is gone by the
+time Garage starts. Docker creates a directory in its place and the deploy fails with
+`not a directory`.
+
 Leave automatic deploys off. The workflow decides when to deploy, after CI, and a second trigger
 would deploy a commit before its images exist.
 
@@ -143,6 +148,9 @@ domain in step 4, so check that domain is set and that you redeployed after sett
 domain, or one of them is `http`. Both must be `https` subdomains of one domain.
 
 **The deploy stops with "required variable is missing".** One of the three values in step 3 is empty.
+
+**Garage fails with "not a directory".** **Preserve repository during deployment** is off. Turn it
+on, as step 2 says, and deploy again.
 
 **`denied` when pulling an image.** See step 1: the package is private.
 

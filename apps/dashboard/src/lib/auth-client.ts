@@ -3,6 +3,7 @@
 import { accessControl, roles } from '@ainam/schema/access'
 import { organizationClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
+import { cmsUrl } from './runtime-config'
 
 /**
  * Talks to cms-server's auth routes.
@@ -12,7 +13,7 @@ import { createAuthClient } from 'better-auth/react'
  * point any dashboard at it".
  */
 export const authClient = createAuthClient({
-  baseURL: process.env['NEXT_PUBLIC_CMS_URL'] ?? 'http://localhost:8787',
+  baseURL: cmsUrl(),
   // The same access control the server enforces. Without it the client types
   // roles against Better Auth's built-in set and refuses to invite an editor.
   plugins: [organizationClient({ ac: accessControl, roles })],

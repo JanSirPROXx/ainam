@@ -1,11 +1,10 @@
 #!/usr/bin/env node
+import { version as VERSION } from '../package.json'
 import { runInit } from './init'
 import { runGenerate } from './generate'
 import { runPull } from './pull'
 import { runPush } from './push'
 import { USAGE } from './usage'
-
-const VERSION = '0.0.0'
 
 function readOption(argv: string[], name: string): string | undefined {
   const index = argv.indexOf(name)

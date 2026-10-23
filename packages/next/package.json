@@ -1,6 +1,6 @@
 {
   "name": "@ainam/next",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "AINAM adapter for the Next.js App Router \u2014 cached reads, webhook revalidation, preview mode, and rich-text rendering.",
   "license": "MIT",

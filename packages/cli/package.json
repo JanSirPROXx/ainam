@@ -1,6 +1,6 @@
 {
   "name": "ainam",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "AINAM command line interface \u2014 scaffold a project, push its content schema, pull generated types.",
   "license": "MIT",

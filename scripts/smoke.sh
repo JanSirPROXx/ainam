@@ -48,8 +48,20 @@ starter=$(curl --silent --fail --max-time 20 "http://localhost:${STARTER_PORT:-3
 echo "$starter" | grep -q 'Content, decoupled' || {
   echo "FAIL: the starter did not render its snapshot content" >&2; exit 1; }
 
-echo "==> GET / on the marketing site"
-marketing=$(curl --silent --fail --max-time 20 "http://localhost:${MARKETING_PORT}/")
+echo "==> the marketing site sends a visitor to their language, and both render"
+# A Swiss browser asks for de-CH; the redirect has to land on German, and a
+# visitor who says nothing has to land on English.
+[ "$(curl --silent --max-time 20 -o /dev/null -w '%{redirect_url}' \
+  -H 'Accept-Language: de-CH,de;q=0.9,en;q=0.8' "http://localhost:${MARKETING_PORT}/")" = "http://localhost:${MARKETING_PORT}/de" ] || {
+  echo "FAIL: / did not send a German-speaking browser to /de" >&2; exit 1; }
+[ "$(curl --silent --max-time 20 -o /dev/null -w '%{redirect_url}' "http://localhost:${MARKETING_PORT}/")" = "http://localhost:${MARKETING_PORT}/en" ] || {
+  echo "FAIL: / did not send a browser with no preference to /en" >&2; exit 1; }
+german=$(curl --silent --fail --max-time 20 "http://localhost:${MARKETING_PORT}/de")
+echo "$german" | grep -q 'Die KI-native CMS-Schicht' || {
+  echo "FAIL: the German marketing page did not render its German snapshot" >&2; exit 1; }
+echo "$german" | grep -q '<html lang="de"' || {
+  echo "FAIL: the German marketing page does not say it is German" >&2; exit 1; }
+marketing=$(curl --silent --fail --max-time 20 "http://localhost:${MARKETING_PORT}/en")
 # Our own site, on the same fallback path as a customer's: unconfigured in this
 # stack, so it must render from its committed snapshot.
 echo "$marketing" | grep -q 'The AI-native CMS layer' || {
@@ -58,7 +70,8 @@ echo "$marketing" | grep -q 'The AI-native CMS layer' || {
 # logo wall and a quote with nobody in them. `if`, not `grep ... && { }`: under
 # `set -e` the latter aborts the run on the passing case, where grep finds
 # nothing and the list returns non-zero.
-if echo "$marketing" | grep -q 'Teams shipping content with AINAM'; then
+if echo "$marketing" | grep -q 'Teams shipping content with AINAM' ||
+   echo "$german" | grep -q 'Teams, die mit AINAM'; then
   echo "FAIL: the logo wall rendered while home/logos/visible is false" >&2; exit 1
 fi
 

@@ -51,6 +51,15 @@ jobs:
           - image: garage-init
             context: docker/garage
             dockerfile: docker/garage/Dockerfile
+          # The marketing pages are prerendered, so the addresses they link to are
+          # fixed here, at build time. Repository variables replace the defaults
+          # once the site has a domain of its own.
+          - image: marketing
+            context: .
+            dockerfile: examples/marketing-next/Dockerfile
+            args: |
+              NEXT_PUBLIC_DASHBOARD_URL=${{ vars.MARKETING_DASHBOARD_URL || 'https://dashboard.91.99.238.68.sslip.io' }}
+              SITE_URL=${{ vars.MARKETING_SITE_URL || 'https://ainam.91.99.238.68.sslip.io' }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -96,6 +105,7 @@ jobs:
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
+          build-args: ${{ matrix.args }}
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -114,6 +124,7 @@ jobs:
       - name: Trigger the deploy webhook
         env:
           COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+          COOLIFY_MARKETING_WEBHOOK: ${{ secrets.COOLIFY_MARKETING_WEBHOOK }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
           # A repository that has not been connected yet should publish its
@@ -125,10 +136,15 @@ jobs:
             exit 0
           fi
 
+          # The marketing site is its own Coolify resource, so it has its own
+          # webhook. Optional: a setup without one deploys only the stack.
           # --fail-with-body: a 401 from a revoked token has to fail this step,
           # and its message has to land in the log.
-          curl --fail-with-body --silent --show-error --max-time 60 \
-            --request POST "$COOLIFY_WEBHOOK" \
-            --header "Authorization: Bearer $COOLIFY_TOKEN"
-          echo
+          for webhook in "$COOLIFY_WEBHOOK" "$COOLIFY_MARKETING_WEBHOOK"; do
+            [ -n "$webhook" ] || continue
+            curl --fail-with-body --silent --show-error --max-time 60 \
+              --request POST "$webhook" \
+              --header "Authorization: Bearer $COOLIFY_TOKEN"
+            echo
+          done
           echo "Coolify accepted the deploy."

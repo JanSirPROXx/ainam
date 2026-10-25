@@ -13,15 +13,43 @@ same way a customer's does — through the snapshot committed beside this file.
 pnpm --filter @ainam/example-marketing-next dev   # http://localhost:3300
 ```
 
-Unconfigured it renders from `ainam-snapshot.en.json`, so a clone shows the
-finished site with no server, no keys and no database.
+Unconfigured it renders from `ainam-snapshot.en.json` and `ainam-snapshot.de.json`,
+so a clone shows the finished site with no server, no keys and no database.
+
+## Two languages
+
+The site is in English and German, at `/en` and `/de`. `/` sends a visitor to
+the one their browser asks for (`src/proxy.ts`), `de-CH` reading as German, and
+a switcher in the header changes it. Each page carries `<html lang>`, a canonical
+address and `hreflang` links to the other.
+
+The copy of each language is a locale of the same AINAM project:
+
+- English is the default of every key in `ainam.config.ts`.
+- German is `content/de.json`, in Swiss spelling. A default is one value per
+  key and a push seeds it into every language, so a translation cannot be a
+  default. It is published as an edit instead, with `scripts/publish-locale.mjs`.
+  That script signs in as a person, because an API key cannot edit content.
+- The words that belong to the markup, such as "Sign in" and the labels of the
+  publish demo, are in `src/lib/dictionary.ts`, beside the components they
+  belong to.
+
+The dashboard edits the default language today. Until it can switch language,
+German copy changes go through `content/de.json` and the script, and the
+feature card about locales says so.
+
+`test/translations.test.ts` fails when the German copy falls behind: a key with
+copy and no translation, a list with different fields or a different number of
+rows, English left where German belongs, a sharp s, or a committed snapshot that
+no longer matches its source.
 
 ## Pointing it at a project
 
 ```bash
 cp ../../.env.example .env          # then fill in the four AINAM_ values
-pnpm ainam:push                     # upload ainam.config.ts
-pnpm ainam:pull                     # regenerate types and the snapshot
+pnpm ainam:push                     # upload ainam.config.ts, in both languages
+pnpm ainam:publish-de               # publish content/de.json (see the script's header)
+pnpm ainam:pull                     # regenerate types and both snapshots
 ```
 
 `push` seeds every key's `default` into the draft and published rows, so the
@@ -36,6 +64,9 @@ not change a project that already has the key. Edit it in the dashboard instead.
 token scanner like `apps/*` are.
 
 ## What is not editable
+
+The words of the controls and of the publish demo are in `src/lib/dictionary.ts`
+and change with the components, not through the dashboard.
 
 The three snippets in the hero are code, not content. A hero snippet has to stay
 runnable, and the moment it is a content field it is one careless edit away from

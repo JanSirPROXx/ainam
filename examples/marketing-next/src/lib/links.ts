@@ -13,4 +13,4 @@ export const DASHBOARD_URL = process.env['NEXT_PUBLIC_DASHBOARD_URL'] ?? 'http:/
 export const SOURCE_URL =
   process.env['NEXT_PUBLIC_SOURCE_URL'] ?? 'https://github.com/JanSirPROXx/ainam'
 
-export const DOCS_URL = `${SOURCE_URL}#getting-started`
+export const DOCS_URL = `${SOURCE_URL}#try-it`

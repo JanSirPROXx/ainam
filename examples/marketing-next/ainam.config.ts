@@ -8,12 +8,35 @@ import { defineContentSchema } from '@ainam/core'
  * dashboard and published without a deploy. If the flow is awkward here, it is
  * awkward for a customer — which is the point of running our own site on it.
  *
+ * The defaults are the English copy. The German copy lives in `content/de.json`
+ * and is published to the `de` locale with `scripts/publish-locale.mjs`, because
+ * a default is one value per key and a push seeds it into every locale.
+ *
  * Two defaults are deliberately `false`. `home/logos/visible` and
  * `home/testimonial/visible` gate the two sections that make claims about other
  * people, and we have no customers to name yet. Turn them on from the dashboard
  * once the names in them are real.
  */
 export default defineContentSchema({
+  // ---------------------------------------------------------------- page
+  'meta/title': {
+    type: 'text',
+    label: 'Page title',
+    description: 'The browser tab and the search result headline.',
+    required: true,
+    multiline: false,
+    default: 'AINAM — the AI-native CMS layer for Next.js',
+  },
+  'meta/description': {
+    type: 'text',
+    label: 'Page description',
+    description: 'The snippet under the headline in search results.',
+    required: true,
+    multiline: true,
+    default:
+      'Tell your coding agent to add AINAM. The text, images and sections of your Next.js site become editable in a dashboard, without a redeploy.',
+  },
+
   // ---------------------------------------------------------------- nav
   'nav/links': {
     type: 'list',
@@ -75,7 +98,7 @@ export default defineContentSchema({
     label: 'Headline, second line',
     required: false,
     multiline: false,
-    default: 'for React and Next.js',
+    default: 'for Next.js',
   },
   'home/hero/body': {
     type: 'text',
@@ -83,14 +106,14 @@ export default defineContentSchema({
     required: false,
     multiline: true,
     default:
-      'Install one package. Every string, image, label and section in your app becomes editable from the AINAM dashboard — no redeploy.',
+      'Tell your coding agent to add AINAM, or install three small packages yourself. Text, images and whole sections of your Next.js site become editable in a dashboard, with no redeploy.',
   },
   'home/hero/cta/primary': {
     type: 'text',
     label: 'Primary button',
     required: true,
     multiline: false,
-    default: 'Start free',
+    default: 'Get started',
   },
   'home/hero/cta/secondary': {
     type: 'text',
@@ -105,7 +128,7 @@ export default defineContentSchema({
     description: 'The mono caption under the buttons.',
     required: false,
     multiline: false,
-    default: 'npm install @ainam/cli',
+    default: 'npm install @ainam/core @ainam/next',
   },
 
   // ---------------------------------------------------------------- logo wall
@@ -148,7 +171,7 @@ export default defineContentSchema({
     label: 'How it works — heading',
     required: true,
     multiline: false,
-    default: 'One package, one key, every project',
+    default: 'One key, one project',
   },
   'home/how/body': {
     type: 'text',
@@ -156,7 +179,7 @@ export default defineContentSchema({
     required: false,
     multiline: true,
     default:
-      'AINAM ships as an npm package. The key in your environment points the app at a project, and the project holds all of its content.',
+      'AINAM ships as three small npm packages. The key in your environment points the site at a project, and the project holds all of its content.',
   },
   'home/how/steps': {
     type: 'list',
@@ -172,15 +195,15 @@ export default defineContentSchema({
     },
     default: [
       {
-        title: 'Install the package',
-        body: 'One dependency, no runtime dependencies of its own.',
-        code: '$ npm install @ainam/next @ainam/cli',
+        title: 'Install the packages',
+        body: 'The client has no dependencies of its own, and the Next.js adapter adds only that.',
+        code: '$ npm install @ainam/core @ainam/next\n$ npm install --save-dev @ainam/cli',
         filename: 'terminal',
       },
       {
         title: 'Push your schema',
         body: 'The content schema lives in your codebase. Push it, and pull the types back down.',
-        code: '$ ainam push\n$ ainam pull',
+        code: '$ npx ainam push\n$ npx ainam pull',
         filename: 'terminal',
       },
       {
@@ -228,6 +251,11 @@ export default defineContentSchema({
     },
     default: [
       {
+        icon: 'bot',
+        title: 'Set up by your agent',
+        body: 'Paste one prompt. Your coding agent installs the packages, creates the account and keys, and uploads the schema.',
+      },
+      {
         icon: 'file-code',
         title: 'Code-first schema',
         body: 'Define content next to the components that render it. Run ainam pull and the types come back down.',
@@ -240,7 +268,7 @@ export default defineContentSchema({
       {
         icon: 'history',
         title: 'Version history',
-        body: 'Every publish is a version. Roll back to any of them in one click.',
+        body: 'Every publish is a version. Roll back a single key or a whole publish.',
       },
       {
         icon: 'eye',
@@ -255,7 +283,7 @@ export default defineContentSchema({
       {
         icon: 'globe',
         title: 'Locales as data',
-        body: 'Locale is in the model from the first migration. Adding a language is never a data migration.',
+        body: 'Every entry carries a language and falls back to the default. The dashboard edits the default language today; translations go in through the API.',
       },
     ],
   },
@@ -327,14 +355,14 @@ export default defineContentSchema({
     label: 'Closing heading, second line',
     required: false,
     multiline: false,
-    default: 'Self-host it, or let us run it.',
+    default: 'Self-host it, or try the free preview.',
   },
   'home/cta/primary': {
     type: 'text',
     label: 'Closing primary button',
     required: true,
     multiline: false,
-    default: 'Start free',
+    default: 'Get started',
   },
   'home/cta/secondary': {
     type: 'text',
@@ -350,7 +378,7 @@ export default defineContentSchema({
     label: 'Footer tagline',
     required: false,
     multiline: true,
-    default: 'The AI-native CMS layer for React and Next.js.',
+    default: 'The AI-native CMS layer for Next.js.',
   },
   'footer/status/visible': {
     type: 'boolean',
@@ -385,12 +413,17 @@ export default defineContentSchema({
       {
         group: 'Developers',
         label: 'Quickstart',
-        href: 'https://github.com/JanSirPROXx/ainam#getting-started',
+        href: 'https://github.com/JanSirPROXx/ainam#try-it',
+      },
+      {
+        group: 'Developers',
+        label: 'Agent guide',
+        href: 'https://github.com/JanSirPROXx/ainam/blob/main/docs/agents.md',
       },
       {
         group: 'Developers',
         label: 'Self-hosting',
-        href: 'https://github.com/JanSirPROXx/ainam#getting-started',
+        href: 'https://github.com/JanSirPROXx/ainam/blob/main/docs/deploy-coolify.md',
       },
       {
         group: 'Legal',

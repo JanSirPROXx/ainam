@@ -11,8 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "ainam:push": "ainam push",
-    "ainam:pull": "ainam pull"
+    "ainam:push": "ainam push --locales en,de --default-locale en",
+    "ainam:pull": "ainam pull",
+    "ainam:publish-de": "node scripts/publish-locale.mjs de"
   },
   "dependencies": {
     "@ainam/core": "workspace:*",

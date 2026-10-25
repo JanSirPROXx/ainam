@@ -93,6 +93,10 @@ export type AinamContent = {
   "home/testimonial/role": string
   /** Show the quote — Off until the quote below is one a real customer actually gave us. */
   "home/testimonial/visible": boolean
+  /** Page description — The snippet under the headline in search results. */
+  "meta/description": string
+  /** Page title — The browser tab and the search result headline. */
+  "meta/title": string
   /** Header button */
   "nav/cta": string
   /** Header links — Shown between the wordmark and the sign-in link. */

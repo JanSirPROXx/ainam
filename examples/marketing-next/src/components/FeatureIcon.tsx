@@ -1,4 +1,5 @@
 import {
+  Bot,
   Eye,
   FileCode,
   Globe,
@@ -25,6 +26,7 @@ import type { LucideIcon } from 'lucide-react'
  * one-line change; the field description in `ainam.config.ts` points at it.
  */
 const ICONS: Record<string, LucideIcon> = {
+  bot: Bot,
   eye: Eye,
   'file-code': FileCode,
   globe: Globe,

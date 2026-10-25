@@ -1,7 +1,7 @@
 {
-  "projectId": "unconfigured",
+  "projectId": "proj_bzAKFpSwgPw8o934",
   "locale": "en",
-  "generatedAt": "2026-08-28T12:33:10.481Z",
+  "generatedAt": "2026-10-25T17:07:33.583Z",
   "entries": {
     "footer/links": [
       {
@@ -25,12 +25,17 @@
         "label": "Source"
       },
       {
-        "href": "https://github.com/JanSirPROXx/ainam#getting-started",
+        "href": "https://github.com/JanSirPROXx/ainam#try-it",
         "group": "Developers",
         "label": "Quickstart"
       },
       {
-        "href": "https://github.com/JanSirPROXx/ainam#getting-started",
+        "href": "https://github.com/JanSirPROXx/ainam/blob/main/docs/agents.md",
+        "group": "Developers",
+        "label": "Agent guide"
+      },
+      {
+        "href": "https://github.com/JanSirPROXx/ainam/blob/main/docs/deploy-coolify.md",
         "group": "Developers",
         "label": "Self-hosting"
       },
@@ -47,14 +52,19 @@
     ],
     "footer/status/label": "all systems normal",
     "footer/status/visible": false,
-    "footer/tagline": "The AI-native CMS layer for React and Next.js.",
-    "home/cta/primary": "Start free",
+    "footer/tagline": "The AI-native CMS layer for Next.js.",
+    "home/cta/primary": "Get started",
     "home/cta/secondary": "Read the source",
-    "home/cta/subtitle": "Self-host it, or let us run it.",
+    "home/cta/subtitle": "Self-host it, or try the free preview.",
     "home/cta/title": "Content, decoupled.",
     "home/features/body": "The schema is defined in code and generated back as types, so a wrong content key is a compile error rather than a blank section.",
     "home/features/eyebrow": "What you get",
     "home/features/items": [
+      {
+        "body": "Paste one prompt. Your coding agent installs the packages, creates the account and keys, and uploads the schema.",
+        "icon": "bot",
+        "title": "Set up by your agent"
+      },
       {
         "body": "Define content next to the components that render it. Run ainam pull and the types come back down.",
         "icon": "file-code",
@@ -66,7 +76,7 @@
         "title": "Images and assets"
       },
       {
-        "body": "Every publish is a version. Roll back to any of them in one click.",
+        "body": "Every publish is a version. Roll back a single key or a whole publish.",
         "icon": "history",
         "title": "Version history"
       },
@@ -81,7 +91,7 @@
         "title": "Section toggles"
       },
       {
-        "body": "Locale is in the model from the first migration. Adding a language is never a data migration.",
+        "body": "Every entry carries a language and falls back to the default. The dashboard edits the default language today; translations go in through the API.",
         "icon": "globe",
         "title": "Locales as data"
       }
@@ -90,35 +100,35 @@
     "home/hero/announcement/tag": "new",
     "home/hero/announcement/text": "Roll back a publish from the dashboard",
     "home/hero/announcement/visible": true,
-    "home/hero/body": "Install one package. Every string, image, label and section in your app becomes editable from the AINAM dashboard \u2014 no redeploy.",
-    "home/hero/cta/primary": "Start free",
+    "home/hero/body": "Tell your coding agent to add AINAM, or install three small packages yourself. Text, images and whole sections of your Next.js site become editable in a dashboard, with no redeploy.",
+    "home/hero/cta/primary": "Get started",
     "home/hero/cta/secondary": "Read the docs",
-    "home/hero/install": "npm install @ainam/cli",
-    "home/hero/subtitle": "for React and Next.js",
+    "home/hero/install": "npm install @ainam/core @ainam/next",
+    "home/hero/subtitle": "for Next.js",
     "home/hero/title": "The AI-native CMS layer",
-    "home/how/body": "AINAM ships as an npm package. The key in your environment points the app at a project, and the project holds all of its content.",
+    "home/how/body": "AINAM ships as three small npm packages. The key in your environment points the site at a project, and the project holds all of its content.",
     "home/how/eyebrow": "How it works",
     "home/how/steps": [
       {
-        "body": "One dependency, no runtime dependencies of its own.",
-        "code": "$ npm install @ainam/next @ainam/cli",
-        "title": "Install the package",
+        "body": "The client has no dependencies of its own, and the Next.js adapter adds only that.",
+        "code": "$ npm install @ainam/core @ainam/next\n$ npm install --save-dev @ainam/cli",
+        "title": "Install the packages",
         "filename": "terminal"
       },
       {
         "body": "The content schema lives in your codebase. Push it, and pull the types back down.",
-        "code": "$ ainam push\n$ ainam pull",
+        "code": "$ npx ainam push\n$ npx ainam pull",
         "title": "Push your schema",
         "filename": "terminal"
       },
       {
-        "body": "Text, images, rich text and whole sections \u2014 changed, previewed, published.",
+        "body": "Text, images, rich text and whole sections — changed, previewed, published.",
         "code": "",
         "title": "Edit from the dashboard",
         "filename": ""
       }
     ],
-    "home/how/title": "One package, one key, every project",
+    "home/how/title": "One key, one project",
     "home/logos/label": "Teams shipping content with AINAM",
     "home/logos/names": [],
     "home/logos/visible": false,
@@ -129,6 +139,8 @@
     "home/testimonial/quote": "",
     "home/testimonial/role": "",
     "home/testimonial/visible": false,
+    "meta/description": "Tell your coding agent to add AINAM. The text, images and sections of your Next.js site become editable in a dashboard, without a redeploy.",
+    "meta/title": "AINAM — the AI-native CMS layer for Next.js",
     "nav/cta": "Get started",
     "nav/links": [
       {

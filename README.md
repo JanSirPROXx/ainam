@@ -25,6 +25,71 @@ examples/
   marketing-next/ Our own marketing site, running on AINAM.
 ```
 
+## Try it
+
+About ten minutes. You need Docker, and Node 24 with pnpm for step 3. Everything runs on your own
+machine.
+
+**1. Start the stack.**
+
+```bash
+git clone https://github.com/JanSirPROXx/ainam && cd ainam
+docker compose up
+```
+
+The first start builds five images and takes a few minutes. When it settles, the dashboard is on
+http://localhost:3000 and a reference site on http://localhost:3200.
+
+**2. Create an account and a project.**
+
+```bash
+docker compose exec cms-server node dist/bootstrap.mjs --email you@example.com --slug try-site
+```
+
+It prints a project id, an API key, a webhook secret and, because the address had no account, a
+password. Each is shown once.
+
+**3. Upload the reference site's content schema.**
+
+```bash
+corepack enable && pnpm install
+pnpm --filter "@ainam/cli..." build
+cd examples/starter-next
+```
+
+Create `.env` there with the printed values:
+
+```bash
+AINAM_URL=http://localhost:8787
+AINAM_PROJECT_ID=<the project id>
+AINAM_API_KEY=<the API key>
+```
+
+```bash
+node ../../packages/cli/dist/index.mjs push
+```
+
+That adds eight keys, each with the copy the site already shows. It runs the built file directly
+because pnpm links the `ainam` command at install time, before the CLI exists in a fresh clone.
+
+**4. Connect the site.** Add the project id, the key and the webhook secret to `.env` in the
+repository root (`cp .env.example .env` if you have none), as `AINAM_PROJECT_ID`,
+`AINAM_API_KEY` and `AINAM_WEBHOOK_SECRET`, then:
+
+```bash
+docker compose up -d
+```
+
+**5. Change something.** Sign in to the dashboard with the printed password and open the project.
+Under Settings, set the webhook URL to `http://starter:3200/api/ainam/revalidate` — the site's
+address inside the Compose network. Under Content, change the hero title, save it, and publish.
+Reload http://localhost:3200: the page shows your text, and its badge reads "Live content".
+
+Without the webhook a publish still reaches AINAM but never the page, which is the one thing to get
+right. When you are done, `docker compose down -v` removes the stack and its data.
+
+To put AINAM on a site of your own, see [Connecting a website](#connecting-a-website).
+
 ## Getting started
 
 The whole stack, with nothing installed but Docker:
@@ -88,16 +153,24 @@ notifications and preview links, and an owner can replace it under Settings.
 
 ## Connecting a website
 
-The content schema lives in the website's codebase, not in a dashboard form.
+The content schema lives in the website's codebase, not in a dashboard form. For a Next.js
+site on the App Router (Next 16, React 19):
 
 ```bash
+npm install @ainam/core @ainam/next
 npm install --save-dev @ainam/cli
 npx ainam init     # writes ainam.config.ts and the env keys it needs
 npx ainam push     # uploads the schema
 npx ainam pull     # generates types and a content snapshot per locale
 ```
 
-The package is `@ainam/cli`; the command it installs is `ainam`.
+The package is `@ainam/cli`; the command it installs is `ainam`. All three read `AINAM_URL`, the
+address of your cms-server, `AINAM_PROJECT_ID` and `AINAM_API_KEY` from the environment. There is
+no default server on purpose: the value decides where your key is sent.
+
+`examples/starter-next` is the whole integration in a handful of files — `ainam.config.ts` for the
+schema, `src/lib/ainam.ts` for the client, and the two routes under `src/app/api/ainam/` that
+refresh the site after a publish and open a preview.
 
 `pull` writes `ainam.gen.ts`. Pass it to the client and a wrong content key
 stops being a blank section on the page and becomes a compile error:

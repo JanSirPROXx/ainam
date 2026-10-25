@@ -24,13 +24,19 @@ docker compose exec cms-server node dist/bootstrap.mjs --slug starter
 Put the printed values in `.env`, then:
 
 ```bash
-pnpm ainam:push    # upload the schema in ainam.config.ts
-pnpm ainam:pull    # regenerate ainam.gen.ts and the snapshot
+pnpm --filter "@ainam/cli..." build                # once, from the repository root
+node ../../packages/cli/dist/index.mjs push        # upload the schema in ainam.config.ts
+node ../../packages/cli/dist/index.mjs pull        # regenerate ainam.gen.ts and the snapshot
 ```
 
-The badge switches to "Live content". Edit a value in the database or the
-dashboard, publish, and the page follows without a redeploy — provided the
-project's webhook points at `/api/ainam/revalidate`.
+(From a fresh clone the `ainam` command pnpm links at install time points at a file that does not
+exist yet, so the commands above run the built file directly. In your own project, `npx ainam`
+works as usual.)
+
+Edit a value in the dashboard and publish, and the page follows without a
+redeploy — provided the project's webhook points at `/api/ainam/revalidate`.
+The badge switches to "Live content" with the first publish. The root README
+walks through the whole loop under "Try it".
 
 ## What to copy from here
 

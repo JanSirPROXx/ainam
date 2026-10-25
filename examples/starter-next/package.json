@@ -23,7 +23,7 @@
     "@types/node": "24.13.3",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.4",
-    "ainam": "workspace:*",
+    "@ainam/cli": "workspace:*",
     "typescript": "6.0.3"
   }
 }

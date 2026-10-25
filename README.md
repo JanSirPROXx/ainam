@@ -1,7 +1,7 @@
 # AINAM
 
 An AI-native CMS layer. A developer — or an AI agent — builds a website, installs
-the `ainam` package, and pulls content from the CMS server. The site owner then
+the AINAM packages, and pulls content from the CMS server. The site owner then
 edits that content through the AINAM dashboard, without going back to a developer
 for every small change.
 
@@ -18,7 +18,7 @@ packages/
   schema/        Zod schemas and shared types.                    internal
   core/          @ainam/core  — framework-agnostic client.        MIT
   next/          @ainam/next  — App Router adapter.               MIT
-  cli/           ainam        — project tooling.                  MIT
+  cli/           @ainam/cli   — project tooling.                  MIT
   ui/            Design system. Internal, never published.         MIT
 examples/
   starter-next/  Reference template — a site whose copy is edited in AINAM.
@@ -91,10 +91,13 @@ notifications and preview links, and an owner can replace it under Settings.
 The content schema lives in the website's codebase, not in a dashboard form.
 
 ```bash
+npm install --save-dev @ainam/cli
 npx ainam init     # writes ainam.config.ts and the env keys it needs
 npx ainam push     # uploads the schema
 npx ainam pull     # generates types and a content snapshot per locale
 ```
+
+The package is `@ainam/cli`; the command it installs is `ainam`.
 
 `pull` writes `ainam.gen.ts`. Pass it to the client and a wrong content key
 stops being a blank section on the page and becomes a compile error:

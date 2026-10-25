@@ -93,7 +93,7 @@
     "home/hero/body": "Install one package. Every string, image, label and section in your app becomes editable from the AINAM dashboard \u2014 no redeploy.",
     "home/hero/cta/primary": "Start free",
     "home/hero/cta/secondary": "Read the docs",
-    "home/hero/install": "npm install ainam",
+    "home/hero/install": "npm install @ainam/cli",
     "home/hero/subtitle": "for React and Next.js",
     "home/hero/title": "The AI-native CMS layer",
     "home/how/body": "AINAM ships as an npm package. The key in your environment points the app at a project, and the project holds all of its content.",
@@ -101,7 +101,7 @@
     "home/how/steps": [
       {
         "body": "One dependency, no runtime dependencies of its own.",
-        "code": "$ npm install ainam @ainam/next",
+        "code": "$ npm install @ainam/next @ainam/cli",
         "title": "Install the package",
         "filename": "terminal"
       },

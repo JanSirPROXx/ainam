@@ -1,8 +1,10 @@
-# ainam
+# @ainam/cli
 
-Command line interface for AINAM projects.
+Command line interface for AINAM projects. The package is `@ainam/cli`; the command it
+installs is `ainam`.
 
 ```bash
+npm install --save-dev @ainam/cli
 npx ainam init
 ```
 

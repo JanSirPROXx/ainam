@@ -1,5 +1,6 @@
 import type { AinamContent } from '../../ainam.gen'
-import { ainam } from './ainam'
+import { ainamFor } from './ainam'
+import type { Locale } from './i18n'
 
 export type ContentReader = <K extends keyof AinamContent>(key: K) => AinamContent[K]
 
@@ -25,11 +26,11 @@ export function createReader(content: AinamContent): ContentReader {
 }
 
 /**
- * Reads the whole project once.
+ * Reads the whole project once, in one language.
  *
  * `getAll` rather than a `get` per key: this page renders nearly every key, and
  * the client coalesces concurrent reads into one request either way.
  */
-export async function loadContent(): Promise<ContentReader> {
-  return createReader(await ainam.getAll())
+export async function loadContent(locale: Locale): Promise<ContentReader> {
+  return createReader(await ainamFor(locale).getAll())
 }

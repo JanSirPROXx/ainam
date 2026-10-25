@@ -6,9 +6,10 @@ export interface SiteFooterProps {
   tagline: string
   status: { visible: boolean; label: string }
   links: FooterLink[]
+  legal: string
 }
 
-export function SiteFooter({ tagline, status, links }: SiteFooterProps) {
+export function SiteFooter({ tagline, status, links, legal }: SiteFooterProps) {
   return (
     <footer className="footer">
       <div className="shell footer__grid">
@@ -38,7 +39,7 @@ export function SiteFooter({ tagline, status, links }: SiteFooterProps) {
 
       <div className="shell footer__bottom">
         <span>© {new Date().getFullYear()} AINAM</span>
-        <span>Open source — AGPL-3.0 and MIT</span>
+        <span>{legal}</span>
       </div>
     </footer>
   )

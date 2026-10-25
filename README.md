@@ -286,7 +286,8 @@ which has nobody to invite it.
 `docker compose up` is for trying AINAM on your own machine: it publishes Postgres and storage on
 host ports, with credentials that are public in this repository. For a server, use
 `docker-compose.coolify.yml` and follow [docs/deploy-coolify.md](docs/deploy-coolify.md). CI
-publishes the images and redeploys on every merge to `main`.
+publishes the images and redeploys on every merge to `main`. The marketing site deploys the same way
+as a resource of its own: [docs/deploy-marketing.md](docs/deploy-marketing.md).
 
 ## Commands
 

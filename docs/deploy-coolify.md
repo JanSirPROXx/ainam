@@ -90,13 +90,20 @@ address.
 Each address is entered twice: once as a domain, so the proxy routes to it, and once as a variable,
 so the stack knows its own address.
 
-Under Domains, give the two services an address each. Write `https://` and no port: Coolify routes
-to the port each service declares.
+Open the resource's Domains page and choose Add Domain. The dialog has separate fields, and you add
+one address per service:
 
-| Service | Domain |
-|---|---|
-| `cms-server` | `https://cms.example.com` |
-| `dashboard` | `https://dashboard.example.com` |
+| Field | `cms-server` | `dashboard` |
+|---|---|---|
+| Service | `cms-server` | `dashboard` |
+| Protocol | `https` | `https` |
+| Domain | `cms.example.com` | `dashboard.example.com` |
+| Port | `8787` | `3000` |
+
+Put the scheme in Protocol and leave it out of Domain: written into Domain it ends up doubled
+(`http://https://…`) and the dialog refuses it. Coolify generated an address for each service on its
+own; delete those four entries once yours are saved. Open the page again afterwards to check the
+ones you entered are still there.
 
 Then, under Environment variables, set the three addresses the stack reads:
 

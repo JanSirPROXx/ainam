@@ -68,13 +68,13 @@ Wrote ainam-snapshot.en.json — 1 entries`,
   },
 ]
 
-export function SdkTabs() {
+export function SdkTabs({ label }: { label: string }) {
   const [active, setActive] = useState(SNIPPETS[0]!.key)
   const snippet = SNIPPETS.find((entry) => entry.key === active) ?? SNIPPETS[0]!
 
   return (
     <div className="sdk">
-      <div className="sdk__tabs" role="tablist" aria-label="Integration steps">
+      <div className="sdk__tabs" role="tablist" aria-label={label}>
         {SNIPPETS.map((entry) => (
           <button
             key={entry.key}

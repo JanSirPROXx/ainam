@@ -184,11 +184,13 @@ services:
     build:
       context: .
       dockerfile: examples/marketing-next/Dockerfile
+      # The pages are prerendered, so these are fixed at build time: as
+      # container variables they would have changed nothing.
+      args:
+        NEXT_PUBLIC_DASHBOARD_URL: http://localhost:${DASHBOARD_PORT:-3000}
+        SITE_URL: http://localhost:${MARKETING_PORT:-3300}
     environment:
       NEXT_TELEMETRY_DISABLED: "1"
-      # Baked into the markup at build time, so they are build args in a real
-      # deployment. Compose only ever serves the local stack.
-      NEXT_PUBLIC_DASHBOARD_URL: ${NEXT_PUBLIC_DASHBOARD_URL:-http://localhost:3000}
       AINAM_URL: http://cms-server:8787
       AINAM_PROJECT_ID: ${AINAM_MARKETING_PROJECT_ID:-}
       AINAM_API_KEY: ${AINAM_MARKETING_API_KEY:-}

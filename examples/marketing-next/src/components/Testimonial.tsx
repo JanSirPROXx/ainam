@@ -4,6 +4,7 @@ export interface TestimonialProps {
   quote: string
   name: string
   role: string
+  eyebrow: string
 }
 
 /**
@@ -12,14 +13,14 @@ export interface TestimonialProps {
  * An unattributed quote on a marketing page reads as a customer saying it, so
  * the section is absent rather than half-filled until both are set.
  */
-export function Testimonial({ quote, name, role }: TestimonialProps) {
+export function Testimonial({ quote, name, role, eyebrow }: TestimonialProps) {
   if (quote.trim() === '' || name.trim() === '') return null
 
   return (
     <section className="section">
       <div className="shell section__inner">
         <div className="quote">
-          <Eyebrow>Customers</Eyebrow>
+          <Eyebrow>{eyebrow}</Eyebrow>
           <blockquote className="quote__text">&ldquo;{quote}&rdquo;</blockquote>
           <div className="quote__by">
             <span className="quote__name">{name}</span>

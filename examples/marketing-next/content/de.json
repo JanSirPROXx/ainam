@@ -1,0 +1,127 @@
+{
+  "meta/title": "AINAM — die KI-native CMS-Schicht für Next.js",
+  "meta/description": "Sag deinem Coding-Agenten, er soll AINAM einbauen. Texte, Bilder und Bereiche deiner Next.js-Seite werden in einem Dashboard bearbeitbar, ohne neues Deployment.",
+
+  "nav/links": [
+    { "label": "Produkt", "href": "#product" },
+    { "label": "So funktioniert's", "href": "#how" },
+    { "label": "Veröffentlichen", "href": "#publish" },
+    { "label": "Quellcode", "href": "https://github.com/JanSirPROXx/ainam" }
+  ],
+  "nav/cta": "Loslegen",
+
+  "home/hero/announcement/tag": "neu",
+  "home/hero/announcement/text": "Eine Veröffentlichung im Dashboard zurückrollen",
+  "home/hero/title": "Die KI-native CMS-Schicht",
+  "home/hero/subtitle": "für Next.js",
+  "home/hero/body": "Sag deinem Coding-Agenten, er soll AINAM einbauen, oder installiere drei kleine Pakete selbst. Texte, Bilder und ganze Bereiche deiner Next.js-Seite werden in einem Dashboard bearbeitbar, ohne neues Deployment.",
+  "home/hero/cta/primary": "Loslegen",
+  "home/hero/cta/secondary": "Dokumentation lesen",
+  "home/hero/install": "npm install @ainam/core @ainam/next",
+
+  "home/logos/label": "Teams, die mit AINAM Inhalte ausliefern",
+
+  "home/how/eyebrow": "So funktioniert's",
+  "home/how/title": "Ein Schlüssel, ein Projekt",
+  "home/how/body": "AINAM besteht aus drei kleinen npm-Paketen. Der Schlüssel in deiner Umgebung verweist die Seite auf ein Projekt, und das Projekt hält ihren gesamten Inhalt.",
+  "home/how/steps": [
+    {
+      "title": "Pakete installieren",
+      "body": "Der Client hat keine eigenen Abhängigkeiten, und der Next.js-Adapter bringt nur ihn mit.",
+      "code": "$ npm install @ainam/core @ainam/next\n$ npm install --save-dev @ainam/cli",
+      "filename": "terminal"
+    },
+    {
+      "title": "Schema hochladen",
+      "body": "Das Inhaltsschema liegt in deinem Code. Lade es hoch und hole die Typen zurück.",
+      "code": "$ npx ainam push\n$ npx ainam pull",
+      "filename": "terminal"
+    },
+    {
+      "title": "Im Dashboard bearbeiten",
+      "body": "Texte, Bilder, Rich Text und ganze Bereiche: ändern, ansehen, veröffentlichen.",
+      "code": "",
+      "filename": ""
+    }
+  ],
+
+  "home/features/eyebrow": "Das bekommst du",
+  "home/features/title": "Inhalt, der neben deinen Komponenten lebt",
+  "home/features/body": "Das Schema steht im Code und kommt als Typen zurück. Ein falscher Inhaltsschlüssel ist deshalb ein Compile-Fehler statt eines leeren Abschnitts.",
+  "home/features/items": [
+    {
+      "icon": "bot",
+      "title": "Von deinem Agenten eingerichtet",
+      "body": "Füge einen Prompt ein. Dein Coding-Agent installiert die Pakete, legt Konto und Schlüssel an und lädt das Schema hoch."
+    },
+    {
+      "icon": "file-code",
+      "title": "Schema im Code",
+      "body": "Definiere den Inhalt neben den Komponenten, die ihn darstellen. Führe ainam pull aus, und die Typen kommen zurück."
+    },
+    {
+      "icon": "image",
+      "title": "Bilder und Dateien",
+      "body": "Einmal hochladen. Das Format kommt aus dem Dateikopf, nie aus dem Dateinamen, und die Adresse wird pro Anfrage aufgelöst."
+    },
+    {
+      "icon": "history",
+      "title": "Versionsverlauf",
+      "body": "Jede Veröffentlichung ist eine Version. Setze einen einzelnen Schlüssel oder eine ganze Veröffentlichung zurück."
+    },
+    {
+      "icon": "eye",
+      "title": "Vorschau vor dem Veröffentlichen",
+      "body": "Entwürfe sind über einen eigenen Zugang und einen eigenen Pfad lesbar, nie mit dem Schlüssel der Seite."
+    },
+    {
+      "icon": "toggle-left",
+      "title": "Bereiche ein- und ausschalten",
+      "body": "Ein boolesches Feld schaltet einen ganzen Bereich aus. Kein Deployment, kein Feature-Flag-Dienst."
+    },
+    {
+      "icon": "globe",
+      "title": "Sprachen als Daten",
+      "body": "Jeder Eintrag trägt eine Sprache und fällt auf die Standardsprache zurück. Das Dashboard bearbeitet heute die Standardsprache, Übersetzungen kommen über die Schnittstelle hinein."
+    }
+  ],
+
+  "home/publish/eyebrow": "Entwurf und Veröffentlichung",
+  "home/publish/title": "Nichts erreicht die Seite, bevor du es sagst",
+  "home/publish/body": "Jede Änderung ist ein Entwurf. Sieh sie dir auf der echten Seite an, veröffentliche, wenn sie stimmt, und rolle den ganzen Satz zurück, wenn nicht.",
+
+  "home/cta/title": "Inhalt, entkoppelt.",
+  "home/cta/subtitle": "Betreibe es selbst oder probiere die kostenlose Vorschau.",
+  "home/cta/primary": "Loslegen",
+  "home/cta/secondary": "Quellcode lesen",
+
+  "footer/tagline": "Die KI-native CMS-Schicht für Next.js.",
+  "footer/status/label": "alle Systeme normal",
+  "footer/links": [
+    { "group": "Produkt", "label": "Überblick", "href": "#product" },
+    { "group": "Produkt", "label": "So funktioniert's", "href": "#how" },
+    { "group": "Produkt", "label": "Veröffentlichen", "href": "#publish" },
+    { "group": "Entwickler", "label": "Quellcode", "href": "https://github.com/JanSirPROXx/ainam" },
+    { "group": "Entwickler", "label": "Schnellstart", "href": "https://github.com/JanSirPROXx/ainam#try-it" },
+    {
+      "group": "Entwickler",
+      "label": "Anleitung für Agenten",
+      "href": "https://github.com/JanSirPROXx/ainam/blob/main/docs/agents.md"
+    },
+    {
+      "group": "Entwickler",
+      "label": "Self-Hosting",
+      "href": "https://github.com/JanSirPROXx/ainam/blob/main/docs/deploy-coolify.md"
+    },
+    {
+      "group": "Rechtliches",
+      "label": "Lizenz",
+      "href": "https://github.com/JanSirPROXx/ainam/blob/main/LICENSE"
+    },
+    {
+      "group": "Rechtliches",
+      "label": "Sicherheit",
+      "href": "https://github.com/JanSirPROXx/ainam/blob/main/SECURITY.md"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+# The marketing site, as a Coolify resource of its own.
+#
+# It is a different resource from docker-compose.coolify.yml on purpose: the stack
+# is the product, this is a website, and the two deploy, break and roll back
+# independently. A broken page must never stop the CMS, or the other way round.
+#
+# The image is built by CI and pulled, never built on the server. The addresses
+# its pages link to are fixed when CI builds it, not here; see
+# docs/deploy-marketing.md.
+#
+# With no AINAM_* values it renders from the snapshots built into the image, in
+# English and German. Set them and a publish in the dashboard reaches the page.
+
+services:
+  marketing:
+    image: ghcr.io/jansirproxx/ainam-marketing:${AINAM_VERSION:-latest}
+    # Pulled on every deploy: `latest` moves, and a redeploy that kept the old
+    # layers would report success while serving yesterday's page.
+    pull_policy: always
+    restart: unless-stopped
+    environment:
+      - SERVICE_URL_MARKETING_3300
+      - NEXT_TELEMETRY_DISABLED=1
+      - AINAM_URL=${AINAM_URL:-}
+      - AINAM_PROJECT_ID=${AINAM_PROJECT_ID:-}
+      - AINAM_API_KEY=${AINAM_API_KEY:-}
+      - AINAM_WEBHOOK_SECRET=${AINAM_WEBHOOK_SECRET:-}
+      - AINAM_PREVIEW_API_KEY=${AINAM_PREVIEW_API_KEY:-}
+    healthcheck:
+      # `/` redirects to a language, and fetch follows it, so this proves a page
+      # renders and not only that the server is up.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3300/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 5s
+      timeout: 5s
+      retries: 20

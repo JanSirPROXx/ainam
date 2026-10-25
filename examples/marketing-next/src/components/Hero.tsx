@@ -12,11 +12,12 @@ export interface HeroProps {
   secondaryCta: string
   install: string
   logos: { visible: boolean; label: string; names: Array<{ name: string }> }
+  stepsLabel: string
 }
 
 /** The one section on the page carrying the glow — everything below keeps the grid alone. */
 export function Hero(props: HeroProps) {
-  const { announcement, title, subtitle, body, primaryCta, secondaryCta, install, logos } = props
+  const { announcement, title, subtitle, body, primaryCta, secondaryCta, install, logos, stepsLabel } = props
 
   return (
     <GridBackdrop>
@@ -54,7 +55,7 @@ export function Hero(props: HeroProps) {
           <span className="hero__install">{install}</span>
         </div>
 
-        <SdkTabs />
+        <SdkTabs label={stepsLabel} />
 
         {logos.visible ? <LogoWall label={logos.label} names={logos.names} /> : null}
       </div>

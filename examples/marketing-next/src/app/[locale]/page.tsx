@@ -1,7 +1,11 @@
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { Badge } from '@ainam/ui'
 import { isConfigured } from '@/lib/ainam'
 import { loadContent } from '@/lib/content'
+import { dictionaryFor } from '@/lib/dictionary'
+import { hasLocale, LOCALES } from '@/lib/i18n'
 import { ClosingCta } from '@/components/ClosingCta'
 import { Features } from '@/components/Features'
 import { Hero } from '@/components/Hero'
@@ -11,31 +15,61 @@ import { SiteFooter } from '@/components/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader'
 import { Testimonial } from '@/components/Testimonial'
 
+type PageParams = { params: Promise<{ locale: string }> }
+
+/** Title, description and the link to the other language, all from the content. */
+export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+  const { locale } = await params
+  if (!hasLocale(locale)) return {}
+
+  const c = await loadContent(locale)
+  return {
+    title: c('meta/title'),
+    description: c('meta/description'),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: Object.fromEntries(LOCALES.map((entry) => [entry, `/${entry}`])),
+    },
+  }
+}
+
 /**
- * The AINAM marketing site.
+ * The AINAM marketing site, in one language.
  *
  * Every string below comes from AINAM. The page reads its content the way a
- * customer's site does — one client, a build-time snapshot behind it — so an
- * outage or a bad publish shows up here before it shows up for anyone paying
- * us.
+ * customer's site does — one client per language, a build-time snapshot behind
+ * each — so an outage or a bad publish shows up here before it shows up for
+ * anyone paying us.
  *
  * Content is read in one call rather than one `get` per key: this page renders
- * nearly the whole project, and one typed reader beats thirty-seven awaits.
+ * nearly the whole project, and one typed reader beats forty awaits.
  */
-export default async function HomePage() {
+export default async function HomePage({ params }: PageParams) {
+  const { locale } = await params
+  if (!hasLocale(locale)) notFound()
+
   const previewing = (await draftMode()).isEnabled
-  const c = await loadContent()
+  const c = await loadContent(locale)
+  const dict = dictionaryFor(locale)
 
   return (
     <>
-      <SiteHeader links={c('nav/links')} cta={c('nav/cta')} />
+      <SiteHeader
+        links={c('nav/links')}
+        cta={c('nav/cta')}
+        locale={locale}
+        signIn={dict.signIn}
+        languageLabel={dict.language}
+      />
 
       {/* Stated on the page, not just in a cookie: someone looking at an
-          unpublished draft has to be able to tell that is what they see. */}
-      {previewing || !isConfigured ? (
+          unpublished draft has to be able to tell that is what they see. The
+          snapshot notice is for people running this locally; on the public
+          site it would tell every visitor an implementation detail. */}
+      {previewing || (!isConfigured && process.env.NODE_ENV !== 'production') ? (
         <div className="shell">
           <Badge tone={previewing ? 'info' : 'neutral'} dot>
-            {previewing ? 'preview — unpublished drafts' : 'build-time snapshot'}
+            {previewing ? dict.previewBadge : dict.snapshotBadge}
           </Badge>
         </div>
       ) : null}
@@ -62,6 +96,7 @@ export default async function HomePage() {
             label: c('home/logos/label'),
             names: c('home/logos/names'),
           }}
+          stepsLabel={dict.stepsLabel}
         />
 
         <HowItWorks
@@ -82,6 +117,9 @@ export default async function HomePage() {
           eyebrow={c('home/publish/eyebrow')}
           title={c('home/publish/title')}
           body={c('home/publish/body')}
+          labels={dict.publish}
+          heroTitle={c('home/hero/title')}
+          cardCount={c('home/features/items').length}
         />
 
         {c('home/testimonial/visible') ? (
@@ -89,6 +127,7 @@ export default async function HomePage() {
             quote={c('home/testimonial/quote')}
             name={c('home/testimonial/name')}
             role={c('home/testimonial/role')}
+            eyebrow={dict.customers}
           />
         ) : null}
 
@@ -104,6 +143,7 @@ export default async function HomePage() {
         tagline={c('footer/tagline')}
         status={{ visible: c('footer/status/visible'), label: c('footer/status/label') }}
         links={c('footer/links')}
+        legal={dict.legal}
       />
     </>
   )

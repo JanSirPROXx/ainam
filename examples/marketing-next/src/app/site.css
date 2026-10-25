@@ -452,3 +452,22 @@ html {
     font-size: var(--fs-display-md);
   }
 }
+
+/* ------------------------------------------------------------ language switcher */
+.lang {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.lang__link {
+  font: var(--type-caption);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: var(--transition-control);
+}
+
+.lang__link:hover,
+.lang__link[aria-current='true'] {
+  color: var(--text-primary);
+}

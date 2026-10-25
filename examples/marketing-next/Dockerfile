@@ -10,6 +10,15 @@ RUN corepack enable
 
 FROM base AS build
 WORKDIR /repo
+# The pages are prerendered, so the addresses they link to are fixed when this
+# stage runs. They are arguments of the build, not variables of the container:
+# setting them on the running container would change nothing.
+ARG NEXT_PUBLIC_DASHBOARD_URL=http://localhost:3000
+ARG NEXT_PUBLIC_SOURCE_URL=https://github.com/JanSirPROXx/ainam
+ARG SITE_URL=http://localhost:3300
+ENV NEXT_PUBLIC_DASHBOARD_URL=$NEXT_PUBLIC_DASHBOARD_URL \
+    NEXT_PUBLIC_SOURCE_URL=$NEXT_PUBLIC_SOURCE_URL \
+    SITE_URL=$SITE_URL
 COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @ainam/example-marketing-next... build

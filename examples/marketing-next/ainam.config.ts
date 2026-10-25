@@ -105,7 +105,7 @@ export default defineContentSchema({
     description: 'The mono caption under the buttons.',
     required: false,
     multiline: false,
-    default: 'npm install ainam',
+    default: 'npm install @ainam/cli',
   },
 
   // ---------------------------------------------------------------- logo wall
@@ -174,7 +174,7 @@ export default defineContentSchema({
       {
         title: 'Install the package',
         body: 'One dependency, no runtime dependencies of its own.',
-        code: '$ npm install ainam @ainam/next',
+        code: '$ npm install @ainam/next @ainam/cli',
         filename: 'terminal',
       },
       {

@@ -1,9 +1,12 @@
 {
-  "name": "ainam",
+  "name": "@ainam/cli",
   "version": "0.1.0",
   "type": "module",
   "description": "AINAM command line interface \u2014 scaffold a project, push its content schema, pull generated types.",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JanSirPROXx/ainam.git",

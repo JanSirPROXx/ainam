@@ -5,6 +5,20 @@ the AINAM packages, and pulls content from the CMS server. The site owner then
 edits that content through the AINAM dashboard, without going back to a developer
 for every small change.
 
+**Let your AI agent do it.** Paste this into Claude Code, Cursor or any coding agent, in the
+project of a Next.js site:
+
+```text
+Add AINAM to this website, so its text, images and sections can be edited without a developer.
+Follow https://raw.githubusercontent.com/JanSirPROXx/ainam/main/docs/agents.md.
+Create the account, project and keys yourself, and ask me only for my email address.
+```
+
+The agent installs the packages, moves the site's copy into a content schema, creates the account on
+the free preview server and uploads the schema. It tells you the dashboard login once, at the end.
+You register nowhere and copy no keys. Running your own server? Name its address in the prompt. The
+steps are in [docs/agents.md](docs/agents.md).
+
 Self-hosting is a first-class deployment mode, not a degraded one. No code path
 assumes AINAM Cloud.
 
